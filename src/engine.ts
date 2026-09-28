@@ -1,4 +1,7 @@
-export type Problem = { id: string; expression: string; answer: number; hint: string };
+import type { ModuleId } from './content.ts';
+import { modulePools } from './module-problems.ts';
+
+export type Problem = { id: string; expression: string; answer: string; hint: string };
 export const POOL_SIZE = 100;
 export const ROUND_SIZE = 10;
 
@@ -18,7 +21,7 @@ function buildPool(): Problem[] {
     problems.push({
       id: `problem-${problems.length + 1}`,
       expression,
-      answer: operation === '+' ? left + right : left - right,
+      answer: String(operation === '+' ? left + right : left - right),
       hint: operation === '+'
         ? `${left} + ${Math.floor(right / 10) * 10} + ${right % 10}`
         : `${left} − ${Math.floor(right / 10) * 10} − ${right % 10}`,
@@ -40,6 +43,10 @@ function buildPool(): Problem[] {
 }
 export const problemPool: readonly Problem[] = buildPool();
 
+export function getProblemPool(moduleId: ModuleId): readonly Problem[] {
+  return moduleId === 'mental-math' ? problemPool : modulePools[moduleId];
+}
+
 export function shuffleProblems(problems: readonly Problem[], random: () => number = Math.random): Problem[] {
   const shuffled = [...problems];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -48,13 +55,13 @@ export function shuffleProblems(problems: readonly Problem[], random: () => numb
   }
   return shuffled;
 }
-export function makeRound(random: () => number = Math.random): Problem[] {
-  return shuffleProblems(problemPool, random).slice(0, ROUND_SIZE);
+export function makeRound(moduleId: ModuleId = 'mental-math', random: () => number = Math.random): Problem[] {
+  return shuffleProblems(getProblemPool(moduleId), random).slice(0, ROUND_SIZE);
 }
-export function restoreRound(ids: string): Problem[] {
+export function restoreRound(ids: string, moduleId: ModuleId = 'mental-math'): Problem[] {
   const requested = ids.split(',');
   if (requested.length !== ROUND_SIZE || new Set(requested).size !== ROUND_SIZE) throw new Error('Invalid round');
-  const byId = new Map(problemPool.map(problem => [problem.id, problem]));
+  const byId = new Map(getProblemPool(moduleId).map(problem => [problem.id, problem]));
   return requested.map(id => {
     const problem = byId.get(id);
     if (!problem) throw new Error('Unknown problem');
@@ -69,6 +76,13 @@ export function shuffleForPractice(problems: readonly Problem[], random: () => n
   return shuffled;
 }
 export function checkAnswer(input: string, problem: Problem): boolean {
-  const normalized = input.trim().replace(',', '.');
-  return normalized !== '' && Number.isFinite(Number(normalized)) && Number(normalized) === problem.answer;
+  function value(raw: string): number | null {
+    const normalized = raw.trim().replace(',', '.');
+    if (/^\d+(?:\.\d+)?$/.test(normalized)) return Number(normalized);
+    const parts = /^(\d+)\/(\d+)$/.exec(normalized);
+    if (!parts || Number(parts[2]) === 0) return null;
+    return Number(parts[1]) / Number(parts[2]);
+  }
+  const given = value(input), expected = value(problem.answer);
+  return given !== null && expected !== null && Math.abs(given - expected) < 1e-10;
 }

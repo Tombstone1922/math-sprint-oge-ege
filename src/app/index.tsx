@@ -21,19 +21,19 @@ export default function Home() {
       <View style={{ flex: 1 }}><Pill tone="mint">ПЕРВЫЙ ШАГ</Pill><Text style={styles.heroTitle}>Устный счёт{ '\n' }без паузы</Text><Text style={styles.heroCaption}>Разберём приёмы, покажем примеры, потом попробуешь сам.</Text></View>
       <Text style={styles.heroSymbol}>✦</Text>
     </View>
-    <Button title={progress.completed ? 'Продолжить тренировку  →' : 'Начать первый урок  →'} onPress={() => router.push('/lesson')} />
+    <Button title={progress.completed ? 'Повторить быстрый счёт  →' : 'Начать первый урок  →'} onPress={() => router.push({ pathname: '/lesson', params: { module: 'mental-math' } })} />
     <View style={styles.stats}>
       <View style={styles.stat}><Text style={styles.statNumber}>{progress.completed}</Text><Text style={styles.statLabel}>тренировок</Text></View>
       <View style={styles.divider} /><View style={styles.stat}><Text style={styles.statNumber}>{progress.best}/10</Text><Text style={styles.statLabel}>лучший результат</Text></View>
     </View>
     <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
     <View style={styles.filters}>{filters.map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: filter === item }} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && { color: colors.white }]}>{item}</Text></Pressable>)}</View>
-    {shown.map((module, index) => <Pressable key={module.id} accessibilityRole="button" accessibilityState={{ disabled: !module.available }} onPress={() => module.available && router.push('/lesson')} style={styles.module}>
+    {shown.map((module, index) => <Pressable key={module.id} accessibilityRole="button" accessibilityLabel={`Открыть модуль ${module.title}`} onPress={() => router.push({ pathname: '/lesson', params: { module: module.id } })} style={styles.module}>
       <View style={[styles.moduleIcon, { backgroundColor: index % 2 ? colors.amber : colors.bluePale }]}><Text style={styles.moduleIconText}>{module.icon}</Text></View>
-      <View style={{ flex: 1 }}><Text style={styles.moduleTitle}>{module.title}</Text><Text style={styles.moduleSub}>{module.subtitle}</Text><Text style={styles.moduleMeta}>{module.available ? `${module.minutes} мин · урок + практика` : 'Скоро · в разработке'}</Text></View>
-      <Text style={styles.chevron}>{module.available ? '›' : '🔒'}</Text>
+      <View style={{ flex: 1 }}><Text style={styles.moduleTitle}>{module.title}</Text><Text style={styles.moduleSub}>{module.subtitle}</Text><Text style={styles.moduleMeta}>{module.minutes} мин · урок + практика{progress.byModule[module.id] ? ` · рекорд ${progress.byModule[module.id]?.best}/10` : ''}</Text></View>
+      <Text style={styles.chevron}>›</Text>
     </Pressable>)}
-    <Text style={styles.footer}>Начинаем с базы. Модули по темам и номерам экзамена будем добавлять постепенно.</Text>
+    <Text style={styles.footer}>Выбери тему и занимайся в удобном темпе. Привязку к номерам экзамена добавим после проверки материалов по актуальному году.</Text>
   </Screen>;
 }
 

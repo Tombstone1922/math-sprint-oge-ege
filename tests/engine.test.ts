@@ -12,13 +12,13 @@ test('pool contains 100 unique addition and subtraction problems with all values
     assert.ok(match, card.expression);
     const left = Number(match[1]), right = Number(match[3]);
     assert.ok(left <= 200 && right <= 200 && card.answer >= 0 && card.answer <= 200);
-    assert.equal(card.answer, match[2] === '+' ? left + right : left - right);
+    assert.equal(Number(card.answer), match[2] === '+' ? left + right : left - right);
   }
   assert.ok(problemPool.some(card => card.expression === '15 + 11'));
   assert.ok(problemPool.some(card => card.expression === '19 + 22'));
 });
 test('the same 10 unique cards appear with and without answers in different order', () => {
-  const guided = makeRound(() => 0.25);
+  const guided = makeRound('mental-math', () => 0.25);
   const practice = shuffleForPractice(restoreRound(guided.map(card => card.id).join(',')), () => 0.25);
   assert.equal(guided.length, 10);
   assert.equal(new Set(guided.map(card => card.id)).size, 10);
@@ -32,5 +32,5 @@ test('answer validation rejects blanks and partial strings', () => {
   assert.equal(checkAnswer(String(card.answer), card), true);
   assert.equal(checkAnswer('', card), false);
   assert.equal(checkAnswer(`${card.answer}abc`, card), false);
-  assert.equal(checkAnswer(String(card.answer + 1), card), false);
+  assert.equal(checkAnswer(String(Number(card.answer) + 1), card), false);
 });
