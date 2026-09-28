@@ -5,6 +5,7 @@ import { Back, Button, Pill, ProgressBar, Screen, problemCardStyle, type } from 
 import { getModule, type ModuleId } from '../content';
 import { makeRound, parseGroup, ROUND_SIZE } from '../engine';
 import { colors } from '../theme';
+import { GeometryFigure } from '../geometry-figure';
 
 export default function Guided() {
   const { module: requested, group: requestedGroup } = useLocalSearchParams<{ module?: string; group?: string }>();
@@ -25,7 +26,8 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <Text style={[type.body, { marginTop: 10 }]}>Сначала просмотри десять примеров с ответами. Затем реши эти же примеры сам в другом порядке.</Text>
     <View style={problemCardStyle(problem.colorIndex)}>
       <Pill tone="amber">ПРИМЕР {index + 1}</Pill>
-      <Text style={styles.expression}>{problem.expression}</Text>
+      {problem.figure && <GeometryFigure figure={problem.figure} />}
+      <Text style={[styles.expression, problem.figure && styles.geometryExpression]}>{problem.expression}</Text>
       <Text style={styles.hint}>{problem.hint}</Text>
       <View style={styles.answer}><Text style={styles.answerText}>= {problem.answer}</Text></View>
     </View>
@@ -33,4 +35,4 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <Button title={index === ROUND_SIZE - 1 ? 'Теперь решаю сам  →' : 'Следующая карточка  →'} onPress={() => index === ROUND_SIZE - 1 ? router.replace({ pathname: '/practice', params: { module: moduleId, group: String(group), ids: round.map(item => item.id).join(',') } }) : setIndex(index + 1)} />
   </Screen>;
 }
-const styles = StyleSheet.create({ row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 13, alignItems: 'center' }, count: { fontWeight: '800', color: colors.muted }, expression: { fontSize: 30, lineHeight: 38, textAlign: 'center', fontWeight: '800', color: colors.ink, marginTop: 30 }, hint: { fontSize: 17, textAlign: 'center', color: colors.muted, marginTop: 16 }, answer: { backgroundColor: colors.mint, paddingVertical: 12, paddingHorizontal: 26, borderRadius: 17, marginTop: 22 }, answerText: { color: colors.green, fontSize: 30, fontWeight: '800' } });
+const styles = StyleSheet.create({ row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 13, alignItems: 'center' }, count: { fontWeight: '800', color: colors.muted }, expression: { fontSize: 30, lineHeight: 38, textAlign: 'center', fontWeight: '800', color: colors.ink, marginTop: 30 }, geometryExpression: { fontSize: 19, lineHeight: 27, marginTop: 12 }, hint: { fontSize: 17, textAlign: 'center', color: colors.muted, marginTop: 16 }, answer: { backgroundColor: colors.mint, paddingVertical: 12, paddingHorizontal: 26, borderRadius: 17, marginTop: 22 }, answerText: { color: colors.green, fontSize: 30, fontWeight: '800' } });

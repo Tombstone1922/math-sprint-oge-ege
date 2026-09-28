@@ -28,12 +28,15 @@ export default function Home() {
     </View>
     <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
     <View style={styles.filters}>{filters.map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: filter === item }} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && { color: colors.white }]}>{item}</Text></Pressable>)}</View>
-    {shown.map((module, index) => <Pressable key={module.id} accessibilityRole="button" accessibilityLabel={`Открыть модуль ${module.title}`} onPress={() => router.push({ pathname: '/lesson', params: { module: module.id } })} style={styles.module}>
+    {shown.map((module, index) => <React.Fragment key={module.id}>
+      {module.id === 'oge-15' && <Text style={[type.section, { marginTop: 25, marginBottom: 6 }]}>Геометрия ОГЭ · №15–19</Text>}
+      <Pressable accessibilityRole="button" accessibilityLabel={`Открыть модуль ${module.title}`} onPress={() => router.push({ pathname: '/lesson', params: { module: module.id } })} style={styles.module}>
       <View style={[styles.moduleIcon, { backgroundColor: index % 2 ? colors.amber : colors.bluePale }]}><Text style={styles.moduleIconText}>{module.icon}</Text></View>
       <View style={{ flex: 1 }}><Text style={styles.moduleTitle}>{module.title}</Text><Text style={styles.moduleSub}>{module.subtitle}</Text><Text style={styles.moduleMeta}>{module.minutes} мин · урок + практика{progress.byModule[module.id] ? ` · рекорд ${progress.byModule[module.id]?.best}/10` : ''}</Text></View>
       <Text style={styles.chevron}>›</Text>
-    </Pressable>)}
-    <Text style={styles.footer}>Выбери тему и занимайся в удобном темпе. Привязку к номерам экзамена добавим после проверки материалов по актуальному году.</Text>
+      </Pressable>
+    </React.Fragment>)}
+    <Text style={styles.footer}>Задачи по геометрии — авторские тренировочные варианты по типам проекта КИМ ОГЭ‑2027. Для заданий с развёрнутым решением №23–25 нужна отдельная практика доказательств.</Text>
   </Screen>;
 }
 

@@ -1,7 +1,8 @@
 import type { ModuleId } from './content.ts';
 import { modulePools } from './module-problems.ts';
 
-export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number };
+export type FigureSpec = { kind: 'triangle' | 'isosceles' | 'right-triangle' | 'circle' | 'circle-diameter' | 'tangent' | 'chord' | 'secant' | 'rectangle' | 'trapezoid' | 'rhombus' | 'grid-rectangle' | 'grid-triangle' | 'grid-parallelogram' | 'grid-segment' | 'claims'; dx?: number; dy?: number };
+export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number; figure?: FigureSpec };
 export const GROUP_COUNT = 10;
 export const GROUP_SIZE = 20;
 export const POOL_SIZE = GROUP_COUNT * GROUP_SIZE;

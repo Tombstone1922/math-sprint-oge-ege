@@ -1,5 +1,6 @@
 import type { ModuleId } from './content.ts';
 import type { Problem } from './engine.ts';
+import { ogeGeometryPools } from './oge-geometry.ts';
 
 type OtherModule = Exclude<ModuleId, 'mental-math'>;
 type AddProblem = (expression: string, answer: string | number, hint: string) => void;
@@ -101,5 +102,5 @@ const probability = collect('probability', add => {
 });
 
 export const modulePools: Record<OtherModule, readonly Problem[]> = {
-  percent, fractions, equations, geometry, powers, probability,
+  percent, fractions, equations, geometry, powers, probability, ...ogeGeometryPools,
 };
