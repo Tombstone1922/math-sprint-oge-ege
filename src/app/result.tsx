@@ -18,7 +18,7 @@ export default function Result() {
     <View style={styles.scoreCard}><Pill tone="mint">ПРАВИЛЬНО С ПЕРВОЙ ПОПЫТКИ</Pill><Text style={styles.score}>{value}<Text style={styles.denominator}> / 10</Text></Text><Text style={styles.caption}>{value >= 8 ? 'Отличный результат!' : 'Повтори карточки и попробуй ещё раз.'}</Text></View>
     <Text style={styles.best}>Личный рекорд: {progress.best} из 10</Text>
     <View style={{ flex: 1, minHeight: 50 }} />
-    <Button title="Ещё одна тренировка  ↻" onPress={() => router.replace('/practice')} />
+    <Button title="Ещё одна тренировка  ↻" onPress={() => router.replace('/guided')} />
     <Button title="К модулям" secondary onPress={() => router.dismissTo('/')} />
   </Screen>;
 }

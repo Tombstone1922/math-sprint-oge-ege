@@ -28,6 +28,18 @@ export function ProgressBar({ current, total }: { current: number; total: number
   return <View accessible accessibilityLabel={`Прогресс: ${current} из ${total}`} style={styles.track}><View style={[styles.fill, { width: `${Math.min(100, current / total * 100)}%` }]} /></View>;
 }
 
+// Shared surface keeps guided and practice examples visually identical.
+export const problemCard = {
+  marginTop: 24,
+  backgroundColor: colors.white,
+  borderRadius: 28,
+  borderWidth: 1,
+  borderColor: colors.border,
+  padding: 26,
+  minHeight: 240,
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+};
 export const type = StyleSheet.create({
   eyebrow: { fontSize: 12, fontWeight: '800', color: colors.blue, letterSpacing: 1.4 },
   title: { fontSize: 32, lineHeight: 38, fontWeight: '800', color: colors.ink, letterSpacing: -.7 },
