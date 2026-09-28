@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { colors } from './theme';
+import { cardPalette, colors } from './theme';
 
 export function Screen({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) {
   return <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -40,6 +40,9 @@ export const problemCard = {
   alignItems: 'center' as const,
   justifyContent: 'center' as const,
 };
+export function problemCardStyle(colorIndex: number) {
+  return [problemCard, { backgroundColor: cardPalette[colorIndex] ?? cardPalette[0] }];
+}
 export const type = StyleSheet.create({
   eyebrow: { fontSize: 12, fontWeight: '800', color: colors.blue, letterSpacing: 1.4 },
   title: { fontSize: 32, lineHeight: 38, fontWeight: '800', color: colors.ink, letterSpacing: -.7 },

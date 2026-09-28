@@ -1,8 +1,10 @@
 import type { ModuleId } from './content.ts';
 import { modulePools } from './module-problems.ts';
 
-export type Problem = { id: string; expression: string; answer: string; hint: string };
-export const POOL_SIZE = 100;
+export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number };
+export const GROUP_COUNT = 10;
+export const GROUP_SIZE = 20;
+export const POOL_SIZE = GROUP_COUNT * GROUP_SIZE;
 export const ROUND_SIZE = 10;
 
 // Stable pool: each session samples from the same one hundred distinct problems.
@@ -20,6 +22,7 @@ function buildPool(): Problem[] {
     seen.add(expression);
     problems.push({
       id: `problem-${problems.length + 1}`,
+      colorIndex: problems.length % GROUP_SIZE,
       expression,
       answer: String(operation === '+' ? left + right : left - right),
       hint: operation === '+'
@@ -29,7 +32,7 @@ function buildPool(): Problem[] {
   }
   add(15, 11, '+');
   add(19, 22, '+');
-  while (problems.length < 50) {
+  while (problems.length < 100) {
     const left = 11 + Math.floor(next() * 90);
     const right = 10 + Math.floor(next() * Math.min(90, 201 - left - 10));
     add(left, right, '+');
@@ -47,6 +50,16 @@ export function getProblemPool(moduleId: ModuleId): readonly Problem[] {
   return moduleId === 'mental-math' ? problemPool : modulePools[moduleId];
 }
 
+export function getGroupProblems(moduleId: ModuleId, group: number): readonly Problem[] {
+  if (!Number.isInteger(group) || group < 1 || group > GROUP_COUNT) throw new Error('Invalid group');
+  return getProblemPool(moduleId).slice((group - 1) * GROUP_SIZE, group * GROUP_SIZE);
+}
+
+export function parseGroup(value: string | undefined): number {
+  const group = Number(value);
+  return Number.isInteger(group) && group >= 1 && group <= GROUP_COUNT ? group : 1;
+}
+
 export function shuffleProblems(problems: readonly Problem[], random: () => number = Math.random): Problem[] {
   const shuffled = [...problems];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -55,13 +68,13 @@ export function shuffleProblems(problems: readonly Problem[], random: () => numb
   }
   return shuffled;
 }
-export function makeRound(moduleId: ModuleId = 'mental-math', random: () => number = Math.random): Problem[] {
-  return shuffleProblems(getProblemPool(moduleId), random).slice(0, ROUND_SIZE);
+export function makeRound(moduleId: ModuleId = 'mental-math', group = 1, random: () => number = Math.random): Problem[] {
+  return shuffleProblems(getGroupProblems(moduleId, group), random).slice(0, ROUND_SIZE);
 }
-export function restoreRound(ids: string, moduleId: ModuleId = 'mental-math'): Problem[] {
+export function restoreRound(ids: string, moduleId: ModuleId = 'mental-math', group = 1): Problem[] {
   const requested = ids.split(',');
   if (requested.length !== ROUND_SIZE || new Set(requested).size !== ROUND_SIZE) throw new Error('Invalid round');
-  const byId = new Map(getProblemPool(moduleId).map(problem => [problem.id, problem]));
+  const byId = new Map(getGroupProblems(moduleId, group).map(problem => [problem.id, problem]));
   return requested.map(id => {
     const problem = byId.get(id);
     if (!problem) throw new Error('Unknown problem');

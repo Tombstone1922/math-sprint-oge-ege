@@ -1,25 +1,26 @@
 import React, { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Back, Button, Pill, ProgressBar, Screen, problemCard, type } from '../components';
+import { Back, Button, Pill, ProgressBar, Screen, problemCardStyle, type } from '../components';
 import { getModule, type ModuleId } from '../content';
-import { checkAnswer, restoreRound, ROUND_SIZE, shuffleForPractice } from '../engine';
+import { checkAnswer, parseGroup, restoreRound, ROUND_SIZE, shuffleForPractice } from '../engine';
 import { useProgress } from '../progress';
 import { colors } from '../theme';
 
 type Feedback = { correct: boolean; answer: string; hint: string };
 
 export default function Practice() {
-  const { ids, module: requested } = useLocalSearchParams<{ ids?: string; module?: string }>();
+  const { ids, module: requested, group: requestedGroup } = useLocalSearchParams<{ ids?: string; module?: string; group?: string }>();
   const selected = getModule(requested);
-  return <PracticeContent key={`${selected.id}:${ids ?? ''}`} moduleId={selected.id} ids={ids} />;
+  const group = parseGroup(requestedGroup);
+  return <PracticeContent key={`${selected.id}:${group}:${ids ?? ''}`} moduleId={selected.id} group={group} ids={ids} />;
 }
 
-function PracticeContent({ ids, moduleId }: { ids?: string; moduleId: ModuleId }) {
+function PracticeContent({ ids, moduleId, group }: { ids?: string; moduleId: ModuleId; group: number }) {
   const round = useMemo(() => {
-    try { return shuffleForPractice(restoreRound(ids ?? '', moduleId)); }
+    try { return shuffleForPractice(restoreRound(ids ?? '', moduleId, group)); }
     catch { return null; }
-  }, [ids, moduleId]);
+  }, [ids, moduleId, group]);
   const [position, setPosition] = useState(0);
   const [input, setInput] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
@@ -44,7 +45,7 @@ function PracticeContent({ ids, moduleId }: { ids?: string; moduleId: ModuleId }
   function next() {
     if (position + 1 >= ROUND_SIZE) {
       record(score, moduleId);
-      router.replace({ pathname: '/result', params: { score: String(score), module: moduleId } });
+      router.replace({ pathname: '/result', params: { score: String(score), module: moduleId, group: String(group) } });
     } else {
       setPosition(value => value + 1);
       setInput('');
@@ -52,14 +53,14 @@ function PracticeContent({ ids, moduleId }: { ids?: string; moduleId: ModuleId }
     }
   }
 
-  if (!round || !problem) return <Screen><Text style={type.title}>Сначала посмотри карточки с ответами</Text><Button title="К карточкам" onPress={() => router.replace({ pathname: '/guided', params: { module: moduleId } })} /></Screen>;
+  if (!round || !problem) return <Screen><Text style={type.title}>Сначала посмотри карточки с ответами</Text><Button title="К карточкам" onPress={() => router.replace({ pathname: '/guided', params: { module: moduleId, group: String(group) } })} /></Screen>;
   return <Screen>
-    <Back label="К уроку" />
-    <View style={styles.row}><Text style={type.eyebrow}>ТЕПЕРЬ ТВОЯ ОЧЕРЕДЬ</Text><Text style={styles.count}>{position + 1} / {ROUND_SIZE}</Text></View>
+    <Back label="К группам" />
+    <View style={styles.row}><Text style={type.eyebrow}>ГРУППА {group} · ТВОЯ ОЧЕРЕДЬ</Text><Text style={styles.count}>{position + 1} / {ROUND_SIZE}</Text></View>
     <ProgressBar current={position + 1} total={ROUND_SIZE} />
     <Text style={[type.title, { marginTop: 20, fontSize: 27 }]}>Найди ответ</Text>
     <Text style={[type.body, { fontSize: 14, marginTop: 4 }]}>Те же десять задач в другом порядке.{fractionInput ? ' Дробь запиши через /.' : ''}</Text>
-    <View style={problemCard}>
+    <View style={problemCardStyle(problem.colorIndex)}>
       <Pill>ПРИМЕР {position + 1}</Pill>
       <Text style={styles.expression}>{problem.expression}</Text>
       <View style={[styles.input, feedback && { borderColor: feedback.correct ? colors.green : colors.red }]}><Text style={[styles.inputText, !input && { color: '#AFBBC9' }]}>{input || (fractionInput ? 'Например, 2/3' : 'Твой ответ')}</Text></View>

@@ -5,14 +5,22 @@ type OtherModule = Exclude<ModuleId, 'mental-math'>;
 type AddProblem = (expression: string, answer: string | number, hint: string) => void;
 
 function collect(module: OtherModule, build: (add: AddProblem) => void): readonly Problem[] {
-  const items: Problem[] = [];
+  const items: Omit<Problem, 'colorIndex'>[] = [];
   const expressions = new Set<string>();
   build((expression, answer, hint) => {
     if (expressions.has(expression)) throw new Error(`Duplicate problem: ${expression}`);
     expressions.add(expression);
     items.push({ id: `${module}-${items.length + 1}`, expression, answer: String(answer), hint });
   });
-  return items;
+  if (items.length < 200) throw new Error(`Too few problems for ${module}: ${items.length}`);
+  // A fixed shuffle spreads each problem type across the ten groups.
+  let seed = 2026 + module.length * 7919;
+  for (let i = items.length - 1; i > 0; i--) {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+    const j = Math.floor(seed / 4294967296 * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+  return items.slice(0, 200).map((item, index) => ({ ...item, colorIndex: index % 20 }));
 }
 
 function gcd(a: number, b: number): number {
@@ -25,12 +33,12 @@ function fraction(numerator: number, denominator: number): string {
 }
 
 const percent = collect('percent', add => {
-  const rates = [5, 10, 20, 25, 50, 75];
-  const bases = [40, 60, 80, 100, 120, 160, 200, 240];
+  const rates = [5, 10, 15, 20, 25, 30, 40, 50, 60, 75];
+  const bases = [40, 60, 80, 100, 120, 160, 200, 240, 300, 400, 500, 600, 800];
   for (const rate of rates) for (const base of bases) {
     add(`${rate}% от ${base}`, base * rate / 100, `${base} × ${rate} ÷ 100`);
   }
-  for (const rate of [10, 20, 25, 50]) for (const base of [80, 100, 120, 200, 240, 300]) {
+  for (const rate of [10, 20, 25, 50]) for (const base of [80, 100, 120, 200, 240, 300, 400, 500, 600, 800]) {
     add(`Цена ${base} ₽, скидка ${rate}%. Новая цена?`, base * (100 - rate) / 100, `${base} − ${base * rate / 100}`);
     add(`Цена ${base} ₽ выросла на ${rate}%. Новая цена?`, base * (100 + rate) / 100, `${base} + ${base * rate / 100}`);
   }
@@ -53,7 +61,7 @@ const fractions = collect('fractions', add => {
 });
 
 const equations = collect('equations', add => {
-  for (const x of [4, 7, 9, 12, 15, 18, 21]) for (const a of [3, 5, 8, 11]) {
+  for (const x of [4, 7, 9, 12, 15, 18, 21, 24, 27, 30, 36, 40]) for (const a of [3, 5, 8, 11, 14, 17]) {
     add(`x + ${a} = ${x + a}`, x, `Вычти ${a} из обеих частей`);
     if (x > a) add(`x − ${a} = ${x - a}`, x, `Прибавь ${a} к обеим частям`);
     add(`2x + ${a} = ${2 * x + a}`, x, `Вычти ${a}, затем раздели на 2`);
@@ -74,15 +82,18 @@ const geometry = collect('geometry', add => {
 });
 
 const powers = collect('powers', add => {
-  for (let n = 2; n <= 20; n++) {
+  for (let n = 2; n <= 50; n++) {
     add(`${n}²`, n * n, `${n} × ${n}`);
     add(`√${n * n}`, n, `${n}² = ${n * n}; корень неотрицательный`);
   }
-  for (let n = 2; n <= 9; n++) add(`${n}³`, n ** 3, `${n} × ${n} × ${n}`);
+  for (let n = 2; n <= 20; n++) add(`${n}³`, n ** 3, `${n} × ${n} × ${n}`);
+  for (let n = 2; n <= 20; n++) for (let extra = 1; extra <= 8; extra++) {
+    add(`${n}² + ${extra}`, n * n + extra, `Сначала ${n} × ${n}, затем прибавь ${extra}`);
+  }
 });
 
 const probability = collect('probability', add => {
-  for (let red = 1; red <= 6; red++) for (let blue = 1; blue <= 6; blue++) {
+  for (let red = 1; red <= 15; red++) for (let blue = 1; blue <= 15; blue++) {
     const total = red + blue;
     add(`В мешке красных: ${red}, синих: ${blue}. P(красный)?`, fraction(red, total), `Подходящих ${red}, всего ${total}: ${red}/${total}`);
     add(`В мешке красных: ${red}, синих: ${blue}. P(синий)?`, fraction(blue, total), `Подходящих ${blue}, всего ${total}: ${blue}/${total}`);
