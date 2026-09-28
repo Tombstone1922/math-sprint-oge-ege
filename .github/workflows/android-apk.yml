@@ -12,6 +12,8 @@ permissions:
 jobs:
   apk:
     name: Build installable APK
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -34,30 +36,12 @@ jobs:
         run: ./gradlew :app:assembleRelease --no-daemon --max-workers=2 --console=plain -x lintVitalAnalyzeRelease -x lintVitalRelease
       - name: Check APK
         run: test -s android/app/build/outputs/apk/release/app-release.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: math-sprint-android-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: error
-          retention-days: 30
-
-  release:
-    name: Attach APK to GitHub Release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: apk
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: math-sprint-android-apk
-          path: apk
-      - name: Publish test APK
+      - name: Publish APK to GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "apk-${GITHUB_RUN_NUMBER}" apk/app-release.apk \
+          gh release create "apk-${GITHUB_RUN_NUMBER}" android/app/build/outputs/apk/release/app-release.apk \
             --title "Android APK #${GITHUB_RUN_NUMBER}" \
-            --notes "Тестовая автономная сборка. Подписана отладочным ключом Expo; для публикации в Google Play и получения OTA-обновлений нужна отдельная production-сборка." \
+            --notes "Установочная тестовая сборка. Обновление загружается из GitHub Releases и подтверждается пользователем в Android." \
             --prerelease
