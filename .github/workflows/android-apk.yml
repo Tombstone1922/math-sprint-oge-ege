@@ -29,6 +29,8 @@ jobs:
         run: npx expo prebuild --platform android --no-install --non-interactive
       - name: Build standalone release APK
         working-directory: android
+        env:
+          EXPO_PUBLIC_BUILD_RUN_NUMBER: ${{ github.run_number }}
         run: ./gradlew :app:assembleRelease --no-daemon
       - name: Check APK
         run: test -s android/app/build/outputs/apk/release/app-release.apk
