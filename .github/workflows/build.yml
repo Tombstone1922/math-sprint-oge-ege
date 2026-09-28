@@ -1,0 +1,49 @@
+name: Build installable app
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'Внутренний APK или сборка для магазина'
+        required: true
+        type: choice
+        options: [preview, production]
+      platform:
+        description: 'Платформа'
+        required: true
+        type: choice
+        options: [android, ios, all]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.profile }}
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      BUILD_PROFILE: ${{ inputs.profile }}
+      BUILD_PLATFORM: ${{ inputs.platform }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check Expo access
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo 'Add EXPO_TOKEN to GitHub Actions secrets before building.' >&2
+            exit 1
+          fi
+      - run: npm ci
+      - name: Check EAS project link
+        run: node scripts/check-eas-config.mjs
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Queue EAS Build
+        run: eas build --profile "$BUILD_PROFILE" --platform "$BUILD_PLATFORM" --non-interactive --no-wait

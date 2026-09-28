@@ -1,0 +1,53 @@
+name: Release OTA update
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Канал сборок, которые получат обновление'
+        required: true
+        type: choice
+        options: [preview, production]
+      message:
+        description: 'Краткое описание обновления'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eas-update-${{ inputs.channel }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.channel }}
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      UPDATE_CHANNEL: ${{ inputs.channel }}
+      UPDATE_MESSAGE: ${{ inputs.message }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check Expo access
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo 'Add EXPO_TOKEN to GitHub Actions secrets before publishing.' >&2
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run typecheck && npm run lint && npm test
+      - name: Check EAS project link
+        run: node scripts/check-eas-config.mjs
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Publish to installed builds
+        run: eas update --channel "$UPDATE_CHANNEL" --environment "$UPDATE_CHANNEL" --message "$UPDATE_MESSAGE" --non-interactive
