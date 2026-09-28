@@ -1,0 +1,61 @@
+name: Android APK
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    name: Build installable APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: npm ci
+      - run: npm run typecheck && npm run lint && npm test
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --no-install --non-interactive
+      - name: Build standalone release APK
+        working-directory: android
+        run: ./gradlew :app:assembleRelease --no-daemon
+      - name: Check APK
+        run: test -s android/app/build/outputs/apk/release/app-release.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: math-sprint-android-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Attach APK to GitHub Release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: apk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: math-sprint-android-apk
+          path: apk
+      - name: Publish test APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "apk-${GITHUB_RUN_NUMBER}" apk/app-release.apk \
+            --title "Android APK #${GITHUB_RUN_NUMBER}" \
+            --notes "Тестовая автономная сборка. Подписана отладочным ключом Expo; для публикации в Google Play и получения OTA-обновлений нужна отдельная production-сборка." \
+            --prerelease
