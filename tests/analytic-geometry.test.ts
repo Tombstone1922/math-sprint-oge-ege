@@ -31,6 +31,10 @@ test('all 400 answers agree with independently measured Euclidean drawings', () 
       assert.ok(point.every(Number.isFinite), p.id);
       assert.ok(point[0] >= 0 && point[0] <= scene.columns && point[1] >= 0 && point[1] <= scene.rows, p.id);
     }
+    const visible = Object.entries(scene.points).filter(([name]) => !scene.hiddenPoints?.includes(name));
+    for (let i = 0; i < visible.length; i++) for (let j = i + 1; j < visible.length; j++) {
+      assert.ok(distance(visible[i][1], visible[j][1]) > 1e-8, `${p.id}: duplicate labels at ${visible[i][0]}, ${visible[j][0]}`);
+    }
     for (const circle of scene.circles) {
       assert.ok(circle.radius > 0);
       assert.ok(circle.center[0] >= circle.radius && circle.center[1] >= circle.radius, p.id);

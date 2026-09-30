@@ -1,5 +1,5 @@
 import type { FigureSpec, Problem } from './engine.ts';
-import { drawing, foot, midpoint, parallelogram, polar, rad, rhombus, splitTrapezoid, trapezoid, type Drawing, type GeometryMeasure } from './analytic-geometry.ts';
+import { drawing, midpoint, parallelogram, polar, rad, rhombus, splitTrapezoid, trapezoid, type Drawing, type GeometryMeasure } from './analytic-geometry.ts';
 import type { GridPoint } from './grid-geometry.ts';
 
 export const quadrilateralGroups = ['Диагонали и точка пересечения', 'Прямоугольник и квадрат', 'Углы ромба и диагонали', 'Ромб: перпендикуляры и высоты', 'Параллелограмм: площадь и высоты', 'Площади частей и диагонали ромба', 'Трапеция: площадь и средняя линия', 'Углы равнобедренной трапеции', 'Трапеция: диагональ и углы', 'Параллелограмм: диагональ и биссектриса'] as const;
@@ -46,8 +46,8 @@ for (let group = 1; group <= 10; group++) for (let j = 0; j < 20; j++) {
       const a = 6 + j, h = 3 + j, A: GridPoint = [0, 0], B: GridPoint = [2, h], C: GridPoint = [a + 2, h], D: GridPoint = [a, 0], H: GridPoint = [2, 0];
       add(group, `В параллелограмме ABCD основание AD=${a}, высота BH=${h}, BH⊥AD. Найдите площадь.`, a * h, `S=основание·высота=${a}·${h}=${a * h}. Высота должна быть перпендикулярна выбранному основанию.`, drawing({ A, B, C, D, H }, ['A', 'B', 'C', 'D'], [['B', 'H']]), area('A', 'B', 'C', 'D'));
     } else {
-      const A: GridPoint = [0, 0], B: GridPoint = [1.8 * k, 2.4 * k], C: GridPoint = [6.8 * k, 2.4 * k], D: GridPoint = [5 * k, 0], H = foot(D, A, B);
-      add(group, `Площадь параллелограмма ABCD равна ${12 * k * k}, стороны AB=${3 * k} и AD=${5 * k}. Найдите большую высоту.`, 4 * k, `h₁=S/AB=${12 * k * k}/${3 * k}=${4 * k}; h₂=S/AD=${12 * k * k}/${5 * k}=${Number((2.4 * k).toFixed(1))}. Большая высота относится к меньшей стороне.`, drawing({ A, B, C, D, H }, ['A', 'B', 'C', 'D'], [['D', 'H']]), length('D', 'H'));
+      const A: GridPoint = [0, 0], B: GridPoint = [1.8 * k, 2.4 * k], C: GridPoint = [6.8 * k, 2.4 * k], D: GridPoint = [5 * k, 0];
+      add(group, `Площадь параллелограмма ABCD равна ${12 * k * k}, стороны AB=${3 * k} и AD=${5 * k}. Найдите большую высоту.`, 4 * k, `h₁=S/AB=${12 * k * k}/${3 * k}=${4 * k}; h₂=S/AD=${12 * k * k}/${5 * k}=${Number((2.4 * k).toFixed(1))}. Большая высота относится к меньшей стороне.`, drawing({ A, B, C, D }, ['A', 'B', 'C', 'D'], [['D', 'B']]), length('D', 'B'));
     }
   } else if (group === 6) {
     if (!second) {
