@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { polygonSlice, type GridPoint, type GridScene } from './grid-geometry';
+import { rightAngleStrokes } from './analytic-geometry';
 import { colors } from './theme';
 
 function stroke(a: GridPoint, b: GridPoint, key: string, color = colors.navy, weight = 1.8) {
@@ -19,10 +20,11 @@ export function GridFigure({ scene }: { scene: GridScene }) {
     const [cx, cy] = pixel(center), r = radius * cell;
     return { position: 'absolute' as const, left: cx - r, top: cy - r, width: r * 2, height: r * 2, borderRadius: r };
   };
-  const accessibility = `Клетчатая сетка ${scene.columns} на ${scene.rows}, клетка 1 на 1. `
+  const gridAccessibility = `Клетчатая сетка ${scene.columns} на ${scene.rows}, клетка 1 на 1. `
     + Object.entries(scene.points).map(([name, p]) => `${name}: ${p[0]} вправо, ${p[1]} вверх от левого нижнего угла.`).join(' ')
     + scene.polygons.map(p => `Вершины фигуры: ${p.vertices.map(v => v.join(', ')).join('; ')}.`).join(' ')
     + scene.circles.map(c => `Круг: центр ${c.center.join(', ')}, радиус ${c.radius}.`).join(' ');
+  const accessibility = scene.grid === false ? `Геометрический рисунок. Точки: ${Object.keys(scene.points).join(', ')}. ` + scene.polygons.map(p => `Контур: ${p.vertices.map(v => Object.entries(scene.points).find(([, q]) => q[0] === v[0] && q[1] === v[1])?.[0] ?? '').join(', ')}.`).join(' ') + ' Числовые данные приведены в условии.' : gridAccessibility;
   return <View accessible accessibilityLabel={accessibility} style={[styles.canvas, { width, height }]}>
     {scene.polygons.flatMap((polygon, index) => {
       if (!polygon.shaded) return [];
@@ -36,13 +38,14 @@ export function GridFigure({ scene }: { scene: GridScene }) {
         });
       });
     })}
-    {scene.circles.map((circle, i) => <View key={`fill-circle-${i}`} style={[circleStyle(circle.center, circle.radius), { backgroundColor: '#E6EDF7' }]} />)}
-    {Array.from({ length: scene.columns + 1 }, (_, i) => stroke(pixel([i, 0]), pixel([i, scene.rows]), `col${i}`, '#BCC8D8', 0.7))}
-    {Array.from({ length: scene.rows + 1 }, (_, i) => stroke(pixel([0, i]), pixel([scene.columns, i]), `row${i}`, '#BCC8D8', 0.7))}
+    {scene.grid !== false && scene.circles.map((circle, i) => <View key={`fill-circle-${i}`} style={[circleStyle(circle.center, circle.radius), { backgroundColor: '#E6EDF7' }]} />)}
+    {scene.grid !== false && Array.from({ length: scene.columns + 1 }, (_, i) => stroke(pixel([i, 0]), pixel([i, scene.rows]), `col${i}`, '#BCC8D8', 0.7))}
+    {scene.grid !== false && Array.from({ length: scene.rows + 1 }, (_, i) => stroke(pixel([0, i]), pixel([scene.columns, i]), `row${i}`, '#BCC8D8', 0.7))}
     {scene.polygons.flatMap((polygon, index) => polygon.vertices.map((p, i) => stroke(pixel(p), pixel(polygon.vertices[(i + 1) % polygon.vertices.length]), `edge${index}-${i}`)))}
     {scene.segments.map(([a, b], i) => stroke(pixel(a), pixel(b), `segment${i}`))}
     {scene.circles.map((circle, i) => <View key={`outline-circle-${i}`} style={[circleStyle(circle.center, circle.radius), { borderWidth: 1.8, borderColor: colors.navy }]} />)}
-    {Object.entries(scene.points).map(([name, p]) => {
+    {scene.grid === false && rightAngleStrokes(scene).map(([a, b], i) => stroke(pixel(a), pixel(b), `right-angle${i}`, '#637892', 1))}
+    {Object.entries(scene.points).filter(([name]) => !scene.hiddenPoints?.includes(name)).map(([name, p]) => {
       const [x, y] = pixel(p);
       const labelX = x < width / 2 ? x - 16 : x + 5;
       const labelY = y < height / 2 ? y - 20 : y + 2;

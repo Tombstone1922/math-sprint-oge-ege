@@ -29,7 +29,7 @@ function PracticeContent({ ids, moduleId, group }: { ids?: string; moduleId: Mod
   const { record } = useProgress();
   const problem = round?.[position];
   const fractionInput = moduleId === 'fractions' || moduleId === 'probability';
-  const decimalInput = moduleId === 'oge-18';
+  const decimalInput = ['oge-16', 'oge-17', 'oge-18'].includes(moduleId);
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', fractionInput ? '/' : decimalInput ? ',' : '', '0', '⌫'];
 
   function pressKey(key: string) {

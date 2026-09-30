@@ -3,6 +3,8 @@ export type GridPolygon = { vertices: GridPoint[]; shaded?: boolean };
 export type GridCircle = { center: GridPoint; radius: number };
 export type GridScene = {
   columns: number; rows: number;
+  grid?: false;
+  hiddenPoints?: string[];
   points: Record<string, GridPoint>;
   polygons: GridPolygon[];
   segments: [GridPoint, GridPoint][];
