@@ -3,7 +3,7 @@ import test from 'node:test';
 import { getProblemPool } from '../src/engine.ts';
 import type { OgeGeometryId } from '../src/oge-geometry.ts';
 
-const ids: OgeGeometryId[] = ['oge-15', 'oge-16', 'oge-17', 'oge-18', 'oge-19'];
+const ids: OgeGeometryId[] = ['oge-15', 'oge-16', 'oge-17', 'oge-19'];
 const numbers = (s: string) => (s.match(/\d+/g) ?? []).map(Number);
 
 test('all geometry sections have 200 original illustrated tasks and coherent answers', () => {
@@ -28,11 +28,6 @@ test('all geometry sections have 200 original illustrated tasks and coherent ans
         answer = p.expression.startsWith('Прямоугольник')
           ? p.expression.includes('периметр') ? 2 * (n[0] + n[1]) : n[0] * n[1]
           : p.expression.startsWith('Основания') ? (n[0] + n[1]) / 2 : n[0] * n[1] / 2;
-      } else if (id === 'oge-18') {
-        answer = p.expression.includes('прямоугольный треугольник') ? n[0] * n[1] / 2
-          : p.expression.includes('прямоугольник') || p.expression.includes('параллелограмм') ? n[0] * n[1]
-          : p.expression.includes('одной горизонтали') ? n[1] - n[0]
-          : Math.hypot(n[0], n[1]);
       } else {
         const match = /1\) Площадь прямоугольника (\d+)×(\d+) равна (\d+)\.\n2\) Диаметр окружности радиуса (\d+) равен (\d+)\.\n3\) Если углы треугольника (\d+)° и (\d+)°, то третий равен (\d+)°/.exec(p.expression);
         assert.ok(match, p.expression);

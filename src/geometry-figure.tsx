@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { FigureSpec } from './engine';
 import { colors } from './theme';
+import { GridFigure } from './grid-figure';
 
 type Point = [number, number];
 const line = (a: Point, b: Point, key: string, faint = false) => {
@@ -12,6 +13,10 @@ const line = (a: Point, b: Point, key: string, faint = false) => {
 const point = (name: string, x: number, y: number) => <Text key={name} style={[styles.label, { left: x, top: y }]}>{name}</Text>;
 
 export function GeometryFigure({ figure }: { figure: FigureSpec }) {
+  return figure.scene ? <GridFigure scene={figure.scene} /> : <LegacyFigure figure={figure} />;
+}
+
+function LegacyFigure({ figure }: { figure: FigureSpec }) {
   const { width } = useWindowDimensions();
   const scale = Math.min(1, (width - 100) / 260);
   const { kind } = figure;

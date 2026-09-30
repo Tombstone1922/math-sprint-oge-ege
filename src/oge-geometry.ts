@@ -1,4 +1,5 @@
 import type { FigureSpec, Problem } from './engine.ts';
+import { gridProblemPool } from './oge18-problems.ts';
 
 export type OgeGeometryId = 'oge-15' | 'oge-16' | 'oge-17' | 'oge-18' | 'oge-19';
 type Add = (expression: string, answer: number, hint: string, figure: FigureSpec) => void;
@@ -62,19 +63,6 @@ const quadrilaterals = bank('oge-17', add => {
   }
 });
 
-const grid = bank('oge-18', add => {
-  for (let dx = 1; dx <= 8; dx++) for (let dy = 1; dy <= 6; dy++) {
-    add(`На клетчатой бумаге прямоугольник имеет стороны ${dx} и ${dy} клеток. Найдите площадь (клетка 1×1).`, dx * dy, `${dx} × ${dy}`, { kind: 'grid-rectangle', dx, dy });
-    add(`На клетчатой бумаге прямоугольный треугольник имеет катеты ${dx} и ${dy} клеток. Найдите площадь.`, dx * dy / 2, `${dx} × ${dy} ÷ 2`, { kind: 'grid-triangle', dx, dy });
-    add(`На клетчатой бумаге параллелограмм имеет основание ${dx} клеток и высоту ${dy} клеток. Найдите площадь.`, dx * dy, `${dx} × ${dy}`, { kind: 'grid-parallelogram', dx, dy });
-  }
-  for (let start = 1; start <= 7; start++) for (let dx = 1; dx <= 8; dx++) {
-    add(`Точки A и B лежат на одной горизонтали сетки: A на столбце ${start}, B на ${start + dx}. Найдите AB (клетка 1×1).`, dx, `${start + dx} − ${start}`, { kind: 'grid-segment', dx, dy: 0 });
-  }
-  for (let k = 1; k <= 2; k++) for (const [dx, dy] of [[3, 4], [4, 3]] as const) {
-    add(`На сетке точка B на ${dx * k} клеток правее и на ${dy * k} клеток выше A. Найдите AB.`, 5 * k, `√(${dx * k}² + ${dy * k}²)`, { kind: 'grid-segment', dx: dx * k, dy: dy * k });
-  }
-});
 
 const statements = bank('oge-19', add => {
   for (let a = 2; a <= 21; a++) for (let b = 3; b <= 12; b++) {
@@ -85,5 +73,5 @@ const statements = bank('oge-19', add => {
 });
 
 export const ogeGeometryPools: Record<OgeGeometryId, readonly Problem[]> = {
-  'oge-15': triangles, 'oge-16': circles, 'oge-17': quadrilaterals, 'oge-18': grid, 'oge-19': statements,
+  'oge-15': triangles, 'oge-16': circles, 'oge-17': quadrilaterals, 'oge-18': gridProblemPool, 'oge-19': statements,
 };

@@ -5,6 +5,7 @@ import { Back, Pill, Screen, type } from '../components';
 import { getModule } from '../content';
 import { GROUP_COUNT, GROUP_SIZE, ROUND_SIZE } from '../engine';
 import { cardPalette, colors } from '../theme';
+import { gridGroups } from '../oge18-problems';
 
 export default function Groups() {
   const { module: requested } = useLocalSearchParams<{ module?: string }>();
@@ -14,9 +15,9 @@ export default function Groups() {
     <Pill tone="mint">{selected.title.toUpperCase()}</Pill>
     <Text style={[type.title, { marginTop: 18 }]}>Выбери группу</Text>
     <Text style={[type.body, { marginTop: 10, marginBottom: 18 }]}>200 задач: 10 групп по 20. За тренировку увидишь 10 случайных задач выбранной группы сначала с ответами, затем без них.</Text>
-    {Array.from({ length: GROUP_COUNT }, (_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`Группа ${index + 1}, ${GROUP_SIZE} задач`} onPress={() => router.push({ pathname: '/guided', params: { module: selected.id, group: String(index + 1) } })} style={styles.group}>
+    {Array.from({ length: GROUP_COUNT }, (_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`${selected.id === 'oge-18' ? gridGroups[index] : `Группа ${index + 1}`}, ${GROUP_SIZE} задач`} onPress={() => router.push({ pathname: '/guided', params: { module: selected.id, group: String(index + 1) } })} style={styles.group}>
       <View style={[styles.icon, { backgroundColor: cardPalette[index] }]}><Text style={styles.number}>{index + 1}</Text></View>
-      <View style={styles.info}><Text style={styles.name}>Группа {index + 1}</Text><Text style={styles.details}>{GROUP_SIZE} задач · {ROUND_SIZE} за тренировку</Text></View>
+      <View style={styles.info}><Text style={styles.name}>{selected.id === 'oge-18' ? gridGroups[index] : `Группа ${index + 1}`}</Text><Text style={styles.details}>{GROUP_SIZE} задач · {ROUND_SIZE} за тренировку</Text></View>
       <Text style={styles.chevron}>›</Text>
     </Pressable>)}
   </Screen>;

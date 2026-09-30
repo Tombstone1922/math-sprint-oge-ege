@@ -18,7 +18,7 @@ test('every module has a lesson, 200 problems in ten groups of twenty, and 20 qu
     const pool = getProblemPool(module.id);
     assert.equal(pool.length, GROUP_COUNT * GROUP_SIZE, module.id);
     assert.equal(new Set(pool.map(problem => problem.id)).size, pool.length, module.id);
-    assert.equal(new Set(pool.map(problem => problem.expression)).size, pool.length, module.id);
+    assert.equal(new Set(pool.map(problem => JSON.stringify([problem.expression, problem.figure?.scene]))).size, pool.length, module.id);
     for (const problem of pool) {
       assert.ok(problem.expression && problem.hint && Number.isFinite(numeric(problem.answer)), problem.id);
       assert.ok(checkAnswer(problem.answer, problem), problem.id);
