@@ -3,6 +3,7 @@ import test from 'node:test';
 import { lessons, modules } from '../src/content.ts';
 import { checkAnswer, getGroupProblems, getProblemPool, GROUP_COUNT, GROUP_SIZE, makeRound, restoreRound, shuffleForPractice } from '../src/engine.ts';
 import { cardPalette } from '../src/theme.ts';
+import { beginnerGroups } from '../src/beginner-math.ts';
 
 const numeric = (answer: string) => {
   const [top, bottom] = answer.split('/').map(Number);
@@ -94,4 +95,25 @@ test('equivalent fractions work, malformed answers do not', () => {
   assert.equal(checkAnswer('3/4', card), false);
   const foreign = makeRound('percent').map(problem => problem.id).join(',');
   assert.throws(() => restoreRound(foreign, 'fractions'));
+});
+
+test('beginner arithmetic stays within 20 and starts with smaller numbers', () => {
+  assert.equal(beginnerGroups.length, 10);
+  const pool = getProblemPool('beginner-math');
+  assert.equal(pool.filter(p => p.expression.includes('+')).length, 100);
+  assert.equal(pool.filter(p => p.expression.includes('−')).length, 100);
+  assert.ok(pool.some(p => p.answer === '0'));
+  assert.ok(pool.some(p => p.answer === '20'));
+  for (const p of pool) {
+    const match = /^(\d+) ([+−]) (\d+)$/.exec(p.expression)!;
+    assert.ok(match, p.id);
+    const a = Number(match[1]), b = Number(match[3]);
+    const expected = match[2] === '+' ? a + b : a - b;
+    assert.ok(a >= 0 && a <= 20 && b >= 0 && b <= 20 && expected >= 0 && expected <= 20, p.id);
+    assert.equal(Number(p.answer), expected, p.expression);
+  }
+  for (const [firstGroup, limit] of [[1, 5], [3, 10], [5, 15], [7, 20]]) {
+    for (const p of getGroupProblems('beginner-math', firstGroup)) assert.ok(Number(p.answer) <= limit, p.id);
+    for (const p of getGroupProblems('beginner-math', firstGroup + 1)) assert.ok(Number(p.expression.split(' ')[0]) <= limit, p.id);
+  }
 });

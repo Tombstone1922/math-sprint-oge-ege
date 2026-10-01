@@ -1,4 +1,5 @@
 import type { ModuleId } from './content.ts';
+import { beginnerGroups } from './beginner-math.ts';
 import { functionGroups } from './oge11-problems.ts';
 import { formulaGroups } from './oge12-problems.ts';
 import { inequalityGroups } from './oge13-problems.ts';
@@ -7,4 +8,4 @@ import { triangleGroups } from './oge15-problems.ts';
 import { circleGroups } from './oge16-problems.ts';
 import { quadrilateralGroups } from './oge17-problems.ts';
 import { gridGroups } from './oge18-problems.ts';
-export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };
+export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { 'beginner-math': beginnerGroups, 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };
