@@ -1,3 +1,6 @@
+import { arithmeticGroups } from './oge6-problems.ts';
+import { comparisonGroups } from './oge7-problems.ts';
+import { expressionGroups } from './oge8-problems.ts';
 import { equationGroups } from './oge9-problems.ts';
 import { probabilityGroups } from './oge10-problems.ts';
 import type { ModuleId } from './content.ts';
@@ -10,4 +13,4 @@ import { triangleGroups } from './oge15-problems.ts';
 import { circleGroups } from './oge16-problems.ts';
 import { quadrilateralGroups } from './oge17-problems.ts';
 import { gridGroups } from './oge18-problems.ts';
-export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { 'oge-9': equationGroups, 'oge-10': probabilityGroups, 'beginner-math': beginnerGroups, 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };
+export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { 'oge-6': arithmeticGroups, 'oge-7': comparisonGroups, 'oge-8': expressionGroups, 'oge-9': equationGroups, 'oge-10': probabilityGroups, 'beginner-math': beginnerGroups, 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };

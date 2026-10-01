@@ -29,7 +29,7 @@ export default function Home() {
     <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
     <View style={styles.filters}>{filters.map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: filter === item }} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && { color: colors.white }]}>{item}</Text></Pressable>)}</View>
     {shown.map((module, index) => <React.Fragment key={module.id}>
-      {module.id === 'oge-9' && <Text style={[type.section, { marginTop: 25, marginBottom: 6 }]}>Алгебра и вероятность ОГЭ · №9–14</Text>}
+      {module.id === 'oge-6' && <Text style={[type.section, { marginTop: 25, marginBottom: 6 }]}>Алгебра и вероятность ОГЭ · №6–14</Text>}
       {module.id === 'oge-15' && <Text style={[type.section, { marginTop: 25, marginBottom: 6 }]}>Геометрия ОГЭ · №15–19</Text>}
       <Pressable accessibilityRole="button" accessibilityLabel={`Открыть модуль ${module.title}`} onPress={() => router.push({ pathname: '/lesson', params: { module: module.id } })} style={styles.module}>
       <View style={[styles.moduleIcon, { backgroundColor: index % 2 ? colors.amber : colors.bluePale }]}><Text style={styles.moduleIconText}>{module.icon}</Text></View>

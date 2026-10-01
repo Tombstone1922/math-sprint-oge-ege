@@ -27,7 +27,7 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <View style={problemCardStyle(problem.colorIndex)}>
       <Pill tone="amber">ПРИМЕР {index + 1}</Pill>
       <ProblemFigure problem={problem} />
-      <Text style={[styles.expression, (hasFigure(problem) || ['oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>
+      <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>
       <Text style={styles.hint}>{problem.hint}</Text>
       <View style={styles.answer}><Text style={styles.answerText}>= {problem.answerDisplay ?? problem.answer}</Text></View>
     </View>

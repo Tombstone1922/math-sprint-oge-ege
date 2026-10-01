@@ -28,13 +28,13 @@ function PracticeContent({ ids, moduleId, group }: { ids?: string; moduleId: Mod
   const [score, setScore] = useState(0);
   const { record } = useProgress();
   const problem = round?.[position];
-  const fractionInput = moduleId === 'fractions' || moduleId === 'probability' || moduleId === 'oge-10';
-  const decimalInput = ['oge-9', 'oge-10', 'oge-12', 'oge-14', 'oge-15', 'oge-16', 'oge-17', 'oge-18'].includes(moduleId);
-  const signedInput = moduleId === 'oge-9' || moduleId === 'oge-12' || moduleId === 'oge-14';
+  const fractionInput = moduleId === 'fractions' || moduleId === 'probability' || ['oge-6', 'oge-8', 'oge-10'].includes(moduleId);
+  const decimalInput = ['oge-6', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14', 'oge-15', 'oge-16', 'oge-17', 'oge-18'].includes(moduleId);
+  const signedInput = moduleId === 'oge-6' || moduleId === 'oge-8' || moduleId === 'oge-9' || moduleId === 'oge-12' || moduleId === 'oge-14';
   const rootsInput = problem?.answerMode === 'roots';
   const sequenceInput = problem?.answerMode === 'sequence';
   const choiceInput = problem?.answerMode === 'choice';
-  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', fractionInput && !decimalInput ? '/' : decimalInput && !rootsInput ? ',' : '', '0', '⌫'];
+  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', fractionInput && !decimalInput ? '/' : decimalInput && !rootsInput && !choiceInput ? ',' : '', '0', '⌫'];
 
   function pressKey(key: string) {
     if (feedback) return;
@@ -72,8 +72,8 @@ function PracticeContent({ ids, moduleId, group }: { ids?: string; moduleId: Mod
     <View style={problemCardStyle(problem.colorIndex)}>
       <Pill>ПРИМЕР {position + 1}</Pill>
       <ProblemFigure problem={problem} />
-      <Text style={[styles.expression, (hasFigure(problem) || ['oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>
-      <View style={styles.inputRow}>{signedInput && !feedback && <Pressable accessibilityRole="button" accessibilityLabel={rootsInput ? "Добавить минус перед корнем" : "Изменить знак ответа"} onPress={() => pressKey('±')} style={styles.signKey}><Text style={styles.keyText}>{rootsInput ? '−' : '±'}</Text></Pressable>}{fractionInput && decimalInput && !feedback && <Pressable accessibilityRole="button" accessibilityLabel="Дробная черта" onPress={() => pressKey('/')} style={styles.signKey}><Text style={styles.keyText}>/</Text></Pressable>}<View style={[styles.input, feedback && { borderColor: feedback.correct ? colors.green : colors.red }]}><Text style={[styles.inputText, !input && { color: '#AFBBC9' }]}>{input || (rootsInput ? 'Корни подряд' : sequenceInput ? 'Три цифры' : choiceInput ? 'Номер варианта' : fractionInput ? 'Например, 2/3' : 'Твой ответ')}</Text></View></View>
+      <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>
+      <View style={styles.inputRow}>{signedInput && !choiceInput && !feedback && <Pressable accessibilityRole="button" accessibilityLabel={rootsInput ? "Добавить минус перед корнем" : "Изменить знак ответа"} onPress={() => pressKey('±')} style={styles.signKey}><Text style={styles.keyText}>{rootsInput ? '−' : '±'}</Text></Pressable>}{fractionInput && decimalInput && !choiceInput && !feedback && <Pressable accessibilityRole="button" accessibilityLabel="Дробная черта" onPress={() => pressKey('/')} style={styles.signKey}><Text style={styles.keyText}>/</Text></Pressable>}<View style={[styles.input, feedback && { borderColor: feedback.correct ? colors.green : colors.red }]}><Text style={[styles.inputText, !input && { color: '#AFBBC9' }]}>{input || (rootsInput ? 'Корни подряд' : sequenceInput ? 'Три цифры' : choiceInput ? 'Номер варианта' : fractionInput ? 'Например, 2/3' : 'Твой ответ')}</Text></View></View>
     </View>
     {feedback ? <View accessible accessibilityLiveRegion="polite" style={[styles.feedback, { backgroundColor: feedback.correct ? colors.mint : '#FCE9EA' }]}><Text style={[styles.feedbackTitle, { color: feedback.correct ? colors.green : colors.red }]}>{feedback.correct ? 'Верно! Отличная работа' : `Пока нет. Ответ: ${feedback.answer}`}</Text><Text style={styles.feedbackHint}>Удобный путь: {feedback.hint}</Text></View> : <View style={{ flex: 1 }} />}
     {!feedback && <View style={styles.keypad}>{keys.map((key, index) => key ? <Pressable accessibilityRole="button" accessibilityLabel={key === '⌫' ? 'Удалить' : key === '/' ? 'Дробная черта' : key} key={key} onPress={() => pressKey(key)} style={({ pressed }) => [styles.key, pressed && { backgroundColor: colors.bluePale }]}><Text style={styles.keyText}>{key}</Text></Pressable> : <View key={`empty-${index}`} style={styles.keyBlank} />)}</View>}
