@@ -1,3 +1,5 @@
+import type { RootTask } from './equation-models.ts';
+import type { ChanceModel } from './chance-models.ts';
 import type { GraphQuestion } from './function-graphs.ts';
 import type { NumberLineQuestion } from './number-lines.ts';
 import type { FormulaTask, SequenceTask } from './calculation-models.ts';
@@ -7,7 +9,7 @@ import { modulePools } from './module-problems.ts';
 import type { GridScene, GridTask } from './grid-geometry.ts';
 
 export type FigureSpec = { kind: 'triangle' | 'isosceles' | 'right-triangle' | 'circle' | 'circle-diameter' | 'tangent' | 'chord' | 'secant' | 'rectangle' | 'trapezoid' | 'rhombus' | 'grid-rectangle' | 'grid-triangle' | 'grid-parallelogram' | 'grid-segment' | 'grid-scene' | 'claims'; dx?: number; dy?: number; scene?: GridScene; unit?: number };
-export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number; figure?: FigureSpec; gridTask?: GridTask; geometryMeasure?: GeometryMeasure; graphs?: GraphQuestion; numberLines?: NumberLineQuestion; formulaTask?: FormulaTask; sequenceTask?: SequenceTask; answerMode?: 'sequence' | 'choice' };
+export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number; figure?: FigureSpec; gridTask?: GridTask; geometryMeasure?: GeometryMeasure; graphs?: GraphQuestion; numberLines?: NumberLineQuestion; formulaTask?: FormulaTask; sequenceTask?: SequenceTask; rootTask?: RootTask; chance?: ChanceModel; answerDisplay?: string; answerMode?: 'sequence' | 'choice' | 'roots' };
 export const GROUP_COUNT = 10;
 export const GROUP_SIZE = 20;
 export const POOL_SIZE = GROUP_COUNT * GROUP_SIZE;
@@ -95,6 +97,7 @@ export function shuffleForPractice(problems: readonly Problem[], random: () => n
   return shuffled;
 }
 export function checkAnswer(input: string, problem: Problem): boolean {
+  if (problem.answerMode === 'roots') return input.trim().replaceAll('−', '-').replaceAll(',', '.') === problem.answer;
   if (problem.answerMode) return input.trim() === problem.answer;
   function value(raw: string): number | null {
     const normalized = raw.trim().replace('−', '-').replace(',', '.');

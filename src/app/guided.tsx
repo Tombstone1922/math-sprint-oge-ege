@@ -27,9 +27,9 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <View style={problemCardStyle(problem.colorIndex)}>
       <Pill tone="amber">ПРИМЕР {index + 1}</Pill>
       <ProblemFigure problem={problem} />
-      <Text style={[styles.expression, (hasFigure(problem) || moduleId === 'oge-12' || moduleId === 'oge-14') && styles.geometryExpression]}>{problem.expression}</Text>
+      <Text style={[styles.expression, (hasFigure(problem) || ['oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>
       <Text style={styles.hint}>{problem.hint}</Text>
-      <View style={styles.answer}><Text style={styles.answerText}>= {problem.answer}</Text></View>
+      <View style={styles.answer}><Text style={styles.answerText}>= {problem.answerDisplay ?? problem.answer}</Text></View>
     </View>
     <View style={{ flex: 1, minHeight: 25 }} />
     <Button title={index === ROUND_SIZE - 1 ? 'Теперь решаю сам  →' : 'Следующая карточка  →'} onPress={() => index === ROUND_SIZE - 1 ? router.replace({ pathname: '/practice', params: { module: moduleId, group: String(group), ids: round.map(item => item.id).join(',') } }) : setIndex(index + 1)} />
