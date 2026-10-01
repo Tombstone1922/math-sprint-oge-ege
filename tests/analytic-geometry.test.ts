@@ -90,3 +90,28 @@ test('circle diagrams satisfy incidence, tangent and chord conditions stated in 
     }
   }
 });
+
+
+test('triangle diagrams satisfy heights, equal sides, angle bisectors and stated triangle types', () => {
+  const angleAt = (a: GridPoint, v: GridPoint, b: GridPoint) => Math.acos(Math.min(1, Math.max(-1,
+    ((a[0] - v[0]) * (b[0] - v[0]) + (a[1] - v[1]) * (b[1] - v[1])) / (distance(a, v) * distance(b, v))))) * 180 / Math.PI;
+  for (const p of getProblemPool('oge-15')) {
+    const { A, B, C, H, D, M, N } = p.figure!.scene!.points;
+    if (p.expression.includes('остроугольном')) for (const [a, v, b] of [[B, A, C], [A, B, C], [A, C, B]]) assert.ok(angleAt(a, v, b) < 90, p.id);
+    if (p.expression.includes('AB=BC')) near(distance(A, B), distance(B, C), p.id);
+    if (p.expression.includes('BC=BM')) near(distance(B, C), distance(B, M), p.id);
+    if (p.expression.includes('равностороннего')) {
+      near(distance(A, B), distance(B, C), p.id);
+      near(distance(A, B), distance(A, C), p.id);
+    }
+    if (p.expression.includes('BH — высота') || p.expression.includes('высота BH')) {
+      near((H[0] - A[0]) * (C[1] - A[1]) - (H[1] - A[1]) * (C[0] - A[0]), 0, p.id);
+      near((B[0] - H[0]) * (C[0] - A[0]) + (B[1] - H[1]) * (C[1] - A[1]), 0, p.id);
+    }
+    if (p.expression.includes('AD — биссектриса')) near(angleAt(B, A, D), angleAt(D, A, C), p.id);
+    if (p.expression.includes('середины AB и BC')) {
+      near(distance(A, M), distance(M, B), p.id);
+      near(distance(B, N), distance(N, C), p.id);
+    }
+  }
+});

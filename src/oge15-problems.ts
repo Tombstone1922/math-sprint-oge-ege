@@ -51,7 +51,7 @@ for (let group = 1; group <= 10; group++) for (let j = 0; j < 20; j++) {
       add(group, `В треугольнике ABC ∠BAC=${alpha}°, AD — биссектриса. Найдите ∠BAD в градусах.`, alpha / 2, `Биссектриса делит угол пополам. ∠BAD=${alpha}/2=${fmt(alpha / 2)}°.`, drawing({ ...p, D }, ['A', 'B', 'C'], [['A', 'D']]), angle('B', 'A', 'D'));
     } else {
       const H: GridPoint = [p.B[0], 0];
-      add(group, `В остроугольном треугольнике ABC BH — высота к AC, ∠BAC=${alpha}°. Найдите ∠ABH в градусах.`, 90 - alpha, `В прямоугольном треугольнике ABH: ∠ABH=90−${alpha}=${90 - alpha}°.`, drawing({ ...p, H }, ['A', 'B', 'C'], [['B', 'H']]), angle('A', 'B', 'H'));
+      add(group, `В треугольнике ABC BH — высота к AC, ∠BAC=${alpha}°. Найдите ∠ABH в градусах.`, 90 - alpha, `В прямоугольном треугольнике ABH: ∠ABH=90−${alpha}=${90 - alpha}°.`, drawing({ ...p, H }, ['A', 'B', 'C'], [['B', 'H']]), angle('A', 'B', 'H'));
     }
   } else if (group === 7) {
     const side = second ? 2 * k * Math.sqrt(3) : 2 * k, h = side * Math.sqrt(3) / 2, A: GridPoint = [-side / 2, 0], B: GridPoint = [0, h], C: GridPoint = [side / 2, 0], H: GridPoint = [0, 0];
