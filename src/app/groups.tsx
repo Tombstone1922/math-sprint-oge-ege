@@ -5,14 +5,12 @@ import { Back, Pill, Screen, type } from '../components';
 import { getModule } from '../content';
 import { GROUP_COUNT, GROUP_SIZE, ROUND_SIZE } from '../engine';
 import { cardPalette, colors } from '../theme';
-import { circleGroups } from '../oge16-problems';
-import { quadrilateralGroups } from '../oge17-problems';
-import { gridGroups } from '../oge18-problems';
+import { topicGroupNames } from '../module-groups';
 
 export default function Groups() {
   const { module: requested } = useLocalSearchParams<{ module?: string }>();
   const selected = getModule(requested);
-  const groupNames = selected.id === 'oge-16' ? circleGroups : selected.id === 'oge-17' ? quadrilateralGroups : selected.id === 'oge-18' ? gridGroups : undefined;
+  const groupNames = topicGroupNames[selected.id];
   return <Screen>
     <Back label="К уроку" />
     <Pill tone="mint">{selected.title.toUpperCase()}</Pill>

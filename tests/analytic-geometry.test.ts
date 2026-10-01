@@ -8,8 +8,8 @@ import { quadrilateralGroups } from '../src/oge17-problems.ts';
 const distance = (a: GridPoint, b: GridPoint) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const near = (a: number, b: number, message: string) => assert.ok(Math.abs(a - b) < 1e-7, `${message}: ${a} != ${b}`);
 
-test('all 400 answers agree with independently measured Euclidean drawings', () => {
-  for (const id of ['oge-16', 'oge-17'] as const) for (const p of getProblemPool(id)) {
+test('all 600 answers agree with independently measured Euclidean drawings', () => {
+  for (const id of ['oge-15', 'oge-16', 'oge-17'] as const) for (const p of getProblemPool(id)) {
     const scene = p.figure!.scene!, unit = p.figure!.unit!, measure = p.geometryMeasure!;
     assert.equal(scene.grid, false);
     assert.ok(unit > 0 && Number.isFinite(unit));

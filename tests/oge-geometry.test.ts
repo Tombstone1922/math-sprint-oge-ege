@@ -3,8 +3,7 @@ import test from 'node:test';
 import { getProblemPool } from '../src/engine.ts';
 import type { OgeGeometryId } from '../src/oge-geometry.ts';
 
-const ids: OgeGeometryId[] = ['oge-15', 'oge-19'];
-const numbers = (s: string) => (s.match(/\d+/g) ?? []).map(Number);
+const ids: OgeGeometryId[] = ['oge-19'];
 
 test('all geometry sections have 200 original illustrated tasks and coherent answers', () => {
   for (const id of ids) {
@@ -13,12 +12,8 @@ test('all geometry sections have 200 original illustrated tasks and coherent ans
     assert.ok(pool.every(p => p.figure), id);
     assert.ok(new Set(pool.map(p => p.figure!.kind)).size >= (id === 'oge-19' ? 1 : 2), id);
     for (const p of pool) {
-      const n = numbers(p.expression);
       let answer: number;
-      if (id === 'oge-15') {
-        answer = p.expression.startsWith('В равнобедренном') ? (180 - n[0]) / 2
-          : p.expression.startsWith('В прямоугольном') ? Math.hypot(n[0], n[1]) : 180 - n[0] - n[1];
-      } else {
+      {
         const match = /1\) Площадь прямоугольника (\d+)×(\d+) равна (\d+)\.\n2\) Диаметр окружности радиуса (\d+) равен (\d+)\.\n3\) Если углы треугольника (\d+)° и (\d+)°, то третий равен (\d+)°/.exec(p.expression);
         assert.ok(match, p.expression);
         const [, a, b, area, radius, diameter, angleA, angleB, angleC] = match.map(Number);

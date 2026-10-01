@@ -5,7 +5,7 @@ import { Back, Button, Pill, ProgressBar, Screen, problemCardStyle, type } from 
 import { getModule, type ModuleId } from '../content';
 import { makeRound, parseGroup, ROUND_SIZE } from '../engine';
 import { colors } from '../theme';
-import { GeometryFigure } from '../geometry-figure';
+import { ProblemFigure, hasFigure } from '../problem-figure';
 
 export default function Guided() {
   const { module: requested, group: requestedGroup } = useLocalSearchParams<{ module?: string; group?: string }>();
@@ -26,8 +26,8 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <Text style={[type.body, { marginTop: 10 }]}>Сначала просмотри десять примеров с ответами. Затем реши эти же примеры сам в другом порядке.</Text>
     <View style={problemCardStyle(problem.colorIndex)}>
       <Pill tone="amber">ПРИМЕР {index + 1}</Pill>
-      {problem.figure && <GeometryFigure figure={problem.figure} />}
-      <Text style={[styles.expression, problem.figure && styles.geometryExpression]}>{problem.expression}</Text>
+      <ProblemFigure problem={problem} />
+      <Text style={[styles.expression, (hasFigure(problem) || moduleId === 'oge-12' || moduleId === 'oge-14') && styles.geometryExpression]}>{problem.expression}</Text>
       <Text style={styles.hint}>{problem.hint}</Text>
       <View style={styles.answer}><Text style={styles.answerText}>= {problem.answer}</Text></View>
     </View>

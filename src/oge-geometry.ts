@@ -1,4 +1,5 @@
 import type { FigureSpec, Problem } from './engine.ts';
+import { triangleProblemPool } from './oge15-problems.ts';
 import { circleProblemPool } from './oge16-problems.ts';
 import { quadrilateralProblemPool } from './oge17-problems.ts';
 import { gridProblemPool } from './oge18-problems.ts';
@@ -24,19 +25,6 @@ function bank(id: OgeGeometryId, build: (add: Add) => void): readonly Problem[] 
   return items.slice(0, 200).map((item, index) => ({ ...item, colorIndex: index % 20 }));
 }
 
-const triangles = bank('oge-15', add => {
-  for (let a = 20; a <= 80; a += 5) for (let b = 25; b <= 100; b += 5) {
-    if (a + b >= 170) continue;
-    add(`В треугольнике ABC ∠A=${a}°, ∠B=${b}°. Найдите ∠C.`, 180 - a - b, `180° − ${a}° − ${b}°`, { kind: 'triangle' });
-  }
-  for (let top = 20; top <= 140; top += 4) {
-    add(`В равнобедренном треугольнике ABC AB=BC, ∠B=${top}°. Найдите ∠A.`, (180 - top) / 2, `(180° − ${top}°) ÷ 2`, { kind: 'isosceles' });
-  }
-  for (let k = 1; k <= 30; k++) {
-    add(`В прямоугольном треугольнике катеты ${3 * k} и ${4 * k}. Найдите гипотенузу.`, 5 * k, `√(${3 * k}² + ${4 * k}²)`, { kind: 'right-triangle' });
-  }
-});
-
 const statements = bank('oge-19', add => {
   for (let a = 2; a <= 21; a++) for (let b = 3; b <= 12; b++) {
     const correct = (a + b) % 3 + 1;
@@ -46,5 +34,5 @@ const statements = bank('oge-19', add => {
 });
 
 export const ogeGeometryPools: Record<OgeGeometryId, readonly Problem[]> = {
-  'oge-15': triangles, 'oge-16': circleProblemPool, 'oge-17': quadrilateralProblemPool, 'oge-18': gridProblemPool, 'oge-19': statements,
+  'oge-15': triangleProblemPool, 'oge-16': circleProblemPool, 'oge-17': quadrilateralProblemPool, 'oge-18': gridProblemPool, 'oge-19': statements,
 };

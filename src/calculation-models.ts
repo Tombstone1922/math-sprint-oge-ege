@@ -1,0 +1,2 @@
+export type FormulaTask = { relation: 'power' | 'heat' | 'kinetic' | 'potential' | 'buoyancy' | 'centripetal' | 'temperature' | 'cost' | 'diagonal-area'; known: Record<string, number>; unknown: string };
+export type SequenceTask = { kind: 'arithmetic' | 'geometric' | 'constant'; first: number; change: number; count: number; target: 'term' | 'sum' | 'first' | 'count' | 'converted' | 'threshold'; threshold?: number };
