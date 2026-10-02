@@ -13,4 +13,5 @@ import { triangleGroups } from './oge15-problems.ts';
 import { circleGroups } from './oge16-problems.ts';
 import { quadrilateralGroups } from './oge17-problems.ts';
 import { gridGroups } from './oge18-problems.ts';
-export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { 'oge-6': arithmeticGroups, 'oge-7': comparisonGroups, 'oge-8': expressionGroups, 'oge-9': equationGroups, 'oge-10': probabilityGroups, 'beginner-math': beginnerGroups, 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };
+const practicalGroups = Array.from({ length: 10 }, (_, i) => `Варианты ${i * 4 + 1}–${i * 4 + 4}`);
+export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { 'oge-apartment': practicalGroups, 'oge-plot': practicalGroups, 'oge-tyres': practicalGroups, 'oge-6': arithmeticGroups, 'oge-7': comparisonGroups, 'oge-8': expressionGroups, 'oge-9': equationGroups, 'oge-10': probabilityGroups, 'beginner-math': beginnerGroups, 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };

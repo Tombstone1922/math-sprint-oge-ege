@@ -29,7 +29,7 @@ test('every module has a lesson, 200 problems in ten groups of twenty, and 20 qu
     assert.deepEqual(grouped.flat().map(problem => problem.id), pool.map(problem => problem.id));
     for (const [index, group] of grouped.entries()) {
       assert.equal(group.length, GROUP_SIZE);
-      assert.equal(new Set(group.map(problem => problem.colorIndex)).size, 20);
+      assert.equal(new Set(group.map(problem => problem.colorIndex)).size, group[0].practical ? 4 : 20);
       const guided = makeRound(module.id, index + 1, () => 0.37);
       const practice = shuffleForPractice(restoreRound(guided.map(problem => problem.id).join(','), module.id, index + 1), () => 0.37);
       assert.equal(guided.length, 10);

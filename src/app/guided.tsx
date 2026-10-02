@@ -23,7 +23,7 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <View style={styles.row}><Text style={type.eyebrow}>ГРУППА {group} · С ОТВЕТОМ</Text><Text style={styles.count}>{index + 1} / {ROUND_SIZE}</Text></View>
     <ProgressBar current={index + 1} total={ROUND_SIZE} />
     <Text style={[type.title, { marginTop: 31 }]}>Смотри и запоминай</Text>
-    <Text style={[type.body, { marginTop: 10 }]}>Сначала просмотри десять примеров с ответами. Затем реши эти же примеры сам в другом порядке.</Text>
+    <Text style={[type.body, { marginTop: 10 }]}>{problem.practical ? 'Два случайных блока по пять вопросов. Открой общее условие, изучи решения, затем реши те же блоки самостоятельно.' : 'Сначала просмотри десять примеров с ответами. Затем реши эти же примеры сам в другом порядке.'}</Text>
     <View style={problemCardStyle(problem.colorIndex)}>
       <Pill tone="amber">ПРИМЕР {index + 1}</Pill>
       <ProblemFigure problem={problem} />

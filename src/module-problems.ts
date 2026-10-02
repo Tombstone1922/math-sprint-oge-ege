@@ -1,3 +1,4 @@
+import { practicalPools } from './oge-practical.ts';
 import type { ModuleId } from './content.ts';
 import type { Problem } from './engine.ts';
 import { beginnerProblemPool } from './beginner-math.ts';
@@ -104,5 +105,5 @@ const probability = collect('probability', add => {
 });
 
 export const modulePools: Record<OtherModule, readonly Problem[]> = {
-  'beginner-math': beginnerProblemPool, percent, fractions, equations, geometry, powers, probability, ...ogeGeometryPools, ...ogeAlgebraPools,
+  'beginner-math': beginnerProblemPool, percent, fractions, equations, geometry, powers, probability, ...ogeGeometryPools, ...ogeAlgebraPools, ...practicalPools,
 };
