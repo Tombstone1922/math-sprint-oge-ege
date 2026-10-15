@@ -1,3 +1,4 @@
+import { FractionReference } from '../fraction-reference';
 import React, { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
@@ -10,7 +11,7 @@ import { ProblemFigure, hasFigure } from '../problem-figure';
 export default function Guided() {
   const { module: requested, group: requestedGroup } = useLocalSearchParams<{ module?: string; group?: string }>();
   const selected = getModule(requested);
-  const group = parseGroup(requestedGroup);
+  const group = parseGroup(requestedGroup, selected.id);
   return <GuidedContent key={`${selected.id}:${group}`} moduleId={selected.id} group={group} />;
 }
 
@@ -24,6 +25,7 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <ProgressBar current={index + 1} total={ROUND_SIZE} />
     <Text style={[type.title, { marginTop: 31 }]}>Смотри и запоминай</Text>
     <Text style={[type.body, { marginTop: 10 }]}>{problem.practical ? 'Два случайных блока по пять вопросов. Открой общее условие, изучи решения, затем реши те же блоки самостоятельно.' : 'Сначала просмотри десять примеров с ответами. Затем реши эти же примеры сам в другом порядке.'}</Text>
+    {moduleId === 'fraction-decimals' && <FractionReference />}
     <View style={problemCardStyle(problem.colorIndex)}>
       <Pill tone="amber">ПРИМЕР {index + 1}</Pill>
       <ProblemFigure problem={problem} />

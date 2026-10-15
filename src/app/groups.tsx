@@ -1,9 +1,10 @@
+import { FractionReference } from '../fraction-reference';
 import React from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Back, Pill, Screen, type } from '../components';
 import { getModule } from '../content';
-import { GROUP_COUNT, GROUP_SIZE, ROUND_SIZE } from '../engine';
+import { getGroupCount, GROUP_SIZE, ROUND_SIZE } from '../engine';
 import { cardPalette, colors } from '../theme';
 import { topicGroupNames } from '../module-groups';
 
@@ -15,8 +16,9 @@ export default function Groups() {
     <Back label="К уроку" />
     <Pill tone="mint">{selected.title.toUpperCase()}</Pill>
     <Text style={[type.title, { marginTop: 18 }]}>Выбери группу</Text>
-    <Text style={[type.body, { marginTop: 10, marginBottom: 18 }]}>{selected.numbers === '№1–5' ? '40 вариантов: 10 групп по 4 блока (20 вопросов). За тренировку — 2 случайных блока, сначала с решениями, затем без ответов. Внутри блока сохраняется порядок №1–5.' : '200 задач: 10 групп по 20. За тренировку увидишь 10 случайных задач выбранной группы сначала с ответами, затем без них.'}</Text>
-    {Array.from({ length: GROUP_COUNT }, (_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`${groupNames?.[index] ?? `Группа ${index + 1}`}, ${GROUP_SIZE} задач`} onPress={() => router.push({ pathname: '/guided', params: { module: selected.id, group: String(index + 1) } })} style={styles.group}>
+    <Text style={[type.body, { marginTop: 10, marginBottom: 18 }]}>{selected.id === 'fraction-decimals' ? '280 дробей: 14 групп по 20. Все числители для знаменателей 2–16 в диапазоне от 1/16 до 17/8. Сначала карточки с ответами, затем те же десять самостоятельно.' : selected.numbers === '№1–5' ? '40 вариантов: 10 групп по 4 блока (20 вопросов). За тренировку — 2 случайных блока, сначала с решениями, затем без ответов. Внутри блока сохраняется порядок №1–5.' : '200 задач: 10 групп по 20. За тренировку увидишь 10 случайных задач выбранной группы сначала с ответами, затем без них.'}</Text>
+    {selected.id === 'fraction-decimals' && <FractionReference />}
+    {Array.from({ length: getGroupCount(selected.id) }, (_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`${groupNames?.[index] ?? `Группа ${index + 1}`}, ${GROUP_SIZE} задач`} onPress={() => router.push({ pathname: '/guided', params: { module: selected.id, group: String(index + 1) } })} style={styles.group}>
       <View style={[styles.icon, { backgroundColor: cardPalette[index] }]}><Text style={styles.number}>{index + 1}</Text></View>
       <View style={styles.info}><Text style={styles.name}>{groupNames?.[index] ?? `Группа ${index + 1}`}</Text><Text style={styles.details}>{GROUP_SIZE} задач · {ROUND_SIZE} за тренировку</Text></View>
       <Text style={styles.chevron}>›</Text>

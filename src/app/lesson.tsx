@@ -1,3 +1,4 @@
+import { FractionReference, WrittenFraction } from '../fraction-reference';
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
@@ -24,10 +25,11 @@ function LessonContent({ moduleId, title }: { moduleId: ModuleId; title: string 
     <Text style={[type.body, { marginTop: 13 }]}>{item.description}</Text>
     <View style={styles.card}>
       <Text style={styles.cardLabel}>ПОПРОБУЙ ТАК</Text>
-      <Text style={styles.expression}>{item.example}</Text>
+      {moduleId === 'fraction-decimals' ? <View style={{ marginTop: 20 }}><WrittenFraction n={Number(item.example.split('/')[0])} d={Number(item.example.split('/')[1])} size={38} /></View> : <Text style={styles.expression}>{item.example}</Text>}
       <Text style={styles.steps}>{item.steps}</Text>
       <View style={styles.answer}><Text style={styles.answerText}>= {item.answer}</Text></View>
     </View>
+    {moduleId === 'fraction-decimals' && <FractionReference />}
     <View style={styles.note}><Text style={styles.noteIcon}>✦</Text><Text style={styles.noteText}>Не гонись за скоростью. Сначала найди удобный путь к ответу.</Text></View>
     <View style={{ flex: 1, minHeight: 25 }} />
     <Button title={index === lesson.length - 1 ? 'Выбрать группу задач  →' : 'Следующий приём  →'} onPress={() => index === lesson.length - 1 ? router.push({ pathname: '/groups', params: { module: moduleId } }) : setIndex(index + 1)} />

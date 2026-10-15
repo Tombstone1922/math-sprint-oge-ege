@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { lessons, modules } from '../src/content.ts';
-import { checkAnswer, getGroupProblems, getProblemPool, GROUP_COUNT, GROUP_SIZE, makeRound, restoreRound, shuffleForPractice } from '../src/engine.ts';
+import { checkAnswer, getGroupProblems, getGroupCount, getProblemPool, GROUP_SIZE, makeRound, restoreRound, shuffleForPractice } from '../src/engine.ts';
 import { cardPalette } from '../src/theme.ts';
 import { beginnerGroups } from '../src/beginner-math.ts';
 
@@ -10,22 +10,23 @@ const numeric = (answer: string) => {
   return bottom === undefined ? top : top / bottom;
 };
 
-test('every module has a lesson, 200 problems in ten groups of twenty, and 20 quiet colors', () => {
+test('every module has a lesson, complete groups of twenty and 20 quiet colors', () => {
   assert.equal(cardPalette.length, 20);
   assert.equal(new Set(cardPalette).size, 20);
   assert.ok(cardPalette.every(hex => /^#[A-F0-9]{6}$/.test(hex)));
   for (const module of modules) {
     assert.equal(lessons[module.id].length, 3, module.id);
     const pool = getProblemPool(module.id);
-    assert.equal(pool.length, GROUP_COUNT * GROUP_SIZE, module.id);
+    assert.equal(pool.length, module.id === 'fraction-decimals' ? 280 : 200, module.id);
+    assert.equal(pool.length, getGroupCount(module.id) * GROUP_SIZE, module.id);
     assert.equal(new Set(pool.map(problem => problem.id)).size, pool.length, module.id);
-    assert.equal(new Set(pool.map(problem => JSON.stringify([problem.expression, problem.figure?.scene, problem.graphs, problem.numberLines?.choices, problem.chance, problem.numericTask, problem.axisScene, problem.orderTask]))).size, pool.length, module.id);
+    assert.equal(new Set(pool.map(problem => JSON.stringify([problem.expression, problem.figure?.scene, problem.graphs, problem.numberLines?.choices, problem.chance, problem.numericTask, problem.axisScene, problem.orderTask, problem.conversion]))).size, pool.length, module.id);
     for (const problem of pool) {
       assert.ok(problem.expression && problem.hint && (problem.answerMode === 'roots' ? Boolean(problem.rootTask && problem.answerDisplay) : Number.isFinite(numeric(problem.answer))), problem.id);
-      assert.ok(checkAnswer(problem.answer, problem), problem.id);
+      assert.ok(checkAnswer(problem.conversion ? problem.answerDisplay! : problem.answer, problem), problem.id);
       assert.ok(problem.colorIndex >= 0 && problem.colorIndex < cardPalette.length, problem.id);
     }
-    const grouped = Array.from({ length: GROUP_COUNT }, (_, i) => getGroupProblems(module.id, i + 1));
+    const grouped = Array.from({ length: getGroupCount(module.id) }, (_, i) => getGroupProblems(module.id, i + 1));
     assert.deepEqual(grouped.flat().map(problem => problem.id), pool.map(problem => problem.id));
     for (const [index, group] of grouped.entries()) {
       assert.equal(group.length, GROUP_SIZE);

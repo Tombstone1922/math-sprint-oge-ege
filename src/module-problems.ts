@@ -1,3 +1,4 @@
+import { fractionDecimalPool } from './fraction-decimals.ts';
 import { squareRootPool } from './squares-roots.ts';
 import { practicalPools } from './oge-practical.ts';
 import type { ModuleId } from './content.ts';
@@ -106,5 +107,5 @@ const probability = collect('probability', add => {
 });
 
 export const modulePools: Record<OtherModule, readonly Problem[]> = {
-  'squares-roots': squareRootPool, 'beginner-math': beginnerProblemPool, percent, fractions, equations, geometry, powers, probability, ...ogeGeometryPools, ...ogeAlgebraPools, ...practicalPools,
+  'fraction-decimals': fractionDecimalPool, 'squares-roots': squareRootPool, 'beginner-math': beginnerProblemPool, percent, fractions, equations, geometry, powers, probability, ...ogeGeometryPools, ...ogeAlgebraPools, ...practicalPools,
 };

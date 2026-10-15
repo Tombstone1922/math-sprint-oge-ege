@@ -1,3 +1,4 @@
+import { matchesDecimal, type FractionConversion } from './fraction-decimals.ts';
 import type { PracticalQuestion } from './oge-practical.ts';
 import type { NumericTask } from './numeric-expressions.ts';
 import type { AxisScene, OrderTask } from './order-models.ts';
@@ -12,7 +13,7 @@ import { modulePools } from './module-problems.ts';
 import type { GridScene, GridTask } from './grid-geometry.ts';
 
 export type FigureSpec = { kind: 'triangle' | 'isosceles' | 'right-triangle' | 'circle' | 'circle-diameter' | 'tangent' | 'chord' | 'secant' | 'rectangle' | 'trapezoid' | 'rhombus' | 'grid-rectangle' | 'grid-triangle' | 'grid-parallelogram' | 'grid-segment' | 'grid-scene' | 'claims'; dx?: number; dy?: number; scene?: GridScene; unit?: number };
-export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number; practical?: PracticalQuestion; figure?: FigureSpec; gridTask?: GridTask; geometryMeasure?: GeometryMeasure; graphs?: GraphQuestion; numberLines?: NumberLineQuestion; formulaTask?: FormulaTask; sequenceTask?: SequenceTask; rootTask?: RootTask; chance?: ChanceModel; numericTask?: NumericTask; axisScene?: AxisScene; orderTask?: OrderTask; answerDisplay?: string; answerMode?: 'sequence' | 'choice' | 'roots' };
+export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number; conversion?: FractionConversion; practical?: PracticalQuestion; figure?: FigureSpec; gridTask?: GridTask; geometryMeasure?: GeometryMeasure; graphs?: GraphQuestion; numberLines?: NumberLineQuestion; formulaTask?: FormulaTask; sequenceTask?: SequenceTask; rootTask?: RootTask; chance?: ChanceModel; numericTask?: NumericTask; axisScene?: AxisScene; orderTask?: OrderTask; answerDisplay?: string; answerMode?: 'sequence' | 'choice' | 'roots' };
 export const GROUP_COUNT = 10;
 export const GROUP_SIZE = 20;
 export const POOL_SIZE = GROUP_COUNT * GROUP_SIZE;
@@ -61,14 +62,18 @@ export function getProblemPool(moduleId: ModuleId): readonly Problem[] {
   return moduleId === 'mental-math' ? problemPool : modulePools[moduleId];
 }
 
+export function getGroupCount(moduleId: ModuleId): number {
+  return getProblemPool(moduleId).length / GROUP_SIZE;
+}
+
 export function getGroupProblems(moduleId: ModuleId, group: number): readonly Problem[] {
-  if (!Number.isInteger(group) || group < 1 || group > GROUP_COUNT) throw new Error('Invalid group');
+  if (!Number.isInteger(group) || group < 1 || group > getGroupCount(moduleId)) throw new Error('Invalid group');
   return getProblemPool(moduleId).slice((group - 1) * GROUP_SIZE, group * GROUP_SIZE);
 }
 
-export function parseGroup(value: string | undefined): number {
+export function parseGroup(value: string | undefined, moduleId: ModuleId = 'mental-math'): number {
   const group = Number(value);
-  return Number.isInteger(group) && group >= 1 && group <= GROUP_COUNT ? group : 1;
+  return Number.isInteger(group) && group >= 1 && group <= getGroupCount(moduleId) ? group : 1;
 }
 
 export function shuffleProblems(problems: readonly Problem[], random: () => number = Math.random): Problem[] {
@@ -115,6 +120,7 @@ export function shuffleForPractice(problems: readonly Problem[], random: () => n
   return shuffled;
 }
 export function checkAnswer(input: string, problem: Problem): boolean {
+  if (problem.conversion) return matchesDecimal(input, problem.conversion.numerator, problem.conversion.denominator);
   if (problem.answerMode === 'roots') return input.trim().replaceAll('−', '-').replaceAll(',', '.') === problem.answer;
   if (problem.answerMode) return input.trim() === problem.answer;
   function value(raw: string): number | null {

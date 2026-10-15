@@ -10,7 +10,7 @@ import { colors } from '../theme';
 export default function Result() {
   const { score, module: requested, group: requestedGroup } = useLocalSearchParams<{ score: string; module?: string; group?: string }>();
   const selected = getModule(requested);
-  const group = parseGroup(requestedGroup);
+  const group = parseGroup(requestedGroup, selected.id);
   const value = Math.max(0, Math.min(10, Number(score) || 0));
   const { progress } = useProgress();
   return <Screen>
