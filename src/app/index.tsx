@@ -5,6 +5,7 @@ import { Button, Pill, Screen, type } from '../components';
 import { Exam, modules } from '../content';
 import { useProgress } from '../progress';
 import { colors } from '../theme';
+import { LearningSummary } from '../learning-ui';
 
 type Filter = 'Все' | Exam;
 const filters: Filter[] = ['Все', 'ОГЭ', 'ЕГЭ база', 'ЕГЭ профиль'];
@@ -23,9 +24,10 @@ export default function Home() {
     </View>
     <Button title={progress.completed ? 'Повторить быстрый счёт  →' : 'Начать первый урок  →'} onPress={() => router.push({ pathname: '/lesson', params: { module: 'mental-math' } })} />
     <View style={styles.stats}>
-      <View style={styles.stat}><Text style={styles.statNumber}>{progress.completed}</Text><Text style={styles.statLabel}>тренировок</Text></View>
+      <View style={styles.stat}><Text style={styles.statNumber}>{progress.completed}</Text><Text style={styles.statLabel}>тренировок по 10</Text></View>
       <View style={styles.divider} /><View style={styles.stat}><Text style={styles.statNumber}>{progress.best}/10</Text><Text style={styles.statLabel}>лучший результат</Text></View>
     </View>
+    <LearningSummary />
     <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
     <View style={styles.filters}>{filters.map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: filter === item }} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && { color: colors.white }]}>{item}</Text></Pressable>)}</View>
     {shown.map((module, index) => <React.Fragment key={module.id}>

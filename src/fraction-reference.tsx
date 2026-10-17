@@ -21,11 +21,11 @@ export function FractionConversionFigure({ value }: { value: FractionConversion 
     </View>
   </View>;
 }
-export function FractionReference() {
+export function FractionReference({ onOpen }: { onOpen?: () => void } = {}) {
   const [open, setOpen] = useState(false);
   const [denominator, setDenominator] = useState<number>(8);
   return <>
-    <Pressable accessibilityRole="button" accessibilityLabel="Открыть общую памятку дробей" onPress={() => setOpen(true)} style={styles.launch}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Открыть общую памятку дробей" onPress={() => { onOpen?.(); setOpen(true); }} style={styles.launch}>
       <View><Text style={styles.launchTitle}>Дроби → десятичные</Text><Text style={styles.launchText}>Общая памятка · знаменатели 2–16</Text></View><Text style={{ color: colors.blue, fontSize: 24 }}>↗</Text>
     </Pressable>
     <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen>

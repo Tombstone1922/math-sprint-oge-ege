@@ -2,25 +2,33 @@ import { FractionReference } from '../fraction-reference';
 import React from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Back, Pill, Screen, type } from '../components';
+import { Back, Button, Pill, Screen, type } from '../components';
 import { getModule } from '../content';
 import { getGroupCount, GROUP_SIZE, ROUND_SIZE } from '../engine';
 import { cardPalette, colors } from '../theme';
 import { topicGroupNames } from '../module-groups';
+import { useProgress } from '../progress';
+import { accuracy, pendingMistakes } from '../learning-progress';
+import { percentText } from '../learning-ui';
 
 export default function Groups() {
   const { module: requested } = useLocalSearchParams<{ module?: string }>();
   const selected = getModule(requested);
   const groupNames = topicGroupNames[selected.id];
+  const { progress } = useProgress();
+  const stats = progress.byModule[selected.id];
   return <Screen>
     <Back label="К уроку" />
     <Pill tone="mint">{selected.title.toUpperCase()}</Pill>
     <Text style={[type.title, { marginTop: 18 }]}>Выбери группу</Text>
     <Text style={[type.body, { marginTop: 10, marginBottom: 18 }]}>{selected.id === 'fraction-decimals' ? '280 дробей: 14 групп по 20. Все числители для знаменателей 2–16 в диапазоне от 1/16 до 17/8. Сначала карточки с ответами, затем те же десять самостоятельно.' : selected.numbers === '№1–5' ? '40 вариантов: 10 групп по 4 блока (20 вопросов). За тренировку — 2 случайных блока, сначала с решениями, затем без ответов. Внутри блока сохраняется порядок №1–5.' : '200 задач: 10 групп по 20. За тренировку увидишь 10 случайных задач выбранной группы сначала с ответами, затем без них.'}</Text>
+    <Button title="Прогресс по этому модулю" secondary onPress={() => router.push({ pathname: '/progress', params: { module: selected.id } })} />
+    {pendingMistakes(progress, { moduleId: selected.id }).length > 0 && <Button title="Ошибки в этом модуле  →" secondary onPress={() => router.push({ pathname: '/review', params: { module: selected.id } })} />}
+    <View style={{ height: 18 }} />
     {selected.id === 'fraction-decimals' && <FractionReference />}
     {Array.from({ length: getGroupCount(selected.id) }, (_, index) => <Pressable key={index} accessibilityRole="button" accessibilityLabel={`${groupNames?.[index] ?? `Группа ${index + 1}`}, ${GROUP_SIZE} задач`} onPress={() => router.push({ pathname: '/guided', params: { module: selected.id, group: String(index + 1) } })} style={styles.group}>
       <View style={[styles.icon, { backgroundColor: cardPalette[index] }]}><Text style={styles.number}>{index + 1}</Text></View>
-      <View style={styles.info}><Text style={styles.name}>{groupNames?.[index] ?? `Группа ${index + 1}`}</Text><Text style={styles.details}>{GROUP_SIZE} задач · {ROUND_SIZE} за тренировку</Text></View>
+      <View style={styles.info}><Text style={styles.name}>{groupNames?.[index] ?? `Группа ${index + 1}`}</Text><Text style={styles.details}>{GROUP_SIZE} задач · {ROUND_SIZE} за тренировку</Text>{stats?.byGroup[index + 1]?.attempts ? <Text style={[styles.details, { color: colors.blue }]}>{stats.byGroup[index + 1].seen.length >= GROUP_SIZE ? 'Пройдена · ' : ''}{percentText(accuracy(stats.byGroup[index + 1].independent, stats.byGroup[index + 1].attempts))} без подсказок · {stats.byGroup[index + 1].seen.length}/{GROUP_SIZE} задач</Text> : null}</View>
       <Text style={styles.chevron}>›</Text>
     </Pressable>)}
   </Screen>;

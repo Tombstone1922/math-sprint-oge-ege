@@ -6,23 +6,30 @@ import { getModule } from '../content';
 import { parseGroup } from '../engine';
 import { useProgress } from '../progress';
 import { colors } from '../theme';
+import { pendingMistakes } from '../learning-progress';
 
 export default function Result() {
-  const { score, module: requested, group: requestedGroup } = useLocalSearchParams<{ score: string; module?: string; group?: string }>();
+  const { score, module: requested, group: requestedGroup, mode, total: requestedTotal, assisted: requestedAssisted } = useLocalSearchParams<{ score: string; module?: string; group?: string; mode?: string; total?: string; assisted?: string }>();
   const selected = getModule(requested);
   const group = parseGroup(requestedGroup, selected.id);
-  const value = Math.max(0, Math.min(10, Number(score) || 0));
+  const review = mode === 'review';
+  const total = review ? Math.max(1, Math.min(10, Math.floor(Number(requestedTotal)) || 1)) : 10;
+  const value = Math.max(0, Math.min(total, Math.floor(Number(score)) || 0));
+  const assisted = Math.max(0, Math.min(total - value, Math.floor(Number(requestedAssisted)) || 0));
   const { progress } = useProgress();
   return <Screen>
     <View style={{ flex: 1, minHeight: 50 }} />
     <View style={styles.badge}><Text style={styles.badgeText}>✦</Text></View>
-    <Text style={[type.eyebrow, { textAlign: 'center', marginTop: 26 }]}>ТРЕНИРОВКА ЗАВЕРШЕНА</Text>
+    <Text style={[type.eyebrow, { textAlign: 'center', marginTop: 26 }]}>{review ? 'ПОВТОРЕНИЕ ЗАВЕРШЕНО' : 'ТРЕНИРОВКА ЗАВЕРШЕНА'}</Text>
     <Text style={[type.title, { textAlign: 'center', marginTop: 13 }]}>Хороший рывок!</Text>
     <Text style={[type.body, { textAlign: 'center', marginTop: 10 }]}>Модуль «{selected.title}», группа {group}. Регулярная практика закрепит приёмы.</Text>
-    <View style={styles.scoreCard}><Pill tone="mint">ПРАВИЛЬНО С ПЕРВОЙ ПОПЫТКИ</Pill><Text style={styles.score}>{value}<Text style={styles.denominator}> / 10</Text></Text><Text style={styles.caption}>{value >= 8 ? 'Отличный результат!' : 'Повтори карточки и попробуй ещё раз.'}</Text></View>
-    <Text style={styles.best}>Рекорд в этом модуле: {progress.byModule[selected.id]?.best ?? 0} из 10</Text>
+    <View style={styles.scoreCard}><Pill tone="mint">САМОСТОЯТЕЛЬНО · БЕЗ ПОДСКАЗОК</Pill><Text style={styles.score}>{value}<Text style={styles.denominator}> / {total}</Text></Text><Text style={styles.caption}>Верно с подсказкой: {assisted} · ошибок: {total - value - assisted}</Text><Text style={styles.caption}>{value / total >= .8 ? 'Отличный результат!' : 'Разобраться в ошибке — тоже шаг вперёд.'}</Text></View>
+    <Text style={styles.best}>{review ? 'Один правильный ответ — один шаг закрепления. Следующие повторы появятся по расписанию.' : `Рекорд в этом модуле: ${progress.byModule[selected.id]?.best ?? 0} из 10`}</Text>
+    <Text style={styles.caption}>На закреплении в модуле: {pendingMistakes(progress, { moduleId: selected.id }).length}. Ответы учтены в твоём прогрессе.</Text>
     <View style={{ flex: 1, minHeight: 50 }} />
-    <Button title="Ещё одна тренировка  ↻" onPress={() => router.replace({ pathname: '/guided', params: { module: selected.id, group: String(group) } })} />
+    <Button title={review ? 'К списку повторений  ↻' : 'Ещё одна тренировка  ↻'} onPress={() => router.replace({ pathname: review ? '/review' : '/guided', params: { module: selected.id, group: String(group) } })} />
+    {!review && pendingMistakes(progress, { moduleId: selected.id }).length > 0 && <Button title="Повторить ошибки" secondary onPress={() => router.replace({ pathname: '/review', params: { module: selected.id } })} />}
+    <Button title="Посмотреть мой прогресс" secondary onPress={() => router.push({ pathname: '/progress', params: { module: selected.id } })} />
     <Button title="Выбрать другую группу" secondary onPress={() => router.replace({ pathname: '/groups', params: { module: selected.id } })} />
     <Button title="К модулям" secondary onPress={() => router.dismissTo('/')} />
   </Screen>;

@@ -1,34 +1,45 @@
 import { FractionReference } from '../fraction-reference';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Back, Button, Pill, ProgressBar, Screen, problemCardStyle, type } from '../components';
 import { getModule, type ModuleId } from '../content';
-import { checkAnswer, parseGroup, restoreRound, ROUND_SIZE, shuffleForPractice } from '../engine';
+import { checkAnswer, parseGroup, restoreRound, shuffleForPractice } from '../engine';
 import { useProgress } from '../progress';
 import { colors } from '../theme';
 import { ProblemFigure, hasFigure } from '../problem-figure';
+import { mistakeKey, restoreReviewRound, type TrainingMode } from '../learning-progress';
+import { getHintSteps } from '../hints';
+import { HintPanel } from '../hint-panel';
+import { reviewTime } from '../learning-ui';
 
-type Feedback = { correct: boolean; answer: string; hint: string };
+type Feedback = { correct: boolean; assisted: boolean; at: number };
 
 export default function Practice() {
-  const { ids, module: requested, group: requestedGroup } = useLocalSearchParams<{ ids?: string; module?: string; group?: string }>();
+  const { ids, module: requested, group: requestedGroup, mode: requestedMode } = useLocalSearchParams<{ ids?: string; module?: string; group?: string; mode?: string }>();
   const selected = getModule(requested);
   const group = parseGroup(requestedGroup, selected.id);
-  return <PracticeContent key={`${selected.id}:${group}:${ids ?? ''}`} moduleId={selected.id} group={group} ids={ids} />;
+  const mode = requestedMode === 'review' ? 'review' : 'practice';
+  return <PracticeContent key={`${selected.id}:${group}:${mode}:${ids ?? ''}`} moduleId={selected.id} group={group} ids={ids} mode={mode} />;
 }
 
-function PracticeContent({ ids, moduleId, group }: { ids?: string; moduleId: ModuleId; group: number }) {
+function PracticeContent({ ids, moduleId, group, mode }: { ids?: string; moduleId: ModuleId; group: number; mode: TrainingMode }) {
   const round = useMemo(() => {
-    try { return shuffleForPractice(restoreRound(ids ?? '', moduleId, group)); }
+    try { return mode === 'review' ? restoreReviewRound(ids ?? '', moduleId, group) : shuffleForPractice(restoreRound(ids ?? '', moduleId, group)); }
     catch { return null; }
-  }, [ids, moduleId, group]);
+  }, [ids, moduleId, group, mode]);
   const [position, setPosition] = useState(0);
   const [input, setInput] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [score, setScore] = useState(0);
-  const { record } = useProgress();
+  const [assistedCount, setAssistedCount] = useState(0);
+  const [hintLevel, setHintLevel] = useState(0);
+  const hintLevelRef = useRef(0);
+  const submitted = useRef(false), finished = useRef(false);
+  const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const { answer, hint, complete, progress } = useProgress();
   const problem = round?.[position];
+  const total = round?.length ?? 0;
   const fractionInput = moduleId === 'fractions' || moduleId === 'probability' || ['oge-6', 'oge-8', 'oge-10'].includes(moduleId);
   const decimalInput = moduleId === 'fraction-decimals' || Boolean(problem?.practical) || ['oge-6', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14', 'oge-15', 'oge-16', 'oge-17', 'oge-18'].includes(moduleId);
   const signedInput = moduleId === 'oge-6' || moduleId === 'oge-8' || moduleId === 'oge-9' || moduleId === 'oge-12' || moduleId === 'oge-14';
@@ -50,41 +61,61 @@ function PracticeContent({ ids, moduleId, group }: { ids?: string; moduleId: Mod
     else setInput(value => !value.endsWith(')') && value.length < (statementsInput ? 3 : sequenceInput ? (problem?.answer.length ?? 3) : choiceInput ? 1 : rootsInput || moduleId === 'fraction-decimals' ? 32 : 12) ? value + key : value);
   }
   function submit() {
-    if (!input || !problem || feedback) return;
+    if (!input || !problem || submitted.current) return;
+    submitted.current = true;
     const correct = checkAnswer(input, problem);
-    if (correct) setScore(value => value + 1);
-    setFeedback({ correct, answer: problem.answerDisplay ?? problem.answer, hint: problem.hint });
+    const assisted = hintLevelRef.current > 0;
+    const at = Date.now();
+    answer({ sessionId, moduleId, group, problemId: problem.id, correct, hintLevel: hintLevelRef.current, mode, at });
+    if (correct && !assisted) setScore(value => value + 1);
+    if (correct && assisted) setAssistedCount(value => value + 1);
+    setFeedback({ correct, assisted, at });
+  }
+  function reveal(level: number) {
+    if (!problem) return;
+    if (!submitted.current) {
+      hintLevelRef.current = Math.max(hintLevelRef.current, Math.min(3, level));
+      hint({ sessionId, moduleId, group, problemId: problem.id, at: Date.now() });
+    }
+    setHintLevel(value => Math.max(value, Math.min(3, level)));
   }
   function next() {
-    if (position + 1 >= ROUND_SIZE) {
-      record(score, moduleId);
-      router.replace({ pathname: '/result', params: { score: String(score), module: moduleId, group: String(group) } });
+    if (!submitted.current || finished.current) return;
+    if (position + 1 >= total) {
+      finished.current = true;
+      complete({ id: sessionId, score, total, moduleId, group, mode });
+      router.replace({ pathname: '/result', params: { score: String(score), total: String(total), assisted: String(assistedCount), module: moduleId, group: String(group), mode } });
     } else {
       setPosition(value => value + 1);
       setInput('');
       setFeedback(null);
+      setHintLevel(0);
+      hintLevelRef.current = 0;
+      submitted.current = false;
     }
   }
 
-  if (!round || !problem) return <Screen><Text style={type.title}>Сначала посмотри карточки с ответами</Text><Button title="К карточкам" onPress={() => router.replace({ pathname: '/guided', params: { module: moduleId, group: String(group) } })} /></Screen>;
+  if (!round || !problem) return <Screen><Text style={type.title}>{mode === 'review' ? 'Эти задачи не удалось открыть' : 'Сначала посмотри карточки с ответами'}</Text><Button title={mode === 'review' ? 'К списку ошибок' : 'К карточкам'} onPress={() => router.replace({ pathname: mode === 'review' ? '/review' : '/guided', params: { module: moduleId, group: String(group) } })} /></Screen>;
+  const pending = progress.mistakes[mistakeKey(moduleId, problem.id)];
   return <Screen>
-    <Back label="К группам" />
-    <View style={styles.row}><Text style={type.eyebrow}>ГРУППА {group} · ТВОЯ ОЧЕРЕДЬ</Text><Text style={styles.count}>{position + 1} / {ROUND_SIZE}</Text></View>
-    <ProgressBar current={position + 1} total={ROUND_SIZE} />
+    <Back label={mode === 'review' ? 'К ошибкам' : 'К группам'} />
+    <View style={styles.row}><Text style={type.eyebrow}>ГРУППА {group} · {mode === 'review' ? 'ПОВТОРЕНИЕ' : 'ТВОЯ ОЧЕРЕДЬ'}</Text><Text style={styles.count}>{position + 1} / {total}</Text></View>
+    <ProgressBar current={position + 1} total={total} />
     <Text style={[type.title, { marginTop: 20, fontSize: 27 }]}>Найди ответ</Text>
-    <Text style={[type.body, { fontSize: 14, marginTop: 4 }]}>{problem.practical ? 'Два тех же блока: вопросы №1–5 идут по порядку.' : 'Те же десять задач в другом порядке.'}{rootsInput ? ' Введи все корни по возрастанию подряд без пробелов.' : statementsInput ? ' Введи номера всех верных утверждений по возрастанию без пробелов.' : sequenceInput ? ` Введи ${problem.answer.length} цифры подряд в указанном порядке.` : choiceInput ? ' Введи номер варианта: 1, 2, 3 или 4.' : fractionInput && decimalInput ? ' Введи точную дробь через / или десятичное число.' : fractionInput ? ' Дробь запиши через /.' : moduleId === 'fraction-decimals' ? ' Введи десятичную дробь. Период — в скобках: 0,(3).' : decimalInput ? ' Дробную часть вводи через запятую.' : ''}</Text>
-    {moduleId === 'fraction-decimals' && <FractionReference />}
-    <View style={problemCardStyle(problem.colorIndex)}>
+    <Text style={[type.body, { fontSize: 14, marginTop: 4 }]}>{mode === 'review' ? 'Личная подборка ошибок без предварительного показа ответов. Общее условие практической задачи можно открыть на карточке.' : problem.practical ? 'Два тех же блока: вопросы №1–5 идут по порядку.' : 'Те же десять задач в другом порядке.'}{rootsInput ? ' Введи все корни по возрастанию подряд без пробелов.' : statementsInput ? ' Введи номера всех верных утверждений по возрастанию без пробелов.' : sequenceInput ? ` Введи ${problem.answer.length} цифры подряд в указанном порядке.` : choiceInput ? ' Введи номер варианта: 1, 2, 3 или 4.' : fractionInput && decimalInput ? ' Введи точную дробь через / или десятичное число.' : fractionInput ? ' Дробь запиши через /.' : moduleId === 'fraction-decimals' ? ' Введи десятичную дробь. Период — в скобках: 0,(3).' : decimalInput ? ' Дробную часть вводи через запятую.' : ''}</Text>
+    {moduleId === 'fraction-decimals' && <FractionReference onOpen={() => reveal(1)} />}
+    <View testID={`problem-card-${problem.id}`} style={problemCardStyle(problem.colorIndex)}>
       <Pill>{problem.practical ? `ЗАДАНИЕ ${problem.practical.number}` : `ПРИМЕР ${position + 1}`}</Pill>
-      {problem.practical && <Text style={[styles.expression, styles.geometryExpression]}>{problem.expression}</Text>}
+      {problem.practical && <Text testID="problem-expression" style={[styles.expression, styles.geometryExpression]}>{problem.expression}</Text>}
       <ProblemFigure problem={problem} />
-      {!problem.practical && <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14', 'oge-19'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>}
+      {!problem.practical && <Text testID="problem-expression" style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14', 'oge-19'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>}
       <View style={styles.inputRow}>{signedInput && !choiceInput && !feedback && <Pressable accessibilityRole="button" accessibilityLabel={rootsInput ? "Добавить минус перед корнем" : "Изменить знак ответа"} onPress={() => pressKey('±')} style={styles.signKey}><Text style={styles.keyText}>{rootsInput ? '−' : '±'}</Text></Pressable>}{fractionInput && decimalInput && !choiceInput && !feedback && <Pressable accessibilityRole="button" accessibilityLabel="Дробная черта" onPress={() => pressKey('/')} style={styles.signKey}><Text style={styles.keyText}>/</Text></Pressable>}<View style={[styles.input, feedback && { borderColor: feedback.correct ? colors.green : colors.red }]}><Text style={[styles.inputText, !input && { color: '#AFBBC9' }]}>{input || (rootsInput ? 'Корни подряд' : statementsInput ? 'Номера утверждений' : sequenceInput ? 'Цифры подряд' : choiceInput ? 'Номер варианта' : fractionInput ? 'Например, 2/3' : 'Твой ответ')}</Text></View></View>
     </View>
-    {feedback ? <View accessible accessibilityLiveRegion="polite" style={[styles.feedback, { backgroundColor: feedback.correct ? colors.mint : '#FCE9EA' }]}><Text style={[styles.feedbackTitle, { color: feedback.correct ? colors.green : colors.red }]}>{feedback.correct ? 'Верно! Отличная работа' : `Пока нет. Ответ: ${feedback.answer}`}</Text><Text style={styles.feedbackHint}>Удобный путь: {feedback.hint}</Text></View> : <View style={{ flex: 1 }} />}
+    {feedback && <View accessible accessibilityLiveRegion="polite" style={[styles.feedback, { backgroundColor: feedback.correct ? colors.mint : '#FCE9EA' }]}><Text style={[styles.feedbackTitle, { color: feedback.correct ? colors.green : colors.red }]}>{feedback.correct ? feedback.assisted ? 'Верно, с подсказкой' : 'Верно, самостоятельно!' : 'Пока неверно. Разберём по шагам'}</Text><Text style={styles.feedbackHint}>{!feedback.correct || feedback.assisted ? 'Задача сохранена для повторения. Подсказки помогут разобраться, а самостоятельные ответы — закрепить.' : mode === 'review' ? pending ? `Закрепление: ${pending.streak}/3. Следующий повтор: ${reviewTime(pending.dueAt, feedback.at)}.` : 'Три самостоятельных повторения пройдены. Задача закреплена!' : 'Ответ сохранён в твоём прогрессе.'}</Text></View>}
+    <HintPanel steps={getHintSteps(problem, moduleId, group)} level={hintLevel} onReveal={reveal} />
     {!feedback && moduleId === 'fraction-decimals' && <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>{['(', ')'].map(key => <Pressable key={key} accessibilityRole="button" accessibilityLabel={key === '(' ? 'Начать период' : 'Закончить период'} onPress={() => pressKey(key)} style={styles.signKey}><Text style={styles.keyText}>{key}</Text></Pressable>)}<Text style={[type.body, { flex: 1, fontSize: 12 }]}>Повторяющиеся цифры заключай в скобки.</Text></View>}
     {!feedback && <View style={styles.keypad}>{keys.map((key, index) => key ? <Pressable accessibilityRole="button" accessibilityLabel={key === '⌫' ? 'Удалить' : key === '/' ? 'Дробная черта' : key} key={key} onPress={() => pressKey(key)} style={({ pressed }) => [styles.key, pressed && { backgroundColor: colors.bluePale }]}><Text style={styles.keyText}>{key}</Text></Pressable> : <View key={`empty-${index}`} style={styles.keyBlank} />)}</View>}
-    <Button title={feedback ? position + 1 >= ROUND_SIZE ? 'Мой результат  →' : 'Дальше  →' : 'Проверить ответ'} disabled={!feedback && (!input || input.endsWith('−') || input.endsWith('/') || input.endsWith(','))} onPress={feedback ? next : submit} />
+    <Button title={feedback ? position + 1 >= total ? 'Мой результат  →' : 'Дальше  →' : 'Проверить ответ'} disabled={!feedback && (!input || input.endsWith('−') || input.endsWith('/') || input.endsWith(',') || (moduleId === 'fraction-decimals' && input.includes('(') && !input.endsWith(')')))} onPress={feedback ? next : submit} />
   </Screen>;
 }
-const styles = StyleSheet.create({ row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }, count: { color: colors.muted, fontWeight: '800' }, expression: { fontSize: 29, lineHeight: 37, textAlign: 'center', color: colors.ink, fontWeight: '800', marginVertical: 18 }, geometryExpression: { fontSize: 19, lineHeight: 27, marginVertical: 12 }, inputRow: { flexDirection: 'row', width: '100%', gap: 8 }, signKey: { width: 48, minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border }, input: { flex: 1, minHeight: 56, borderWidth: 2, borderColor: colors.border, borderRadius: 15, justifyContent: 'center', alignItems: 'center' }, inputText: { fontSize: 22, color: colors.ink, fontWeight: '700' }, feedback: { marginTop: 16, padding: 17, borderRadius: 18, flex: 1, justifyContent: 'center' }, feedbackTitle: { fontSize: 18, fontWeight: '800' }, feedbackHint: { color: colors.ink, fontSize: 14, marginTop: 7 }, keypad: { flex: 1, minHeight: 196, marginTop: 15, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignContent: 'space-between' }, key: { width: '31.5%', height: '23%', minHeight: 39, borderRadius: 13, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center' }, keyBlank: { width: '31.5%', height: '23%', minHeight: 39 }, keyText: { fontSize: 23, fontWeight: '700', color: colors.ink } });
+const styles = StyleSheet.create({ row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }, count: { color: colors.muted, fontWeight: '800' }, expression: { fontSize: 29, lineHeight: 37, textAlign: 'center', color: colors.ink, fontWeight: '800', marginVertical: 18 }, geometryExpression: { fontSize: 19, lineHeight: 27, marginVertical: 12 }, inputRow: { flexDirection: 'row', width: '100%', gap: 8 }, signKey: { width: 48, minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 15, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border }, input: { flex: 1, minHeight: 56, borderWidth: 2, borderColor: colors.border, borderRadius: 15, justifyContent: 'center', alignItems: 'center' }, inputText: { fontSize: 22, color: colors.ink, fontWeight: '700' }, feedback: { marginTop: 16, padding: 17, borderRadius: 18, flex: 1, justifyContent: 'center' }, feedbackTitle: { fontSize: 18, fontWeight: '800' }, feedbackHint: { color: colors.ink, fontSize: 14, lineHeight: 21, marginTop: 7 }, keypad: { flex: 1, minHeight: 196, marginTop: 15, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignContent: 'space-between' }, key: { width: '31.5%', height: '23%', minHeight: 39, borderRadius: 13, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, justifyContent: 'center', alignItems: 'center' }, keyBlank: { width: '31.5%', height: '23%', minHeight: 39 }, keyText: { fontSize: 23, fontWeight: '700', color: colors.ink } });
