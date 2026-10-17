@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { geometryLayout } from './geometry-layout';
 import { polygonSlice, type GridPoint, type GridScene } from './grid-geometry';
 import { rightAngleStrokes } from './analytic-geometry';
 import { colors } from './theme';
@@ -9,13 +10,11 @@ function stroke(a: GridPoint, b: GridPoint, key: string, color = colors.navy, we
   return <View key={key} style={{ position: 'absolute', left: (a[0] + b[0] - length) / 2, top: (a[1] + b[1]) / 2 - weight / 2, width: length, height: weight, backgroundColor: color, transform: [{ rotate: `${Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI}deg` }] }} />;
 }
 
-export function GridFigure({ scene }: { scene: GridScene }) {
+export function GridFigure({ scene, enlarged = false }: { scene: GridScene; enlarged?: boolean }) {
   const { width: screenWidth } = useWindowDimensions();
-  const width = Math.min(300, screenWidth - 96), height = 240;
-  // The same cell size on both axes preserves every distance and right angle.
-  const cell = Math.min((width - 28) / scene.columns, (height - 28) / scene.rows);
-  const left = (width - scene.columns * cell) / 2, top = (height - scene.rows * cell) / 2;
-  const pixel = ([x, y]: GridPoint): GridPoint => [left + x * cell, top + (scene.rows - y) * cell];
+  const width = enlarged ? Math.max(620, scene.columns * 40) : Math.min(300, screenWidth - 96), height = enlarged ? Math.max(460, scene.rows * 40) : 240;
+  const layout = useMemo(() => geometryLayout(scene, width, height, enlarged ? 20 : 14), [scene, width, height, enlarged]);
+  const { cell, pixel } = layout;
   const circleStyle = (center: GridPoint, radius: number) => {
     const [cx, cy] = pixel(center), r = radius * cell;
     return { position: 'absolute' as const, left: cx - r, top: cy - r, width: r * 2, height: r * 2, borderRadius: r };
@@ -45,13 +44,11 @@ export function GridFigure({ scene }: { scene: GridScene }) {
     {scene.segments.map(([a, b], i) => stroke(pixel(a), pixel(b), `segment${i}`))}
     {scene.circles.map((circle, i) => <View key={`outline-circle-${i}`} style={[circleStyle(circle.center, circle.radius), { borderWidth: 1.8, borderColor: colors.navy }]} />)}
     {scene.grid === false && rightAngleStrokes(scene).map(([a, b], i) => stroke(pixel(a), pixel(b), `right-angle${i}`, '#637892', 1))}
-    {Object.entries(scene.points).filter(([name]) => !scene.hiddenPoints?.includes(name)).map(([name, p]) => {
-      const [x, y] = pixel(p);
-      const labelX = x < width / 2 ? x - 16 : x + 5;
-      const labelY = y < height / 2 ? y - 20 : y + 2;
-      return <React.Fragment key={name}>
+    {layout.labels.map(label => {
+      const [x, y] = label.point;
+      return <React.Fragment key={label.name}>
         <View style={{ position: 'absolute', left: x - 2.5, top: y - 2.5, width: 5, height: 5, borderRadius: 3, backgroundColor: colors.navy }} />
-        <Text style={[styles.label, { left: Math.max(0, Math.min(width - 17, labelX)), top: Math.max(0, Math.min(height - 19, labelY)) }]}>{name}</Text>
+        <Text allowFontScaling={false} style={[styles.label, { left: label.x, top: label.y, width: label.width, height: label.height, fontSize: layout.fontSize, lineHeight: label.height }]}>{label.name}</Text>
       </React.Fragment>;
     })}
   </View>;

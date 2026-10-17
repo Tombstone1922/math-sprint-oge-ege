@@ -3,7 +3,7 @@ import { makeGridScene, type GridCircle, type GridPoint, type GridScene } from '
 export type GeometryMeasure =
   | { kind: 'length'; points: [string, string] }
   | { kind: 'angle'; points: [string, string, string] }
-  | { kind: 'area'; points: string[] };
+  | { kind: 'area' | 'perimeter'; points: string[] };
 export type Drawing = { scene: GridScene; unit: number };
 export const rad = (degrees: number) => degrees * Math.PI / 180;
 export const polar = (radius: number, angle: number): GridPoint => [radius * Math.cos(rad(angle)), radius * Math.sin(rad(angle))];

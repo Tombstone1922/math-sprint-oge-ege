@@ -30,9 +30,9 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
       <Pill tone="amber">{problem.practical ? `ЗАДАНИЕ ${problem.practical.number}` : `ПРИМЕР ${index + 1}`}</Pill>
       {problem.practical && <Text style={[styles.expression, styles.geometryExpression]}>{problem.expression}</Text>}
       <ProblemFigure problem={problem} />
-      {!problem.practical && <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>}
+      {!problem.practical && <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14', 'oge-19'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>}
       <Text style={styles.hint}>{problem.hint}</Text>
-      <View style={styles.answer}><Text style={styles.answerText}>= {problem.answerDisplay ?? problem.answer}</Text></View>
+      <View style={styles.answer}><Text style={styles.answerText}>{problem.statements ? 'Ответ: ' : '= '}{problem.answerDisplay ?? problem.answer}</Text></View>
     </View>
     <View style={{ flex: 1, minHeight: 25 }} />
     <Button title={index === ROUND_SIZE - 1 ? 'Теперь решаю сам  →' : 'Следующая карточка  →'} onPress={() => index === ROUND_SIZE - 1 ? router.replace({ pathname: '/practice', params: { module: moduleId, group: String(group), ids: round.map(item => item.id).join(',') } }) : setIndex(index + 1)} />

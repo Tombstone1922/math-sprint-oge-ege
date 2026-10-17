@@ -8,7 +8,7 @@ const angle = (a: string, b: string, c: string): GeometryMeasure => ({ kind: 'an
 const area = (...points: string[]): GeometryMeasure => ({ kind: 'area', points });
 const fmt = (n: number) => String(Number(n.toFixed(8))).replace('.', ',');
 function add(group: number, expression: string, answer: number, hint: string, d: Drawing, geometryMeasure: GeometryMeasure, kind: FigureSpec['kind'] = 'triangle') {
-  pool.push({ id: `oge-15-g${group}-${pool.length % 20 + 1}`, colorIndex: pool.length % 20, expression, answer: String(Number(answer.toFixed(8))), hint, geometryMeasure, figure: { kind, scene: d.scene, unit: d.unit } });
+  pool.push({ id: `oge-15-g${group}-${pool.length % 20 + 1}`, colorIndex: pool.length % 20, expression, answer: String(Number(answer.toFixed(8))), answerDisplay: fmt(answer), hint: hint.replace(/(\d)\.(\d)/g, '$1,$2'), geometryMeasure, figure: { kind, scene: d.scene, unit: d.unit } });
 }
 function triangle(alpha: number, gamma: number, base = 6): Record<string, GridPoint> {
   const ab = base * Math.sin(rad(gamma)) / Math.sin(rad(180 - alpha - gamma));

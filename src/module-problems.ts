@@ -1,3 +1,4 @@
+import { drawing } from './analytic-geometry.ts';
 import { fractionDecimalPool } from './fraction-decimals.ts';
 import { squareRootPool } from './squares-roots.ts';
 import { practicalPools } from './oge-practical.ts';
@@ -77,7 +78,7 @@ const equations = collect('equations', add => {
   }
 });
 
-const geometry = collect('geometry', add => {
+const basicGeometry = collect('geometry', add => {
   for (let a = 3; a <= 12; a++) for (let b = 2; b <= 9; b++) {
     add(`Прямоугольник ${a} × ${b}. Площадь?`, a * b, `S = ${a} × ${b}`);
     add(`Прямоугольник ${a} × ${b}. Периметр?`, 2 * (a + b), `P = 2 × (${a} + ${b})`);
@@ -85,6 +86,14 @@ const geometry = collect('geometry', add => {
   for (const base of [4, 6, 8, 10, 12, 14]) for (let height = 3; height <= 10; height++) {
     add(`Треугольник: основание ${base}, высота ${height}. Площадь?`, base * height / 2, `S = ${base} × ${height} ÷ 2`);
   }
+});
+
+const geometry: readonly Problem[] = basicGeometry.map(problem => {
+  const [a, b] = problem.expression.match(/\d+/g)!.map(Number), triangle = problem.expression.startsWith('Треугольник');
+  const d = triangle
+    ? drawing({ A: [0, 0], B: [a / 3, b], C: [a, 0], H: [a / 3, 0] }, ['A', 'B', 'C'], [['B', 'H']])
+    : drawing({ A: [0, 0], B: [0, b], C: [a, b], D: [a, 0] }, ['A', 'B', 'C', 'D']);
+  return { ...problem, answerDisplay: problem.answer.replace('.', ','), figure: { kind: triangle ? 'triangle' : 'rectangle', scene: d.scene, unit: d.unit }, geometryMeasure: { kind: problem.expression.includes('Периметр') ? 'perimeter' : 'area', points: triangle ? ['A', 'B', 'C'] : ['A', 'B', 'C', 'D'] } };
 });
 
 const powers = collect('powers', add => {

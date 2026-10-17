@@ -5,7 +5,7 @@ import type { GridPoint } from './grid-geometry.ts';
 export const quadrilateralGroups = ['Диагонали и точка пересечения', 'Прямоугольник и квадрат', 'Углы ромба и диагонали', 'Ромб: перпендикуляры и высоты', 'Параллелограмм: площадь и высоты', 'Площади частей и диагонали ромба', 'Трапеция: площадь и средняя линия', 'Углы равнобедренной трапеции', 'Трапеция: диагональ и углы', 'Параллелограмм: диагональ и биссектриса'] as const;
 const pool: Problem[] = [];
 function add(group: number, expression: string, answer: number, hint: string, d: Drawing, measure: GeometryMeasure, kind: FigureSpec['kind'] = 'rectangle') {
-  pool.push({ id: `oge-17-g${group}-${pool.length % 20 + 1}`, expression, answer: String(answer), hint, colorIndex: pool.length % 20, figure: { kind, scene: d.scene, unit: d.unit }, geometryMeasure: measure });
+  pool.push({ id: `oge-17-g${group}-${pool.length % 20 + 1}`, expression, answer: String(answer), answerDisplay: String(answer).replace('.', ','), hint: hint.replace(/(\d)\.(\d)/g, '$1,$2'), colorIndex: pool.length % 20, figure: { kind, scene: d.scene, unit: d.unit }, geometryMeasure: measure });
 }
 const length = (a: string, b: string): GeometryMeasure => ({ kind: 'length', points: [a, b] });
 const angle = (a: string, b: string, c: string): GeometryMeasure => ({ kind: 'angle', points: [a, b, c] });
@@ -51,7 +51,7 @@ for (let group = 1; group <= 10; group++) for (let j = 0; j < 20; j++) {
     }
   } else if (group === 6) {
     if (!second) {
-      const A: GridPoint = [0, 0], B: GridPoint = [2, 4 * k], C: GridPoint = [6, 4 * k], D: GridPoint = [4, 0], E = midpoint(A, B);
+      const scale = Math.sqrt(k), A: GridPoint = [0, 0], B: GridPoint = [2 * scale, 4 * scale], C: GridPoint = [6 * scale, 4 * scale], D: GridPoint = [4 * scale, 0], E = midpoint(A, B);
       add(group, `Площадь параллелограмма ABCD равна ${16 * k}. E — середина AB. Найдите площадь трапеции EBCD.`, 12 * k, `Треугольник AED занимает четверть площади параллелограмма. S(EBCD)=3S/4=3·${16 * k}/4=${12 * k}.`, drawing({ A, B, C, D, E }, ['A', 'B', 'C', 'D'], [['E', 'D']]), area('E', 'B', 'C', 'D'));
     } else {
       const A: GridPoint = [-4 * k, 0], B: GridPoint = [0, 3 * k], C: GridPoint = [4 * k, 0], D: GridPoint = [0, -3 * k], O: GridPoint = [0, 0];

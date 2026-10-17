@@ -5,7 +5,7 @@ import type { GridPoint } from './grid-geometry.ts';
 export const circleGroups = ['Вписанные и центральные углы', 'Диаметр и прямоугольный треугольник', 'Касательная и секущая', 'Две касательные и углы', 'Хорда и касательная', 'Окружность и квадрат', 'Равносторонний треугольник', 'Вписанная окружность и площадь', 'Вписанные четырёхугольники и высоты', 'Описанные фигуры и радиусы'] as const;
 const pool: Problem[] = [];
 function add(group: number, expression: string, answer: number, hint: string, d: Drawing, measure: GeometryMeasure, kind: FigureSpec['kind'] = 'circle') {
-  pool.push({ id: `oge-16-g${group}-${pool.length % 20 + 1}`, expression, answer: String(answer), hint, colorIndex: pool.length % 20, figure: { kind, scene: d.scene, unit: d.unit }, geometryMeasure: measure });
+  pool.push({ id: `oge-16-g${group}-${pool.length % 20 + 1}`, expression, answer: String(answer), answerDisplay: String(answer).replace('.', ','), hint: hint.replace(/(\d)\.(\d)/g, '$1,$2'), colorIndex: pool.length % 20, figure: { kind, scene: d.scene, unit: d.unit }, geometryMeasure: measure });
 }
 const length = (a: string, b: string): GeometryMeasure => ({ kind: 'length', points: [a, b] });
 const angle = (a: string, b: string, c: string): GeometryMeasure => ({ kind: 'angle', points: [a, b, c] });

@@ -1,3 +1,4 @@
+import type { GeometryStatement } from './oge19-problems.ts';
 import { matchesDecimal, type FractionConversion } from './fraction-decimals.ts';
 import type { PracticalQuestion } from './oge-practical.ts';
 import type { NumericTask } from './numeric-expressions.ts';
@@ -12,8 +13,8 @@ import type { ModuleId } from './content.ts';
 import { modulePools } from './module-problems.ts';
 import type { GridScene, GridTask } from './grid-geometry.ts';
 
-export type FigureSpec = { kind: 'triangle' | 'isosceles' | 'right-triangle' | 'circle' | 'circle-diameter' | 'tangent' | 'chord' | 'secant' | 'rectangle' | 'trapezoid' | 'rhombus' | 'grid-rectangle' | 'grid-triangle' | 'grid-parallelogram' | 'grid-segment' | 'grid-scene' | 'claims'; dx?: number; dy?: number; scene?: GridScene; unit?: number };
-export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number; conversion?: FractionConversion; practical?: PracticalQuestion; figure?: FigureSpec; gridTask?: GridTask; geometryMeasure?: GeometryMeasure; graphs?: GraphQuestion; numberLines?: NumberLineQuestion; formulaTask?: FormulaTask; sequenceTask?: SequenceTask; rootTask?: RootTask; chance?: ChanceModel; numericTask?: NumericTask; axisScene?: AxisScene; orderTask?: OrderTask; answerDisplay?: string; answerMode?: 'sequence' | 'choice' | 'roots' };
+export type FigureSpec = { kind: 'triangle' | 'isosceles' | 'right-triangle' | 'circle' | 'circle-diameter' | 'tangent' | 'chord' | 'secant' | 'rectangle' | 'trapezoid' | 'rhombus' | 'grid-rectangle' | 'grid-triangle' | 'grid-parallelogram' | 'grid-segment' | 'grid-scene' | 'claims'; dx?: number; dy?: number; scene?: GridScene; unit?: number; caption?: string };
+export type Problem = { id: string; expression: string; answer: string; hint: string; colorIndex: number; statements?: readonly GeometryStatement[]; conversion?: FractionConversion; practical?: PracticalQuestion; figure?: FigureSpec; gridTask?: GridTask; geometryMeasure?: GeometryMeasure; graphs?: GraphQuestion; numberLines?: NumberLineQuestion; formulaTask?: FormulaTask; sequenceTask?: SequenceTask; rootTask?: RootTask; chance?: ChanceModel; numericTask?: NumericTask; axisScene?: AxisScene; orderTask?: OrderTask; answerDisplay?: string; answerMode?: 'sequence' | 'choice' | 'roots' | 'statements' };
 export const GROUP_COUNT = 10;
 export const GROUP_SIZE = 20;
 export const POOL_SIZE = GROUP_COUNT * GROUP_SIZE;

@@ -1,7 +1,8 @@
-import React from 'react';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { FigureSpec } from './engine';
 import { colors } from './theme';
+import { Button, Screen } from './components';
 import { GridFigure } from './grid-figure';
 
 type Point = [number, number];
@@ -13,7 +14,20 @@ const line = (a: Point, b: Point, key: string, faint = false) => {
 const point = (name: string, x: number, y: number) => <Text key={name} style={[styles.label, { left: x, top: y }]}>{name}</Text>;
 
 export function GeometryFigure({ figure }: { figure: FigureSpec }) {
-  return figure.scene ? <GridFigure scene={figure.scene} /> : <LegacyFigure figure={figure} />;
+  const [open, setOpen] = useState(false);
+  if (!figure.scene) return <LegacyFigure figure={figure} />;
+  return <View style={{ alignSelf: 'stretch' }}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Увеличить геометрический рисунок" onPress={() => setOpen(true)}><GridFigure scene={figure.scene} /></Pressable>
+    <Pressable accessibilityRole="button" onPress={() => setOpen(true)} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.blue, fontSize: 13, fontWeight: '700' }}>Увеличить рисунок ↗</Text></Pressable>
+    {figure.caption && <Text style={{ color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center', marginBottom: 8 }}>{figure.caption}</Text>}
+    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen>
+      <Button secondary title="Вернуться к заданию" onPress={() => setOpen(false)} />
+      <Text style={{ color: colors.muted, marginTop: 16, marginBottom: 6 }}>Крупный рисунок можно прокручивать вправо.</Text>
+      <ScrollView horizontal nestedScrollEnabled><GridFigure scene={figure.scene} enlarged /></ScrollView>
+      {figure.caption && <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 21, marginVertical: 12 }}>{figure.caption}</Text>}
+      <Button title="Вернуться к заданию" onPress={() => setOpen(false)} />
+    </Screen></Modal>
+  </View>;
 }
 
 function LegacyFigure({ figure }: { figure: FigureSpec }) {

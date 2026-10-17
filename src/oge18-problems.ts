@@ -11,7 +11,7 @@ const triples = [[3, 4, 5], [4, 3, 5], [6, 8, 10], [8, 6, 10], [5, 12, 13], [12,
 const pool: Problem[] = [];
 function add(group: number, slot: number, question: string, answer: number, hint: string, scene: GridScene, gridTask: GridTask) {
   if (!Number.isFinite(answer) || answer <= 0) throw new Error('Invalid grid answer');
-  pool.push({ id: `oge-18-g${group + 1}-${slot + 1}`, expression: prefix + question, answer: String(answer), hint, colorIndex: slot, figure: { kind: 'grid-scene', scene }, gridTask });
+  pool.push({ id: `oge-18-g${group + 1}-${slot + 1}`, expression: prefix + question, answer: String(answer), answerDisplay: String(answer).replace('.', ','), hint: hint.replace(/(\d)\.(\d)/g, '$1,$2'), colorIndex: slot, figure: { kind: 'grid-scene', scene }, gridTask });
 }
 const outline = (vertices: GridPoint[], shaded = false) => [{ vertices, shaded }];
 
@@ -26,7 +26,7 @@ for (let slot = 0; slot < 20; slot++) {
     const height = 2 + (slot - 10) % 5, width = 4 + Math.floor((slot - 10) / 5);
     add(0, slot, 'отмечены точки A, B и C. Найдите расстояние от A до прямой BC.', height,
       `Расстояние до прямой измеряют по перпендикуляру. От A до линии BC — ${height} клеток.`,
-      makeGridScene({ A: [1, height], B: [0, 0], C: [width, 0] }, [], [], [], slot), 'point-line');
+      makeGridScene({ A: [1, height], B: [0, 0], C: [width, 0] }, [], [[[0, 0], [width, 0]]], [], slot), 'point-line');
   } else {
     const height = 2 + slot % 5, base = 5 + slot % 3, topX = 1 + slot % 2;
     add(0, slot, 'изображён треугольник ABC. Найдите длину высоты, опущенной из B на AC.', height,
