@@ -57,7 +57,7 @@ test('floor plans are buildable: rooms tile the apartment; doors connect the sta
 
 test('all 600 answers agree with independent measurements and full prices including rounding and discounts', () => {
   const skills = new Set<string>();
-  for (const pool of Object.values(practicalPools)) for (const p of pool) {
+  for (const pool of [practicalPools['oge-apartment'], practicalPools['oge-plot'], practicalPools['oge-tyres']]) for (const p of pool) {
     const { block, skill, table } = p.practical!, s = block.scene, f = block.facts;
     skills.add(skill);
     assert.ok(checkAnswer(p.answer, p));
@@ -95,7 +95,7 @@ test('all 600 answers agree with independent measurements and full prices includ
         assert.ok(setup>0 && usage(electric)>usage(gas)); expected = setup/(usage(electric)-usage(gas));
       } else if (skill === 'plot-fence') expected = Math.min(...table!.rows.map(r=>(2*(s.width+s.height)*s.unit-4)*number(r[1])+number(r[2])));
       else throw new Error(skill);
-    } else {
+    } else if (s.kind === 'tyre') {
       const height = s.width*s.ratio/100, oldD = s.rim*25.4+2*height, newD=f.newRim*25.4+2*f.newWidth*f.newRatio/100;
       assert.ok(newD > oldD, `${block.id}: increasing diameter is required`);
       const values = block.table!.rows.filter(r=>r[3] !== '—').map(r=>number(r[0]));
@@ -115,6 +115,7 @@ test('all 600 answers agree with independent measurements and full prices includ
       assert.ok(block.table!.rows.some(r=>r[column]===`${f.newWidth}/${f.newRatio}`),block.id);
       assert.equal(block.table!.rows.find(r=>r[0]===String(s.width))![2],`${s.width}/${s.ratio}`);
     }
+    else throw new Error('Unexpected scene');
     if (typeof expected==='string') assert.equal(p.answer,expected,p.id);
     else assert.ok(Math.abs(Number(p.answer)-expected)<1e-6,`${p.id} ${skill}: ${p.answer} vs ${expected}`);
   }

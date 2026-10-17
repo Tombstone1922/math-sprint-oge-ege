@@ -1,17 +1,9 @@
+import { extraPracticalPools } from './oge-practical-extra.ts';
+import { cards, labelOrder, type Question } from './practical-shared.ts';
 import type { Problem } from './engine.ts';
-import { area, perimeter, mirroredScene, rectangleDistance, fmt, rounded, type DataTable, type PlanRoom, type PlanScene, type PracticalBlock } from './practical-models.ts';
+import { area, perimeter, mirroredScene, rectangleDistance, fmt, rounded, type PlanRoom, type PlanScene, type PracticalBlock } from './practical-models.ts';
 export type { PracticalBlock, PracticalScene, PracticalQuestion, PlanRoom } from './practical-models.ts';
-export const isPracticalModule = (id: string) => ['oge-apartment', 'oge-plot', 'oge-tyres'].includes(id);
-type Question = { text: string; value: number | string; solution: string; skill: string; sequence?: boolean; table?: DataTable };
-function labelOrder(count: number, seed: number): string[] {
-  const labels = Array.from({ length: count }, (_, i) => String(i + 1));
-  let state = seed + 1979;
-  for (let i = count - 1; i > 0; i--) { state = (Math.imul(state, 1664525) + 1013904223) >>> 0; const j = state % (i + 1); [labels[i], labels[j]] = [labels[j], labels[i]]; }
-  return labels;
-}
-function cards(block: PracticalBlock, questions: Question[], index: number): Problem[] {
-  return questions.map((q, n) => ({ id: `${block.id}-q${n + 1}`, expression: `Вариант ${index + 1} · №${n + 1}. ${q.text}`, answer: typeof q.value === 'number' ? String(rounded(q.value, 6)) : q.value, answerDisplay: typeof q.value === 'number' ? fmt(q.value) : q.value, hint: q.solution, colorIndex: index % 20, practical: { block, number: n + 1, skill: q.skill, table: q.table }, ...(q.sequence ? { answerMode: 'sequence' as const } : {}) }));
-}
+export const isPracticalModule = (id: string) => id in practicalPools;
 
 function apartment(i: number): Problem[] {
   const a = 6 + 2 * (i % 2), b = a + 4, c = a + 2, t = 10 + 2 * (Math.floor(i / 2) % 2), bottom = 4, unit = i % 5 === 4 ? 0.4 : 0.5;
@@ -146,4 +138,4 @@ function tyres(i: number): Problem[] {
   }
   return cards(block, q, i);
 }
-export const practicalPools = { 'oge-apartment': Array.from({ length: 40 }, (_, i) => apartment(i)).flat(), 'oge-plot': Array.from({ length: 40 }, (_, i) => plot(i)).flat(), 'oge-tyres': Array.from({ length: 40 }, (_, i) => tyres(i)).flat() };
+export const practicalPools = { ...extraPracticalPools, 'oge-apartment': Array.from({ length: 40 }, (_, i) => apartment(i)).flat(), 'oge-plot': Array.from({ length: 40 }, (_, i) => plot(i)).flat(), 'oge-tyres': Array.from({ length: 40 }, (_, i) => tyres(i)).flat() };

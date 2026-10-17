@@ -1,5 +1,6 @@
+import { extraPracticalDrawing } from './practical-extra-drawing.ts';
 import type { PracticalScene, Point } from './practical-models.ts';
-export type Ink = { kind: 'line'; x1: number; y1: number; x2: number; y2: number; stroke: string; weight: number } | { kind: 'rect'; x: number; y: number; w: number; h: number; fill: string; radius?: number } | { kind: 'circle'; x: number; y: number; r: number; fill: string; stroke: string; weight: number } | { kind: 'text'; x: number; y: number; value: string; size: number; color: string; bold?: boolean };
+export type Ink = { kind: 'line'; x1: number; y1: number; x2: number; y2: number; stroke: string; weight: number } | { kind: 'rect'; x: number; y: number; w: number; h: number; fill: string; radius?: number } | { kind: 'circle'; x: number; y: number; r: number; fill: string; stroke: string; weight: number } | { kind: 'text'; x: number; y: number; value: string; size: number; color: string; bold?: boolean; maxWidth?: number };
 export type Drawing = { width: number; height: number; items: Ink[] };
 const black = '#233246';
 export function pointInside(p: Point, polygon: Point[]): boolean {
@@ -11,6 +12,7 @@ export function pointInside(p: Point, polygon: Point[]): boolean {
   return inside;
 }
 export function practicalDrawing(scene: PracticalScene): Drawing {
+  if (scene.kind !== 'plan' && scene.kind !== 'tyre') return extraPracticalDrawing(scene);
   const items: Ink[] = [];
   const line = (x1: number, y1: number, x2: number, y2: number, weight = 2, stroke = black) => items.push({ kind: 'line', x1, y1, x2, y2, weight, stroke });
   const text = (x: number, y: number, value: string, size = 18, bold = false) => items.push({ kind: 'text', x, y, value, size, color: black, bold });
