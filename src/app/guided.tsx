@@ -27,9 +27,10 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
     <Text style={[type.body, { marginTop: 10 }]}>{problem.practical ? 'Два случайных блока по пять вопросов. Открой общее условие, изучи решения, затем реши те же блоки самостоятельно.' : 'Сначала просмотри десять примеров с ответами. Затем реши эти же примеры сам в другом порядке.'}</Text>
     {moduleId === 'fraction-decimals' && <FractionReference />}
     <View style={problemCardStyle(problem.colorIndex)}>
-      <Pill tone="amber">ПРИМЕР {index + 1}</Pill>
+      <Pill tone="amber">{problem.practical ? `ЗАДАНИЕ ${problem.practical.number}` : `ПРИМЕР ${index + 1}`}</Pill>
+      {problem.practical && <Text style={[styles.expression, styles.geometryExpression]}>{problem.expression}</Text>}
       <ProblemFigure problem={problem} />
-      <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>
+      {!problem.practical && <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>}
       <Text style={styles.hint}>{problem.hint}</Text>
       <View style={styles.answer}><Text style={styles.answerText}>= {problem.answerDisplay ?? problem.answer}</Text></View>
     </View>
