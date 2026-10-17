@@ -8,7 +8,7 @@ export const expressionProblemPool: readonly Problem[] = Array.from({ length: 20
   else if (g === 1) { formula = div(p(p(v('a'), n), 2), p(v('a'), 2 * n - 1)); variables = { a: b }; answer = String(b); hint = `Степень степени: a^${2 * n}. После деления остаётся a.`; }
   else if (g === 2) {
     if (j % 2) { formula = div(mul(p(v('a'), n + 1), p(p(v('b'), 2), n)), p(mul(v('a'), v('b')), 2 * n)); variables = { a: b, b: Math.SQRT2 }; answer = fractionAnswer(1, b ** (n - 1)); hint = `Раскрой степень произведения. Степени b сокращаются, остаётся a^${1 - n}.`; }
-    else { formula = div(p(mul(num(2), num(b)), n), mul(p(num(2), n - 1), p(num(b), n - 2))); answer = String(2 * b ** 2); hint = 'Раскрой степень произведения. После сокращения остаётся 2 · b².'; }
+    else { formula = div(p(mul(num(2), num(b)), n), mul(p(num(2), n - 1), p(num(b), n - 2))); answer = String(2 * b ** 2); hint = `Раскрой степень произведения. После сокращения остаётся 2 · ${b}².`; }
   }
   else if (g === 3) { formula = div(p(p(num(b), n), -2), p(num(b), -2 * n - 1)); answer = String(b); hint = `Показатель числителя равен ${-2 * n}. Вычти показатель знаменателя: получается 1.`; }
   else if (g === 4) { const a = j % 2 ? -k : k; formula = sqrt(div(mul(num(16), p(v('a'), 10)), p(v('a'), 4))); variables = { a }; answer = String(4 * Math.abs(a ** 3)); hint = 'Под корнем 16a⁶ = (4a³)². Арифметический корень неотрицателен: 4|a³|.'; }
@@ -19,5 +19,5 @@ export const expressionProblemPool: readonly Problem[] = Array.from({ length: 20
   else if (j < 10) { const c = 2 + j % 3, rad = 3 + j % 4, d = 5 + j; formula = div(p(mul(num(c * k), sqrt(num(rad))), 2), num(d * rad)); answer = fractionAnswer((c * k) ** 2, d); hint = 'Возведи в квадрат коэффициент и корень, затем сократи общий множитель подкоренного числа.'; }
   else { formula = div(mul(sqrt(num(k)), sqrt(num(2 * k))), sqrt(num(k))); const correct = sqrt(num(2 * k)), wrong = [sqrt(num(2 * k + 1)), num(2 * k), num(2 * k + 1)]; choices = [...wrong]; choices.splice(j % 4, 0, correct); answer = String(j % 4 + 1); hint = `Сократи одинаковые ненулевые корни. Остаётся √(${2 * k}). Введи номер этого варианта.`; }
   const condition = variables ? ' При ' + Object.entries(variables).map(([name, value]) => `${name} = ${name === 'b' && g === 2 ? '√2' : String(value).replace('-', '−')}`).join(', ') + '.' : '';
-  return { id: `oge-8-g${g + 1}-${j + 1}`, colorIndex: j, expression: (choices ? 'Укажи номер верного значения выражения.' : 'Найди значение выражения. Дробь можно ввести через /.') + condition, answer, numericTask: { formula, variables, choices }, ...(choices ? { answerMode: 'choice' as const } : {}), hint: `${hint} Ответ: ${answer}.` };
+  return { id: `oge-8-g${g + 1}-${j + 1}`, colorIndex: j, expression: (choices ? 'Укажи номер верного значения выражения.' : 'Найди значение выражения. Дробь можно ввести через /.') + condition, answer, answerDisplay: answer.replace('.', ',').replace('-', '−'), numericTask: { formula, variables, choices }, ...(choices ? { answerMode: 'choice' as const } : {}), hint: `${hint} Ответ: ${answer.replace('.', ',').replace('-', '−')}.` };
 });

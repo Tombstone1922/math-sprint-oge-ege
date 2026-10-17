@@ -15,7 +15,8 @@ export function functionFormula(fn: FunctionSpec): string {
   const a = fn.coefficient ?? displayNumber(fn.a);
   if (fn.kind === 'reciprocal') return `y = (${a})/x`;
   if (fn.kind === 'sqrt') return `y = ${a}√(x${fn.b ? term(-fn.b) : ''})${fn.c ? term(fn.c) : ''}`;
-  return `y = ${a}x${fn.kind === 'quadratic' ? '²' : ''}${fn.kind === 'quadratic' && fn.b ? term(fn.b, 'x') : ''}${fn.c ? term(fn.c) : ''}`;
+  const coefficient = a.includes('/') ? `(${a}) · ` : a;
+  return `y = ${coefficient}x${fn.kind === 'quadratic' ? '²' : ''}${fn.kind === 'quadratic' && fn.b ? term(fn.b, 'x') : ''}${fn.c ? term(fn.c) : ''}`;
 }
 // Clip each segment to the viewport; never connect opposite branches of a hyperbola.
 export function curveSegments(fn: FunctionSpec): [PlotPoint, PlotPoint][] {

@@ -1,25 +1,25 @@
 import type { Problem } from './engine.ts';
 import { multiplyPolynomials as mul, type RootTask } from './equation-models.ts';
 import { displayNumber as f } from './function-graphs.ts';
-export const equationGroups = ['Линейные: перенос слагаемых', 'Неизвестное в обеих частях', 'Одна скобка', 'Несколько скобок', 'Квадрат и два корня', 'Выносим x за скобку', 'Квадратные: формула и Виет', 'Произведение множителей', 'Квадратные с коэффициентом', 'Общие множители и три корня'] as const;
+export const equationGroups = ['Линейные: перенос слагаемых', 'Неизвестное в обеих частях', 'Одна скобка', 'Несколько скобок', 'Квадрат и два корня', 'Выносим x за скобку', 'Квадратные: формула и Виет', 'Произведение множителей', 'Квадратные с коэффициентом', 'Общие множители и выбор корня'] as const;
 const pool: Problem[] = [];
 const term = (n: number) => `${n < 0 ? ' − ' : ' + '}${f(Math.abs(n))}`;
 const factor = (root: number) => `(x${term(-root)})`;
-function add(group: number, equation: string, roots: number[], left: number[], right: number[], hint: string, required: RootTask['required']) {
+function add(group: number, equation: string, roots: number[], left: number[], right: number[], hint: string, required: Exclude<RootTask['required'], 'all'>) {
   const sorted = [...new Set(roots)].sort((a, b) => a - b);
-  const chosen = required === 'all' ? sorted : [required === 'smallest' ? sorted[0] : sorted[sorted.length - 1]];
-  const answer = chosen.map(n => String(n)).join('');
-  const instruction = required === 'all' ? 'Запишите все корни без пробелов и разделителей в порядке возрастания.' : `Запишите ${required === 'smallest' ? 'меньший' : 'больший'} корень, если их несколько.`;
-  pool.push({ id: `oge-9-g${group}-${pool.length % 20 + 1}`, colorIndex: pool.length % 20, expression: `Решите уравнение: ${equation}.\n${instruction}`, answer, hint: `${hint} Корни: ${sorted.map(f).join('; ')}.${required === 'all' ? ` Запись ответа: ${answer.replaceAll('-', '−')}.` : ''}`, rootTask: { left, right, required }, ...(required === 'all' ? { answerMode: 'roots' as const, answerDisplay: chosen.map(f).join('; ') } : {}) });
+  const chosen = required === 'smallest' ? sorted[0] : sorted[sorted.length - 1];
+  const answer = String(chosen);
+  const instruction = sorted.length === 1 ? 'Запишите корень уравнения.' : `Запишите ${required === 'smallest' ? 'наименьший' : 'наибольший'} корень.`;
+  pool.push({ id: `oge-9-g${group}-${pool.length % 20 + 1}`, colorIndex: pool.length % 20, expression: `Решите уравнение: ${equation}.\n${instruction}`, answer, answerDisplay: f(chosen), hint: `${hint} Корни: ${sorted.map(f).join('; ')}. Ответ по условию: ${f(chosen)}.`, rootTask: { left, right, required } });
 }
 for (let group = 1; group <= 10; group++) for (let j = 0; j < 20; j++) {
-  const k = j + 1, pick = j % 3 === 0 ? 'smallest' : j % 3 === 1 ? 'largest' : 'all';
+  const k = j + 1, pick = j % 2 === 0 ? 'smallest' : 'largest';
   if (group === 1) {
     const root = (j - 9) / 4, b = j + 3, c = 4 * root + b;
     add(group, `4x + ${b} = ${f(c)}`, [root], [b, 4], [c], `4x=${f(c)}−${b}=${f(4 * root)}. Делим обе части на 4: x=${f(root)}.`, 'smallest');
   } else if (group === 2) {
     const root = (j - 10) / 10, a = 12 + j, c = a - 10, b = j + 5, d = 10 * root + b;
-    add(group, `${a}x + ${b} = ${c}x + ${f(d)}`, [root], [b, a], [d, c], `Переносим x влево, числа вправо: (${a}−${c})x=${f(d)}−${b}. 10x=${f(10 * root)}, x=${f(root)}.`, 'smallest');
+    add(group, `${a}x + ${b} = ${c}x${term(d)}`, [root], [b, a], [d, c], `Переносим x влево, числа вправо: (${a}−${c})x=${f(d)}−${b}. 10x=${f(10 * root)}, x=${f(root)}.`, 'smallest');
   } else if (group === 3) {
     const root = (j - 7) / 4, shift = k, c = 4 * (root + shift);
     add(group, `4(x + ${shift}) = ${f(c)}`, [root], [4 * shift, 4], [c], `Делим на 4: x+${shift}=${f(c / 4)}. Вычитаем ${shift}: x=${f(root)}.`, 'smallest');
@@ -44,7 +44,7 @@ for (let group = 1; group <= 10; group++) for (let j = 0; j < 20; j++) {
     add(group, `2x²${term(b)}x${term(c)} = 0`, [r, s], [c, b, a], [0], `D=b²−4ac=${discriminant}, √D=${Math.sqrt(discriminant)}. x=(−b±√D)/(2a), то есть ${f(r)} и ${f(s)}.`, j % 2 ? 'largest' : 'smallest');
   } else {
     const a = [-3 * k, 3], b = [-k - 4, 1];
-    add(group, `(3x − ${3 * k})²(x − ${k + 4}) = (3x − ${3 * k})(x − ${k + 4})²`, [k - 2, k, k + 4], mul(mul(a, a), b), mul(a, mul(b, b)), `Переносим вправо стоящее произведение влево и выносим общие множители: (3x−${3 * k})(x−${k + 4})(2x${term(4 - 2 * k)})=0. Каждый множитель может равняться нулю. Сокращение на общий множитель потеряло бы корни.`, 'all');
+    add(group, `(3x − ${3 * k})²(x − ${k + 4}) = (3x − ${3 * k})(x − ${k + 4})²`, [k - 2, k, k + 4], mul(mul(a, a), b), mul(a, mul(b, b)), `Переносим вправо стоящее произведение влево и выносим общие множители: (3x−${3 * k})(x−${k + 4})(2x${term(4 - 2 * k)})=0. Каждый множитель может равняться нулю. Сокращение на общий множитель потеряло бы корни.`, pick);
   }
 }
 export const equationProblemPool: readonly Problem[] = pool;

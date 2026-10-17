@@ -5,7 +5,7 @@ export const formulaGroups = ['Мощность: сопротивление', '�
 const pool: Problem[] = [];
 const clean = (n: number) => Number(n.toFixed(8));
 function add(group: number, expression: string, answer: number, hint: string, formulaTask: FormulaTask) {
-  pool.push({ id: `oge-12-g${group}-${pool.length % 20 + 1}`, expression, answer: String(clean(answer)), hint, formulaTask, colorIndex: pool.length % 20 });
+  pool.push({ id: `oge-12-g${group}-${pool.length % 20 + 1}`, expression, answer: String(clean(answer)), answerDisplay: fmt(clean(answer)), hint, formulaTask, colorIndex: pool.length % 20 });
 }
 for (let group = 1; group <= 10; group++) for (let j = 0; j < 20; j++) {
   const k = j + 1, second = j % 2 === 1;

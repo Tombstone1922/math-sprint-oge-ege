@@ -6,7 +6,7 @@ const pool: Problem[] = [];
 function add(group: number, expression: string, chance: ChanceModel, explanation: string) {
   const [n, d] = chance.kind === 'frequency' ? [0, 1] : chanceRatio(chance);
   const answer = chance.kind === 'frequency' ? String(chance.rows.reduce((best, row, i, rows) => row[1] / row[0] > rows[best][1] / rows[best][0] ? i : best, 0) + 1) : ratioAnswer(n, d);
-  pool.push({ id: `oge-10-g${group}-${pool.length % 20 + 1}`, colorIndex: pool.length % 20, expression, answer, chance, hint: `${explanation} ${chance.kind === 'frequency' ? `Ответ: стрелок ${answer}.` : `P=${f(n)}/${f(d)}=${answer.replace('.', ',')}. Дробь можно ввести через /.`}`, ...(chance.kind === 'frequency' ? { answerMode: 'choice' as const } : {}) });
+  pool.push({ id: `oge-10-g${group}-${pool.length % 20 + 1}`, colorIndex: pool.length % 20, expression, answer, answerDisplay: answer.replace('.', ','), chance, hint: `${explanation} ${chance.kind === 'frequency' ? `Ответ: стрелок ${answer}.` : `P=(${f(n)})/(${f(d)})=${answer.replace('.', ',')}. Дробь можно ввести через /.`}`, ...(chance.kind === 'frequency' ? { answerMode: 'choice' as const } : {}) });
 }
 const events: SetEvent[] = ['A', 'B', 'union', 'intersection', 'notUnion', 'notAorB', 'Aonly', 'notIntersection'];
 const diceEvents: DiceEvent[] = [{ kind: 'sum', values: [4] }, { kind: 'sum', values: [5, 8] }, { kind: 'max', value: 5 }, { kind: 'min', value: 2 }, { kind: 'bothBelow', value: 4 }, { kind: 'anyBelow', value: 4 }, { kind: 'parity', even: true }, { kind: 'parity', even: false }, { kind: 'max', value: 3 }, { kind: 'bothAbove', value: 4 }];

@@ -16,19 +16,20 @@ test('all 200 equations have the complete independently found root set and requi
     for (let i = -2000; i <= 2000; i++) if (Math.abs(evaluate(coefficients, i / 20)) < 1e-7) roots.push(i / 20);
     assert.equal(roots.length, coefficients.length - 1, p.expression);
     assert.ok(roots.length > 0 && roots.length <= 3);
-    const expected = m.required === 'all' ? roots.map(String).join('') : String(m.required === 'smallest' ? roots[0] : roots[roots.length - 1]);
+    assert.notEqual(m.required, 'all', 'OGE equation cards request one numerical root');
+    const expected = String(m.required === 'smallest' ? roots[0] : roots[roots.length - 1]);
     assert.equal(p.answer, expected, p.expression);
     assert.ok(checkAnswer(expected.replaceAll('-', '−'), p));
-    if (m.required === 'all') {
-      assert.equal(p.answerMode, 'roots');
-      assert.equal(p.answerDisplay, roots.map(x => String(x).replace('-', '−').replace('.', ',')).join('; '));
-      assert.equal(checkAnswer(roots.map(String).join(' '), p), false);
-      assert.equal(checkAnswer([...roots].reverse().map(String).join(''), p), false);
+    assert.equal(p.answerMode, undefined);
+    assert.equal(p.answerDisplay, expected.replace('-', '−').replace('.', ','));
+    if (roots.length > 1) {
+      assert.equal(checkAnswer(roots.map(String).join('; '), p), false);
+      assert.equal(checkAnswer(String(m.required === 'smallest' ? roots[roots.length - 1] : roots[0]), p), false);
     }
   }
-  const twoNegative = getProblemPool('oge-9').find(p => p.answerMode === 'roots' && p.answer.includes('-', 1));
-  assert.ok(twoNegative, 'multiple minus signs are needed for the supplied types');
-  assert.ok(checkAnswer(twoNegative.answer.replaceAll('-', '−'), twoNegative));
+  const negative = getProblemPool('oge-9').find(p => Number(p.answer) < 0)!;
+  assert.ok(negative);
+  assert.ok(checkAnswer(negative.answer.replace('-', '−'), negative));
 });
 
 test('all 200 chance answers agree with independent counting, binomial or joint-event calculations', () => {
