@@ -153,3 +153,13 @@ test('storage preserves snapshot order, recovers after a write failure and never
   assert.equal((await loadProgress(adapter)).completed, 4);
   await assert.rejects(loadProgress({ ...adapter, getItem: async (k: string) => k === PROGRESS_KEY ? '{broken' : null }));
 });
+
+test('conditional probability hints preserve whether the condition is B or its complement', () => {
+  for (const p of getProblemPool('oge-10')) {
+    if (p.chance?.kind !== 'tree') continue;
+    const step = getHintSteps(p, 'oge-10', Number(p.id.split('-g')[1].split('-')[0])).firstStep;
+    if (p.chance.event === 'AgivenNotB') assert.match(step, /условии «не B».*B не произошло/, p.id);
+    else if (p.chance.event === 'AgivenB') assert.match(step, /условии B.*произошло B/, p.id);
+    else assert.match(step, /пути, соответствующие событию из вопроса/, p.id);
+  }
+});
