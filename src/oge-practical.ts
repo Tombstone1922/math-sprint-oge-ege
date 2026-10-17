@@ -10,7 +10,7 @@ function labelOrder(count: number, seed: number): string[] {
   return labels;
 }
 function cards(block: PracticalBlock, questions: Question[], index: number): Problem[] {
-  return questions.map((q, n) => ({ id: `${block.id}-q${n + 1}`, expression: `Вариант ${index + 1} · №${n + 1}. ${q.text}`, answer: typeof q.value === 'number' ? String(rounded(q.value, 6)) : q.value, hint: q.solution, colorIndex: index % 20, practical: { block, number: n + 1, skill: q.skill, table: q.table }, ...(q.sequence ? { answerMode: 'sequence' as const } : {}) }));
+  return questions.map((q, n) => ({ id: `${block.id}-q${n + 1}`, expression: `Вариант ${index + 1} · №${n + 1}. ${q.text}`, answer: typeof q.value === 'number' ? String(rounded(q.value, 6)) : q.value, answerDisplay: typeof q.value === 'number' ? fmt(q.value) : q.value, hint: q.solution, colorIndex: index % 20, practical: { block, number: n + 1, skill: q.skill, table: q.table }, ...(q.sequence ? { answerMode: 'sequence' as const } : {}) }));
 }
 
 function apartment(i: number): Problem[] {

@@ -61,6 +61,8 @@ test('all 600 answers agree with independent measurements and full prices includ
     const { block, skill, table } = p.practical!, s = block.scene, f = block.facts;
     skills.add(skill);
     assert.ok(checkAnswer(p.answer, p));
+    assert.equal(p.answerDisplay, p.answer.replace('.', ','));
+    assert.ok(checkAnswer(p.answerDisplay!, p));
     let expected: number | string;
     if (s.kind === 'plan') {
       const room = (r: string) => s.rooms.find(v => v.role === r)!;
