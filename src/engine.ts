@@ -77,7 +77,7 @@ export function parseGroup(value: string | undefined, moduleId: ModuleId = 'ment
   return Number.isInteger(group) && group >= 1 && group <= getGroupCount(moduleId) ? group : 1;
 }
 
-export function shuffleProblems(problems: readonly Problem[], random: () => number = Math.random): Problem[] {
+export function shuffleProblems<T>(problems: readonly T[], random: () => number = Math.random): T[] {
   const shuffled = [...problems];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));

@@ -27,6 +27,7 @@ export default function Home() {
       <View style={styles.stat}><Text style={styles.statNumber}>{progress.completed}</Text><Text style={styles.statLabel}>тренировок по 10</Text></View>
       <View style={styles.divider} /><View style={styles.stat}><Text style={styles.statNumber}>{progress.best}/10</Text><Text style={styles.statLabel}>лучший результат</Text></View>
     </View>
+    <View style={styles.dailyCard}><Pill tone="mint">КАЖДЫЙ ДЕНЬ · 5 МИНУТ</Pill><Text style={[type.section, { marginTop: 12 }]}>Есть пять минут</Text><Text style={[type.body, { fontSize: 14, marginTop: 7 }]}>Немного счёта, знакомые темы и твои ошибки — подборка уже за тебя.</Text><Button title="Моя короткая тренировка  →" onPress={() => router.push('/daily')} /></View>
     <LearningSummary />
     <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
     <View style={styles.filters}>{filters.map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: filter === item }} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && { color: colors.white }]}>{item}</Text></Pressable>)}</View>
@@ -46,6 +47,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
+  dailyCard: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white, padding: 20, borderRadius: 24, marginTop: 20 },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 9 }, logo: { width: 34, height: 34, backgroundColor: colors.navy, borderRadius: 11, alignItems: 'center', justifyContent: 'center' }, logoText: { color: colors.white, fontSize: 23, fontWeight: '800' }, brandText: { fontSize: 12, fontWeight: '900', letterSpacing: 1, color: colors.navy },
   hero: { marginTop: 26, backgroundColor: colors.navy, borderRadius: 26, padding: 22, minHeight: 206, flexDirection: 'row', overflow: 'hidden' }, heroTitle: { color: colors.white, fontSize: 26, lineHeight: 31, fontWeight: '800', marginTop: 17 }, heroCaption: { color: '#C8D8EF', fontSize: 13, lineHeight: 19, marginTop: 8 }, heroSymbol: { color: '#92AFFF', fontSize: 72, alignSelf: 'center' },
   stats: { flexDirection: 'row', backgroundColor: colors.white, borderRadius: 20, marginTop: 20, padding: 18, alignItems: 'center' }, stat: { flex: 1, alignItems: 'center' }, statNumber: { color: colors.ink, fontSize: 24, fontWeight: '800' }, statLabel: { color: colors.muted, fontSize: 12, marginTop: 2 }, divider: { height: 36, width: 1, backgroundColor: colors.border },

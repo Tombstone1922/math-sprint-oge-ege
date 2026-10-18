@@ -1,0 +1,25 @@
+services:
+  assistant:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    env_file: .env
+    volumes:
+      - assistant_limits:/app/server/data
+    restart: unless-stopped
+  https:
+    image: caddy:2-alpine
+    environment:
+      ASSISTANT_DOMAIN: ${ASSISTANT_DOMAIN:?Set your domain in server/.env}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+volumes:
+  assistant_limits:
+  caddy_data:
+  caddy_config:
