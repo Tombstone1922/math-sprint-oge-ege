@@ -12,7 +12,7 @@ function stroke(a: GridPoint, b: GridPoint, key: string, color = colors.navy, we
 
 export function GridFigure({ scene, enlarged = false }: { scene: GridScene; enlarged?: boolean }) {
   const { width: screenWidth } = useWindowDimensions();
-  const width = enlarged ? Math.max(620, scene.columns * 40) : Math.min(300, screenWidth - 96), height = enlarged ? Math.max(460, scene.rows * 40) : 240;
+  const width = enlarged ? scene.grid === false ? 620 : Math.max(620, scene.columns * 40) : Math.min(300, screenWidth - 96), height = enlarged ? scene.grid === false ? 460 : Math.max(460, scene.rows * 40) : 240;
   const layout = useMemo(() => geometryLayout(scene, width, height, enlarged ? 20 : 14), [scene, width, height, enlarged]);
   const { cell, pixel } = layout;
   const circleStyle = (center: GridPoint, radius: number) => {

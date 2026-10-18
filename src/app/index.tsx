@@ -5,6 +5,8 @@ import { Button, Pill, Screen, type } from '../components';
 import { Exam, modules } from '../content';
 import { useProgress } from '../progress';
 import { colors } from '../theme';
+import { ExtendedSummary } from '../extended/ui';
+import { extendedModules } from '../extended/bank';
 import { LearningSummary } from '../learning-ui';
 
 type Filter = 'Все' | Exam;
@@ -28,6 +30,7 @@ export default function Home() {
       <View style={styles.divider} /><View style={styles.stat}><Text style={styles.statNumber}>{progress.best}/10</Text><Text style={styles.statLabel}>лучший результат</Text></View>
     </View>
     <View style={styles.dailyCard}><Pill tone="mint">КАЖДЫЙ ДЕНЬ · 5 МИНУТ</Pill><Text style={[type.section, { marginTop: 12 }]}>Есть пять минут</Text><Text style={[type.body, { fontSize: 14, marginTop: 7 }]}>Немного счёта, знакомые темы и твои ошибки — подборка уже за тебя.</Text><Button title="Моя короткая тренировка  →" onPress={() => router.push('/daily')} /></View>
+    <ExtendedSummary />
     <LearningSummary />
     <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
     <View style={styles.filters}>{filters.map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: filter === item }} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && { color: colors.white }]}>{item}</Text></Pressable>)}</View>
@@ -42,7 +45,13 @@ export default function Home() {
       <Text style={styles.chevron}>›</Text>
       </Pressable>
     </React.Fragment>)}
-    <Text style={styles.footer}>Задачи по геометрии — авторские тренировочные варианты по типам проекта КИМ ОГЭ‑2027. Для заданий с развёрнутым решением №23–25 нужна отдельная практика доказательств.</Text>
+    {(filter === 'Все' || filter === 'ОГЭ') && <>
+      <Text style={[type.section, { marginTop: 28 }]}>Вторая часть ОГЭ · №20–25</Text>
+      {extendedModules.map(module => <Pressable key={module.number} accessibilityRole="button" accessibilityLabel={`Открыть номер ${module.number}`} onPress={() => router.push({ pathname: '/extended', params: { number: String(module.number) } })} style={styles.module}>
+        <View style={[styles.moduleIcon, { backgroundColor: colors.amber }]}><Text style={styles.moduleIconText}>{module.number}</Text></View><View style={{ flex: 1 }}><Text style={styles.moduleTitle}>{module.title}</Text><Text style={styles.moduleSub}>{module.subtitle}</Text><Text style={styles.moduleMeta}>200 задач · 10 групп · полный разбор</Text></View><Text style={styles.chevron}>›</Text>
+      </Pressable>)}
+    </>}
+    <Text style={styles.footer}>Авторские тренировочные задания по типам материалов ФИПИ ОГЭ‑2026 и проекта ОГЭ‑2027. Для второй части доступны рисунки, развёрнутые решения и самопроверка.</Text>
   </Screen>;
 }
 

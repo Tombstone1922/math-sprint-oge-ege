@@ -1,3 +1,4 @@
+import { ExtendedSummary } from '../extended/ui';
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -20,6 +21,7 @@ export default function Review() {
   for (const item of shown) { const key = `${item.moduleId}:${item.group}`; groups.set(key, [...(groups.get(key) ?? []), item]); }
   return <Screen>
     <Back />
+    {!module && <ExtendedSummary />}
     <Pill tone="amber">ЛИЧНОЕ ПОВТОРЕНИЕ</Pill>
     <Text style={[type.title, { marginTop: 18 }]}>Ошибки становятся опытом</Text>
     <Text style={[type.body, { marginTop: 10 }]}>{module ? `${module.title}. ` : ''}Здесь задачи, в которых была ошибка или понадобилась подсказка. Повторяй их без предварительного показа ответов.</Text>

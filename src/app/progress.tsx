@@ -1,3 +1,4 @@
+import { ExtendedSummary } from '../extended/ui';
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -19,6 +20,7 @@ export default function ProgressPage() {
   const totals = selected ? progress.byModule[selected.id] : progress;
   return <Screen>
     <Back />
+    {!selected && <ExtendedSummary />}
     <Pill tone="mint">МОЙ ПРОГРЕСС</Pill>
     <Text style={[type.title, { marginTop: 18 }]}>Видно, что получается</Text>
     <Text style={[type.body, { marginTop: 10 }]}>{selected ? selected.title : 'Результаты по темам и группам'}. Точность считается по проверенным ответам, включая незаконченные тренировки.</Text>
