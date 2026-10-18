@@ -1,3 +1,4 @@
+import { StudySummary } from '../study/ui';
 import { ExtendedSummary } from '../extended/ui';
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -21,6 +22,7 @@ export default function Review() {
   for (const item of shown) { const key = `${item.moduleId}:${item.group}`; groups.set(key, [...(groups.get(key) ?? []), item]); }
   return <Screen>
     <Back />
+    {!module && <StudySummary />}
     {!module && <ExtendedSummary />}
     <Pill tone="amber">ЛИЧНОЕ ПОВТОРЕНИЕ</Pill>
     <Text style={[type.title, { marginTop: 18 }]}>Ошибки становятся опытом</Text>

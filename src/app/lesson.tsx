@@ -31,6 +31,7 @@ function LessonContent({ moduleId, title }: { moduleId: ModuleId; title: string 
     </View>
     {moduleId === 'fraction-decimals' && <FractionReference />}
     <View style={styles.note}><Text style={styles.noteIcon}>✦</Text><Text style={styles.noteText}>Не гонись за скоростью. Сначала найди удобный путь к ответу.</Text></View>
+    <Button secondary title="Формулы и примеры по теме ↗" onPress={() => router.push({ pathname: '/reference', params: { module: moduleId } })} />
     <View style={{ flex: 1, minHeight: 25 }} />
     <Button title={index === lesson.length - 1 ? 'Выбрать группу задач  →' : 'Следующий приём  →'} onPress={() => index === lesson.length - 1 ? router.push({ pathname: '/groups', params: { module: moduleId } }) : setIndex(index + 1)} />
   </Screen>;

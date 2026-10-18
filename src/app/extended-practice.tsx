@@ -33,6 +33,7 @@ export default function ExtendedPractice() {
       {task.scene && <GeometryFigure figure={{ kind: 'grid-scene', scene: task.scene, caption: 'Рисунок к условию. Нажми, чтобы увеличить.' }} />}
       {task.graph && !work.revealed && <Text style={s.small}>Построй график на бумаге. Образец появится при сравнении решения.</Text>}
     </View>
+    <Button secondary title="Справочник формул ↗" onPress={() => { if (!work.revealed && !work.rating && work.hint === 0) extended({ type: 'hint', session, index }); router.push('/reference'); }} />
     {!work.revealed ? <>
       <View style={s.card}>
         <Text style={s.heading}>Твой ход решения</Text><Text style={s.small}>Запиши основные преобразования и основания. Можно решить на бумаге и отметить это ниже.</Text>

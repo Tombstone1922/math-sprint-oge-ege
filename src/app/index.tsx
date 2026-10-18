@@ -1,3 +1,4 @@
+import { StudySummary } from '../study/ui';
 import React, { useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -30,6 +31,7 @@ export default function Home() {
       <View style={styles.divider} /><View style={styles.stat}><Text style={styles.statNumber}>{progress.best}/10</Text><Text style={styles.statLabel}>лучший результат</Text></View>
     </View>
     <View style={styles.dailyCard}><Pill tone="mint">КАЖДЫЙ ДЕНЬ · 5 МИНУТ</Pill><Text style={[type.section, { marginTop: 12 }]}>Есть пять минут</Text><Text style={[type.body, { fontSize: 14, marginTop: 7 }]}>Немного счёта, знакомые темы и твои ошибки — подборка уже за тебя.</Text><Button title="Моя короткая тренировка  →" onPress={() => router.push('/daily')} /></View>
+    <StudySummary />
     <ExtendedSummary />
     <LearningSummary />
     <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
