@@ -1,17 +1,27 @@
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { cardPalette, colors } from './theme';
+import { useBottomNavigation } from './app-navigation';
 
-export function Screen({ children, scroll = true }: { children: React.ReactNode; scroll?: boolean }) {
-  return <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
-    {scroll ? <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>{children}</ScrollView> : <View style={styles.contentFill}>{children}</View>}
+export function Screen({ children, scroll = true, footer, modal = false }: { children: React.ReactNode; scroll?: boolean; footer?: React.ReactNode; modal?: boolean }) {
+  const bar = useBottomNavigation();
+  return <SafeAreaView style={styles.safe} edges={bar && !modal ? ['top'] : ['top', 'bottom']}>
+    <KeyboardAvoidingView style={{ flex: 1 }} enabled={Boolean(footer)} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      {scroll ? <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>{children}</ScrollView> : <View style={styles.contentFill}>{children}</View>}
+      {footer && <View testID="task-footer" style={styles.footer}>{footer}</View>}
+    </KeyboardAvoidingView>
   </SafeAreaView>;
 }
 
 export function Back({ label = 'Назад' }: { label?: string }) {
-  return <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel={label} style={styles.back}><Text style={styles.backText}>‹  {label}</Text></Pressable>;
+  return <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace('/topics')} accessibilityRole="button" accessibilityLabel={label} style={styles.back}><Text style={styles.backText}>‹  {label}</Text></Pressable>;
+}
+
+export function Disclosure({ title, children, initialOpen = false }: { title: string; children: React.ReactNode; initialOpen?: boolean }) {
+  const [open, setOpen] = useState(initialOpen);
+  return <View style={styles.disclosure}><Pressable accessibilityRole="button" accessibilityLabel={title} aria-expanded={open} accessibilityState={{ expanded: open }} onPress={() => setOpen(v => !v)} style={styles.disclosureTitle}><Text style={{ color: colors.navy, fontSize: 14, lineHeight: 21, fontWeight: '700', flex: 1 }}>{title}</Text><Text style={{ color: colors.blue, fontSize: 20 }}>{open ? '−' : '+'}</Text></Pressable>{open && <View style={{ paddingBottom: 14 }}>{children}</View>}</View>;
 }
 
 export function Pill({ children, tone = 'blue' }: { children: React.ReactNode; tone?: 'blue' | 'mint' | 'amber' }) {
@@ -45,13 +55,16 @@ export function problemCardStyle(colorIndex: number) {
 }
 export const type = StyleSheet.create({
   eyebrow: { fontSize: 12, fontWeight: '800', color: colors.blue, letterSpacing: 1.4 },
-  title: { fontSize: 32, lineHeight: 38, fontWeight: '800', color: colors.ink, letterSpacing: -.7 },
-  section: { fontSize: 23, fontWeight: '800', color: colors.ink, letterSpacing: -.4 },
+  title: { fontSize: 29, lineHeight: 36, fontWeight: '800', color: colors.ink, letterSpacing: -.6 },
+  section: { fontSize: 21, lineHeight: 28, fontWeight: '800', color: colors.ink, letterSpacing: -.3 },
   body: { fontSize: 16, lineHeight: 24, color: colors.muted },
 });
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
+  footer: { backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border, paddingHorizontal: 22, paddingBottom: 12, paddingTop: 2 },
+  disclosure: { borderTopWidth: 1, borderTopColor: colors.border, marginTop: 16 },
+  disclosureTitle: { minHeight: 50, paddingVertical: 12, flexDirection: 'row', alignItems: 'center', gap: 10 },
   content: { paddingHorizontal: 22, paddingTop: 14, paddingBottom: 32, flexGrow: 1 },
   contentFill: { paddingHorizontal: 22, paddingTop: 14, paddingBottom: 24, flex: 1 },
   back: { alignSelf: 'flex-start', paddingVertical: 10, paddingRight: 20, marginBottom: 10 },

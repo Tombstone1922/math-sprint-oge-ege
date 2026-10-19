@@ -20,7 +20,7 @@ export function GeometryFigure({ figure }: { figure: FigureSpec }) {
     <Pressable accessibilityRole="button" accessibilityLabel="Увеличить геометрический рисунок" onPress={() => setOpen(true)}><GridFigure scene={figure.scene} /></Pressable>
     <Pressable accessibilityRole="button" onPress={() => setOpen(true)} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.blue, fontSize: 13, fontWeight: '700' }}>Увеличить рисунок ↗</Text></Pressable>
     {figure.caption && <Text style={{ color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center', marginBottom: 8 }}>{figure.caption}</Text>}
-    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen>
+    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen modal>
       <Button secondary title="Вернуться к заданию" onPress={() => setOpen(false)} />
       <Text style={{ color: colors.muted, marginTop: 16, marginBottom: 6 }}>Крупный рисунок можно прокручивать вправо.</Text>
       <ScrollView horizontal nestedScrollEnabled><GridFigure scene={figure.scene} enlarged /></ScrollView>

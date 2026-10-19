@@ -14,7 +14,7 @@ export default function Daily() {
   const result = done ?? latest;
   function start() { dailyStart(); router.push({ pathname: '/practice', params: { mode: 'daily' } }); }
   return <Screen>
-    <Back label="К модулям" />
+    <Back label="Назад" />
     <Pill tone="mint">ПОНЕМНОГУ КАЖДЫЙ ДЕНЬ</Pill>
     <Text style={[type.title, { marginTop: 20 }]}>Есть пять минут</Text>
     <Text style={[type.body, { marginTop: 10 }]}>Одна кнопка — и подборка готова. Разомнём счёт, вспомним знакомое и поработаем над ошибками.</Text>

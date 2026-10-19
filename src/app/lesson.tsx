@@ -16,8 +16,8 @@ function LessonContent({ moduleId, title }: { moduleId: ModuleId; title: string 
   const [index, setIndex] = useState(0);
   const lesson = lessons[moduleId];
   const item = lesson[index];
-  return <Screen>
-    <Back label="К модулям" />
+  return <Screen key={`${moduleId}:${index}`} footer={<Button title={index === lesson.length - 1 ? 'Выбрать группу задач →' : 'Следующий приём →'} onPress={() => index === lesson.length - 1 ? router.push({ pathname: '/groups', params: { module: moduleId } }) : setIndex(index + 1)} />}>
+    <Back label="Назад" />
     <View style={styles.row}><Text style={type.eyebrow}>УРОК · {title.toUpperCase()}</Text><Text style={styles.count}>{index + 1} / {lesson.length}</Text></View>
     <ProgressBar current={index + 1} total={lesson.length} />
     <View style={{ marginTop: 30 }}><Pill>{item.label}</Pill></View>
@@ -32,8 +32,7 @@ function LessonContent({ moduleId, title }: { moduleId: ModuleId; title: string 
     {moduleId === 'fraction-decimals' && <FractionReference />}
     <View style={styles.note}><Text style={styles.noteIcon}>✦</Text><Text style={styles.noteText}>Не гонись за скоростью. Сначала найди удобный путь к ответу.</Text></View>
     <Button secondary title="Формулы и примеры по теме ↗" onPress={() => router.push({ pathname: '/reference', params: { module: moduleId } })} />
-    <View style={{ flex: 1, minHeight: 25 }} />
-    <Button title={index === lesson.length - 1 ? 'Выбрать группу задач  →' : 'Следующий приём  →'} onPress={() => index === lesson.length - 1 ? router.push({ pathname: '/groups', params: { module: moduleId } }) : setIndex(index + 1)} />
+
   </Screen>;
 }
 

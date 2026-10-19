@@ -1,5 +1,3 @@
-import { StudySummary } from '../study/ui';
-import { ExtendedSummary } from '../extended/ui';
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -22,15 +20,14 @@ export default function Review() {
   for (const item of shown) { const key = `${item.moduleId}:${item.group}`; groups.set(key, [...(groups.get(key) ?? []), item]); }
   return <Screen>
     <Back />
-    {!module && <StudySummary />}
-    {!module && <ExtendedSummary />}
     <Pill tone="amber">ЛИЧНОЕ ПОВТОРЕНИЕ</Pill>
-    <Text style={[type.title, { marginTop: 18 }]}>Ошибки становятся опытом</Text>
+    <Text style={[type.title, { marginTop: 18 }]}>Повторить ошибки</Text>
     <Text style={[type.body, { marginTop: 10 }]}>{module ? `${module.title}. ` : ''}Здесь задачи, в которых была ошибка или понадобилась подсказка. Повторяй их без предварительного показа ответов.</Text>
     <View style={styles.hero}><Text style={styles.big}>{due.length}<Text style={styles.bigLabel}> сейчас</Text></Text><Text style={[styles.caption, { color: '#D3E0F5' }]}>Ещё {pending.length - due.length} ожидают своего времени · успешных циклов закрепления: {progress.reviewed}</Text></View>
+    {!module && <View style={styles.card}><Text style={styles.cardTitle}>Повторение в других режимах</Text><Button secondary title="Вторая часть · №20–25" onPress={() => router.push('/extended')} /><Button secondary title="Найди ошибку" onPress={() => router.push('/detective')} /></View>}
     <Text style={styles.rule}>Три самостоятельных повторения: первое — сейчас, следующее — через день, затем через три дня. Ошибка или подсказка начинает закрепление заново.</Text>
     <View style={styles.tabs}>{[{ title: `Сейчас · ${due.length}`, value: false }, { title: `Все · ${pending.length}`, value: true }].map(tab => <Pressable key={tab.title} accessibilityRole="button" accessibilityState={{ selected: all === tab.value }} onPress={() => setAll(tab.value)} style={[styles.tab, all === tab.value && styles.activeTab]}><Text style={[styles.tabText, all === tab.value && { color: colors.white }]}>{tab.title}</Text></Pressable>)}</View>
-    {!shown.length && <View style={styles.card}><Text style={styles.cardTitle}>{pending.length ? 'На сейчас всё повторено' : 'Пока нет задач на повторение'}</Text><Text style={styles.caption}>{pending.length ? `Задания остаются на закреплении. Ближайший повтор: ${reviewTime(pending[0].dueAt, now)}.` : 'После ошибки или подсказки задача автоматически появится здесь, даже если выйти из тренировки.'}</Text>{pending.length > 0 && <Button title="Посмотреть ожидающие задачи" secondary onPress={() => setAll(true)} />}<Button title={module ? 'К обычной тренировке' : 'Выбрать модуль'} secondary onPress={() => module ? router.push({ pathname: '/groups', params: { module: module.id } }) : router.dismissTo('/')} /></View>}
+    {!shown.length && <View style={styles.card}><Text style={styles.cardTitle}>{pending.length ? 'На сейчас всё повторено' : 'Пока нет задач на повторение'}</Text><Text style={styles.caption}>{pending.length ? `Задания остаются на закреплении. Ближайший повтор: ${reviewTime(pending[0].dueAt, now)}.` : 'После ошибки или подсказки задача автоматически появится здесь, даже если выйти из тренировки.'}</Text>{pending.length > 0 && <Button title="Посмотреть ожидающие задачи" secondary onPress={() => setAll(true)} />}<Button title={module ? 'К обычной тренировке' : 'Выбрать модуль'} secondary onPress={() => module ? router.push({ pathname: '/groups', params: { module: module.id } }) : router.dismissTo('/topics')} /></View>}
     {[...groups.entries()].map(([key, items]) => {
       const first = items[0], selected = modules.find(m => m.id === first.moduleId)!, available = items.filter(m => m.dueAt <= now).slice(0, 10);
       const total = pending.filter(m => m.moduleId === first.moduleId && m.group === first.group).length;

@@ -2,7 +2,7 @@ import { FractionReference } from '../fraction-reference';
 import React from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Back, Button, Pill, Screen, type } from '../components';
+import { Back, Button, Disclosure, Pill, Screen, type } from '../components';
 import { getModule } from '../content';
 import { getGroupCount, GROUP_SIZE, ROUND_SIZE } from '../engine';
 import { cardPalette, colors } from '../theme';
@@ -18,10 +18,11 @@ export default function Groups() {
   const { progress } = useProgress();
   const stats = progress.byModule[selected.id];
   return <Screen>
-    <Back label="К уроку" />
-    <Pill tone="mint">{selected.title.toUpperCase()}</Pill>
-    <Text style={[type.title, { marginTop: 18 }]}>Выбери группу</Text>
-    <Text style={[type.body, { marginTop: 10, marginBottom: 18 }]}>{selected.id === 'fraction-decimals' ? '280 дробей: 14 групп по 20. Все числители для знаменателей 2–16 в диапазоне от 1/16 до 17/8. Сначала карточки с ответами, затем те же десять самостоятельно.' : selected.numbers === '№1–5' ? '40 вариантов: 10 групп по 4 блока (20 вопросов). За тренировку — 2 случайных блока, сначала с решениями, затем без ответов. Внутри блока сохраняется порядок №1–5.' : '200 задач: 10 групп по 20. За тренировку увидишь 10 случайных задач выбранной группы сначала с ответами, затем без них.'}</Text>
+    <Back label="Назад" />
+    <Pill tone="mint">{selected.id.startsWith('oge-') ? `ОГЭ ${selected.numbers}` : 'БАЗОВЫЙ НАВЫК'}</Pill>
+    <Text style={[type.title, { marginTop: 18 }]}>{selected.title.replace(/^ОГЭ №\d+(?:–\d+)? · /, '')}</Text><Text style={[type.body, { marginTop: 8 }]}>Выбери, что потренировать.</Text>
+    <Disclosure title="Как проходит тренировка"><Text style={[type.body, { marginTop: 10, marginBottom: 18 }]}>{selected.id === 'fraction-decimals' ? '280 дробей: 14 групп по 20. Все числители для знаменателей 2–16 в диапазоне от 1/16 до 17/8. Сначала карточки с ответами, затем те же десять самостоятельно.' : selected.numbers === '№1–5' ? '40 вариантов: 10 групп по 4 блока (20 вопросов). За тренировку — 2 случайных блока, сначала с решениями, затем без ответов. Внутри блока сохраняется порядок №1–5.' : '200 задач: 10 групп по 20. За тренировку увидишь 10 случайных задач выбранной группы сначала с ответами, затем без них.'}</Text></Disclosure>
+    <Button secondary title="Короткий урок по теме ↗" onPress={() => router.push({ pathname: '/lesson', params: { module: selected.id } })} />
     <Button title="Прогресс по этому модулю" secondary onPress={() => router.push({ pathname: '/progress', params: { module: selected.id } })} />
     {pendingMistakes(progress, { moduleId: selected.id }).length > 0 && <Button title="Ошибки в этом модуле  →" secondary onPress={() => router.push({ pathname: '/review', params: { module: selected.id } })} />}
     <View style={{ height: 18 }} />
@@ -34,4 +35,4 @@ export default function Groups() {
   </Screen>;
 }
 
-const styles = StyleSheet.create({ group: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, marginBottom: 10, backgroundColor: colors.white, borderRadius: 20, borderWidth: 1, borderColor: colors.border }, icon: { width: 50, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }, number: { fontSize: 19, fontWeight: '800', color: colors.navy }, info: { flex: 1 }, name: { fontSize: 16, fontWeight: '800', color: colors.ink }, details: { fontSize: 12, color: colors.muted, marginTop: 4 }, chevron: { fontSize: 24, color: colors.muted } });
+const styles = StyleSheet.create({ group: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, marginBottom: 10, backgroundColor: colors.white, borderRadius: 20, borderWidth: 1, borderColor: colors.border }, icon: { width: 50, height: 50, borderRadius: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border }, number: { fontSize: 19, fontWeight: '800', color: colors.navy }, info: { flex: 1 }, name: { fontSize: 16, fontWeight: '800', color: colors.ink }, details: { fontSize: 13, color: colors.muted, marginTop: 4 }, chevron: { fontSize: 24, color: colors.muted } });

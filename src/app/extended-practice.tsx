@@ -1,7 +1,7 @@
 import React from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Button, Pill, ProgressBar, Screen, type } from '../components';
+import { Button, Disclosure, Pill, ProgressBar, Screen, type } from '../components';
 import { extendedModule, extendedTask } from '../extended/bank';
 import { emptyWork } from '../extended/progress';
 import { GraphFigure } from '../extended/figure';
@@ -9,6 +9,8 @@ import { extendedStyles as s } from '../extended/ui';
 import { GeometryFigure } from '../geometry-figure';
 import { useProgress } from '../progress';
 import { cardPalette, colors } from '../theme';
+import { AssessmentActions, TaskActions } from '../task-actions';
+import { ExamPrompt } from '../study/task-view';
 import { WorkbookLink } from '../workbook/ui';
 
 export default function ExtendedPractice() {
@@ -19,7 +21,14 @@ export default function ExtendedPractice() {
   if (!task) return <Screen key="summary"><Pill tone="mint">ПОДБОРКА РАЗОБРАНА</Pill><Text style={[type.title, { marginTop: 22 }]}>Теперь понятнее</Text><Text style={s.body}>№{active.number} · {module.groups[active.group - 1]}</Text><View style={s.card}><Text style={s.heading}>Самооценка {results.length} решений</Text><Text style={s.body}>Самостоятельно: {results.filter(w => w.rating === 'self').length}{'\n'}Разобрался с помощью: {results.filter(w => w.rating === 'help').length}{'\n'}Нужно повторить: {results.filter(w => w.rating === 'repeat').length}</Text><Text style={s.small}>Это учебная самооценка. Экзаменационные баллы за полноту решения здесь не выставляются.</Text></View><Button title="К другим задачам  →" onPress={() => { extended({ type: 'finish', session: active.id }); router.dismissTo('/extended'); }} /></Screen>;
   const work = active.work[id] ?? emptyWork(), session = active.id, index = active.position;
   const allChecked = work.checks.length === task.checklist.length;
-  return <Screen key={id}>
+  const condition = <ExamPrompt task={{ number: task.number, moduleId: 'extended', group: task.group, problemId: id }} />;
+  const rate = (rating: 'self' | 'help' | 'repeat') => extended({ type: 'rate', session, index, rating });
+  const footer = work.revealed && !work.rating ? <AssessmentActions condition={condition} actions={[
+    { title: 'Решил самостоятельно', disabled: !allChecked || work.hint > 0 || work.wrong, onPress: () => rate('self') },
+    { title: 'Разобрался с помощью', disabled: !allChecked, onPress: () => rate('help') },
+    { title: 'Нужно повторить', onPress: () => rate('repeat') },
+  ]} /> : <TaskActions condition={condition} title={work.rating ? index + 1 < active.ids.length ? 'Следующая задача →' : 'Итог подборки →' : 'Сравнить с решением →'} disabled={!work.revealed && !work.paper && !work.draft.trim()} onPress={() => extended({ type: work.rating ? 'next' : 'reveal', session, index })} />;
+  return <Screen key={id} footer={footer}>
     <Pressable accessibilityRole="button" onPress={() => router.dismissTo('/extended')} style={{ paddingVertical: 12 }}><Text style={s.link}>‹  Сохранить и к модулям</Text></Pressable>
     <Pill tone={active.mode === 'review' ? 'mint' : 'amber'}>№{task.number} · {active.mode === 'review' ? 'ПОВТОРЕНИЕ' : 'ПОЛНОЕ РЕШЕНИЕ'}</Pill>
     <Text style={[s.heading, { marginTop: 17 }]}>{module.groups[active.group - 1]}</Text><Text style={s.small}>Задача {index + 1} из {active.ids.length} · группа {active.group} · вариант {task.index + 1}</Text><View style={{ marginTop: 12 }}><ProgressBar current={index} total={active.ids.length} /></View>
@@ -48,23 +57,19 @@ export default function ExtendedPractice() {
           {work.checked !== undefined && <Text accessibilityLiveRegion="polite" style={[s.body, { color: work.checked ? colors.green : colors.red }]}>{work.checked ? 'Числовой итог совпал. Теперь проверь полноту хода решения.' : 'Итог не совпал. Проверь вычисления, ограничения и все возможные корни.'}</Text>}
         </>}
       </View>
-      <View style={s.card}><Text style={s.heading}>Если застрял</Text>{task.clues.slice(0, work.hint).map((clue, i) => <Text key={i} style={s.body}>{i + 1}. {clue}</Text>)}<Button secondary disabled={work.hint >= 2} title={work.hint === 0 ? 'Небольшой намёк' : work.hint === 1 ? 'Показать первый шаг' : 'Обе подсказки открыты'} onPress={() => extended({ type: 'hint', session, index })} /><Text style={s.small}>Подсказки учитываются в самооценке и добавляют задачу на закрепление.</Text></View>
+      <Disclosure title="Если застрял" initialOpen={work.hint > 0}>{task.clues.slice(0, work.hint).map((clue, i) => <Text key={i} style={s.body}>{i + 1}. {clue}</Text>)}<Button secondary disabled={work.hint >= 2} title={work.hint === 0 ? 'Небольшой намёк' : work.hint === 1 ? 'Показать первый шаг' : 'Обе подсказки открыты'} onPress={() => extended({ type: 'hint', session, index })} /><Text style={s.small}>Подсказки учитываются в самооценке и добавляют задачу на закрепление.</Text></Disclosure>
       <WorkbookLink source="practice" session={session} taskId={id} />
-      <Button title="Сравнить с решением  →" disabled={!work.paper && !work.draft.trim()} onPress={() => extended({ type: 'reveal', session, index })} /><Text style={s.small}>Сначала запиши свой ход, прикрепи фото или отметь решение на бумаге. После сравнения исходный черновик останется для проверки.</Text>
+<Text style={s.small}>Сначала запиши свой ход, прикрепи фото или отметь решение на бумаге. После сравнения исходный черновик останется для проверки.</Text>
     </> : <>
-      {work.draft && <View style={s.card}><Text style={s.heading}>Твой исходный черновик</Text><Text selectable style={s.body}>{work.draft}</Text></View>}
+      {Boolean(work.draft) && <View style={s.card}><Text style={s.heading}>Твой исходный черновик</Text><Text selectable style={s.body}>{work.draft}</Text></View>}
       <WorkbookLink source="practice" session={session} taskId={id} />
       <View style={s.card}><Pill tone="mint">ОБРАЗЕЦ РЕШЕНИЯ</Pill>{task.graph && <GraphFigure graph={task.graph} />}{task.steps.map((step, i) => <View key={i} style={{ marginTop: 19 }}><Text style={s.heading}>{i + 1}. {step.title}</Text><Text selectable style={s.body}>{step.text}</Text></View>)}<View style={styles.answer}><Text style={s.small}>ИТОГ</Text><Text selectable style={s.heading}>{task.answer}</Text></View><Text style={s.small}>{task.pitfall}</Text></View>
       <View style={s.card}><Text style={s.heading}>Сверь своё решение</Text><Text style={s.small}>Отмечай то, что присутствовало в твоём решении или теперь стало понятно после разбора. Совпадение с образцом слово в слово не требуется.</Text>{task.checklist.map((item, i) => <Pressable key={i} accessibilityRole="checkbox" accessibilityLabel={item} accessibilityState={{ checked: work.checks.includes(i), disabled: Boolean(work.rating) }} disabled={Boolean(work.rating)} onPress={() => extended({ type: 'tick', session, index, item: i })} style={styles.check}><Text style={styles.checkMark}>{work.checks.includes(i) ? '☑' : '☐'}</Text><Text style={[s.body, { flex: 1, marginTop: 0 }]}>{item}</Text></Pressable>)}
         {!work.rating ? <>
           <Text style={s.small}>Самостоятельно — только если все эти шаги были в твоей работе до открытия образца. Если дополнил решение по разбору, выбери «с помощью».</Text>
-          <Button title="Решил самостоятельно" disabled={!allChecked || work.hint > 0 || work.wrong} onPress={() => extended({ type: 'rate', session, index, rating: 'self' })} />
-          <Button title="Разобрался с помощью" secondary disabled={!allChecked} onPress={() => extended({ type: 'rate', session, index, rating: 'help' })} />
-          <Button title="Нужно повторить" secondary onPress={() => extended({ type: 'rate', session, index, rating: 'repeat' })} />
           {(work.hint > 0 || work.wrong) && <Text style={s.small}>Была подсказка или ошибка итога. Самостоятельность закрепим в следующем повторении.</Text>}
         </> : <Text accessibilityLiveRegion="polite" style={[s.body, { color: colors.green }]}>Самооценка сохранена: {work.rating === 'self' ? 'самостоятельно' : work.rating === 'help' ? 'разобрался с помощью' : 'нужно повторить'}.</Text>}
       </View>
-      {work.rating && <Button title={index + 1 < active.ids.length ? 'Следующая задача  →' : 'Посмотреть итог подборки  →'} onPress={() => extended({ type: 'next', session, index })} />}
     </>}
   </Screen>;
 }

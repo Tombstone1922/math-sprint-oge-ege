@@ -23,4 +23,13 @@ const routeGroups = Array.from({ length: 10 }, (_, i) => ['Маршруты · �
 const tariffGroups = Array.from({ length: 10 }, (_, i) => i % 2 ? 'Средний расход · плата · тариф на год' : 'Чтение графика · пакеты · тариф на год');
 const stoveGroups = Array.from({ length: 10 }, (_, i) => i % 2 ? 'Объём · площадь стен · арка' : 'Выбор печи · стоимость · арка');
 const paperGroups = Array.from({ length: 10 }, (_, i) => i % 2 ? 'Стороны форматов · масса · покупка' : 'Раскрой · площади · целые пачки');
-export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { 'oge-19': statementGroups, 'oge-routes-grid': routeGroups, 'oge-routes': routeGroups, 'oge-tariffs': tariffGroups, 'oge-stoves': stoveGroups, 'oge-paper': paperGroups, 'fraction-decimals': fractionDecimalGroups, 'squares-roots': squareRootGroups, 'oge-apartment': apartmentGroups, 'oge-plot': plotGroups, 'oge-tyres': tyreGroups, 'oge-6': arithmeticGroups, 'oge-7': comparisonGroups, 'oge-8': expressionGroups, 'oge-9': equationGroups, 'oge-10': probabilityGroups, 'beginner-math': beginnerGroups, 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };
+const baseGroups: Partial<Record<ModuleId, readonly string[]>> = {
+  'mental-math': Array.from({ length: 10 }, (_, i) => `${i < 5 ? 'Сложение до 200' : 'Вычитание до 200'} · подборка ${i % 5 + 1}`),
+  percent: Array.from({ length: 10 }, (_, i) => `Проценты и цены · подборка ${i + 1}`),
+  fractions: Array.from({ length: 10 }, (_, i) => `Действия с дробями и доля числа · ${i + 1}`),
+  equations: Array.from({ length: 10 }, (_, i) => `Линейные уравнения · подборка ${i + 1}`),
+  geometry: Array.from({ length: 10 }, (_, i) => `Площадь и периметр · подборка ${i + 1}`),
+  powers: Array.from({ length: 10 }, (_, i) => `Квадраты, кубы и корни · подборка ${i + 1}`),
+  probability: Array.from({ length: 10 }, (_, i) => `Вероятность по исходам · подборка ${i + 1}`),
+};
+export const topicGroupNames: Partial<Record<ModuleId, readonly string[]>> = { ...baseGroups, 'oge-19': statementGroups, 'oge-routes-grid': routeGroups, 'oge-routes': routeGroups, 'oge-tariffs': tariffGroups, 'oge-stoves': stoveGroups, 'oge-paper': paperGroups, 'fraction-decimals': fractionDecimalGroups, 'squares-roots': squareRootGroups, 'oge-apartment': apartmentGroups, 'oge-plot': plotGroups, 'oge-tyres': tyreGroups, 'oge-6': arithmeticGroups, 'oge-7': comparisonGroups, 'oge-8': expressionGroups, 'oge-9': equationGroups, 'oge-10': probabilityGroups, 'beginner-math': beginnerGroups, 'oge-11': functionGroups, 'oge-12': formulaGroups, 'oge-13': inequalityGroups, 'oge-14': sequenceGroups, 'oge-15': triangleGroups, 'oge-16': circleGroups, 'oge-17': quadrilateralGroups, 'oge-18': gridGroups };

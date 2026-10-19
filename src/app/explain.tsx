@@ -36,7 +36,7 @@ export default function Explain() {
     } catch (e) { if (active.current && !pending.signal.aborted) setError(e instanceof Error ? e.message : 'Не удалось получить объяснение.'); }
     finally { if (controller.current === pending) { controller.current = null; if (active.current) setLoading(false); } }
   }
-  if (!problem) return <Screen><Back /><Text style={type.title}>Не удалось открыть задачу</Text><Button title="К модулям" onPress={() => router.dismissTo('/')} /></Screen>;
+  if (!problem) return <Screen><Back /><Text style={type.title}>Не удалось открыть задачу</Text><Button title="К модулям" onPress={() => router.dismissTo('/topics')} /></Screen>;
   const steps = getHintSteps(problem, selected.id, group);
   const suggestions = [problem.numberLines || problem.rootTask || selected.id === 'equations' ? 'Почему здесь меняется знак?' : 'Объясни первый шаг проще.', 'Как проверить мой ответ?', 'Где я мог ошибиться?'];
   return <Screen>

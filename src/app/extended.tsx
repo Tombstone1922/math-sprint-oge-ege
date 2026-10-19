@@ -16,7 +16,7 @@ export default function Extended() {
   const { progress, extended } = useProgress(), state = progress.extended, active = state.active, now = useLearningClock();
   const pending = extendedPending(state), due = extendedPending(state, now);
   return <Screen>
-    <Back label="К модулям" />
+    <Back label="Назад" />
     <Pill tone="amber">№20–25 · РАЗВЁРНУТОЕ РЕШЕНИЕ</Pill>
     <Text style={[type.title, { marginTop: 20 }]}>Вторая часть ОГЭ</Text>
     <Text style={s.body}>Шесть модулей по 200 авторских задач. В каждом — 10 групп по 20. На тренировку случайно выбираются 10 задач; решай по одной в своём темпе.</Text>

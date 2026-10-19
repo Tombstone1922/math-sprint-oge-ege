@@ -1,68 +1,43 @@
-import { StudySummary } from '../study/ui';
-import React, { useState } from 'react';
+import React from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Button, Pill, Screen, type } from '../components';
-import { Exam, modules } from '../content';
+import { Disclosure, Screen, type } from '../components';
 import { useProgress } from '../progress';
+import { accuracy, pendingMistakes } from '../learning-progress';
+import { extendedPending } from '../extended/progress';
+import { detectivePending } from '../study/detective';
+import { localDay } from '../daily-model';
+import { nextTopic, resumeItems, type ResumeItem } from '../today-model';
+import { useLearningClock } from '../learning-ui';
 import { colors } from '../theme';
-import { ExtendedSummary } from '../extended/ui';
-import { extendedModules } from '../extended/bank';
-import { LearningSummary } from '../learning-ui';
 
-type Filter = 'Все' | Exam;
-const filters: Filter[] = ['Все', 'ОГЭ', 'ЕГЭ база', 'ЕГЭ профиль'];
-
-export default function Home() {
-  const [filter, setFilter] = useState<Filter>('Все');
-  const { progress } = useProgress();
-  const shown = modules.filter(module => filter === 'Все' || (module.exams as readonly string[]).includes(filter));
+export default function Today() {
+  const { progress } = useProgress(), now = useLearningClock(), saved = resumeItems(progress), current = saved[0];
+  const due = pendingMistakes(progress, { dueOnly: true, now }).length + extendedPending(progress.extended, now).length + detectivePending(progress.study.detective, now).length;
+  const done = progress.daily.history.find(r => r.day === localDay(now)), recommendation = nextTopic(progress), percent = accuracy(progress.independent, progress.attempts);
+  const open = (item: ResumeItem) => item.daily ? router.push({ pathname: '/practice', params: { mode: 'daily' } }) : router.push(item.path);
   return <Screen>
-    <View style={styles.brand}><View style={styles.logo}><Text style={styles.logoText}>∑</Text></View><Text style={styles.brandText}>МАТЕМАТИКА · РЫВОК</Text></View>
-    <Text style={[type.title, { marginTop: 26 }]}>Понимай. Решай.{'\n'}Успевай.</Text>
-    <Text style={[type.body, { marginTop: 12 }]}>Короткие уроки и тренировки для подготовки к ОГЭ и ЕГЭ по математике.</Text>
+    <View style={styles.brand}><View style={styles.logo}><Text style={styles.logoText}>∑</Text></View><View><Text style={styles.brandName}>Математика: рывок</Text><Text style={styles.caption}>{new Date(now).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</Text></View></View>
+    <Text style={[type.title, { marginTop: 24 }]}>Сегодня</Text><Text style={[type.body, { marginTop: 5 }]}>Один понятный шаг вперёд.</Text>
     <View style={styles.hero}>
-      <View style={{ flex: 1 }}><Pill tone="mint">ПЕРВЫЙ ШАГ</Pill><Text style={styles.heroTitle}>Устный счёт{ '\n' }без паузы</Text><Text style={styles.heroCaption}>Разберём приёмы, покажем примеры, потом попробуешь сам.</Text></View>
-      <Text style={styles.heroSymbol}>✦</Text>
+      <Text style={styles.heroLabel}>{current ? 'СОХРАНЕНО ДЛЯ ТЕБЯ' : done ? 'ХОРОШЕЕ НАЧАЛО' : 'НАЧНЁМ С МАЛЕНЬКОГО'}</Text>
+      <Text style={styles.heroTitle}>{current ? current.title : done ? 'Сегодня уже позанимались' : 'Пять минут математики'}</Text>
+      <Text style={styles.heroText}>{current ? current.description : done ? `В короткой тренировке: ${done.independent} из ${done.answered} самостоятельно. Можно перейти к любимой теме.` : 'Немного счёта, знакомые темы и прошлые ошибки — всё в одной короткой тренировке.'}</Text>
+      <Pressable accessibilityRole="button" onPress={() => current ? open(current) : router.push(done ? '/topics' : '/daily')} style={styles.heroButton}><Text style={styles.heroButtonText}>{current ? 'Продолжить работу' : done ? 'Выбрать тему' : 'Начать пять минут'}  →</Text></Pressable>
     </View>
-    <Button title={progress.completed ? 'Повторить быстрый счёт  →' : 'Начать первый урок  →'} onPress={() => router.push({ pathname: '/lesson', params: { module: 'mental-math' } })} />
-    <View style={styles.stats}>
-      <View style={styles.stat}><Text style={styles.statNumber}>{progress.completed}</Text><Text style={styles.statLabel}>тренировок по 10</Text></View>
-      <View style={styles.divider} /><View style={styles.stat}><Text style={styles.statNumber}>{progress.best}/10</Text><Text style={styles.statLabel}>лучший результат</Text></View>
-    </View>
-    <View style={styles.dailyCard}><Pill tone="mint">КАЖДЫЙ ДЕНЬ · 5 МИНУТ</Pill><Text style={[type.section, { marginTop: 12 }]}>Есть пять минут</Text><Text style={[type.body, { fontSize: 14, marginTop: 7 }]}>Немного счёта, знакомые темы и твои ошибки — подборка уже за тебя.</Text><Button title="Моя короткая тренировка  →" onPress={() => router.push('/daily')} /></View>
-    <StudySummary />
-    <ExtendedSummary />
-    <LearningSummary />
-    <Text style={[type.section, { marginTop: 30, marginBottom: 16 }]}>Модули</Text>
-    <View style={styles.filters}>{filters.map(item => <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: filter === item }} onPress={() => setFilter(item)} style={[styles.filter, filter === item && styles.filterActive]}><Text style={[styles.filterText, filter === item && { color: colors.white }]}>{item}</Text></Pressable>)}</View>
-    {shown.map((module, index) => <React.Fragment key={module.id}>
-      {module.id === 'oge-apartment' && <View style={{ marginTop: 25 }}><Text style={type.section}>Практические задачи ОГЭ · №1–5</Text><Text style={[type.body, { marginTop: 8, fontSize: 14 }]}>8 тем · 320 вариантов · 1600 вопросов. В каждом варианте единое условие, рисунок и пять связанных заданий.</Text></View>}
-      {(['oge-apartment', 'oge-routes-grid', 'oge-tyres', 'oge-paper'] as string[]).includes(module.id) && <Text style={styles.family}>{module.id === 'oge-apartment' ? 'КВАРТИРЫ И УЧАСТКИ' : module.id === 'oge-routes-grid' ? 'ПУТЕШЕСТВИЯ' : module.id === 'oge-tyres' ? 'СВЯЗЬ, ШИНЫ И ПЕЧИ' : 'ФОРМАТЫ БУМАГИ'}</Text>}
-      {module.id === 'oge-6' && <Text style={[type.section, { marginTop: 25, marginBottom: 6 }]}>Алгебра и вероятность ОГЭ · №6–14</Text>}
-      {module.id === 'oge-15' && <Text style={[type.section, { marginTop: 25, marginBottom: 6 }]}>Геометрия ОГЭ · №15–19</Text>}
-      <Pressable accessibilityRole="button" accessibilityLabel={`Открыть модуль ${module.title}`} onPress={() => router.push({ pathname: '/lesson', params: { module: module.id } })} style={styles.module}>
-      <View style={[styles.moduleIcon, { backgroundColor: index % 2 ? colors.amber : colors.bluePale }]}><Text style={styles.moduleIconText}>{module.icon}</Text></View>
-      <View style={{ flex: 1 }}><Text style={styles.moduleTitle}>{module.title}</Text><Text style={styles.moduleSub}>{module.subtitle}</Text><Text style={styles.moduleMeta}>{module.minutes} мин · урок + практика{progress.byModule[module.id] ? ` · рекорд ${progress.byModule[module.id]?.best}/10` : ''}</Text></View>
-      <Text style={styles.chevron}>›</Text>
-      </Pressable>
-    </React.Fragment>)}
-    {(filter === 'Все' || filter === 'ОГЭ') && <>
-      <Text style={[type.section, { marginTop: 28 }]}>Вторая часть ОГЭ · №20–25</Text>
-      {extendedModules.map(module => <Pressable key={module.number} accessibilityRole="button" accessibilityLabel={`Открыть номер ${module.number}`} onPress={() => router.push({ pathname: '/extended', params: { number: String(module.number) } })} style={styles.module}>
-        <View style={[styles.moduleIcon, { backgroundColor: colors.amber }]}><Text style={styles.moduleIconText}>{module.number}</Text></View><View style={{ flex: 1 }}><Text style={styles.moduleTitle}>{module.title}</Text><Text style={styles.moduleSub}>{module.subtitle}</Text><Text style={styles.moduleMeta}>200 задач · 10 групп · полный разбор</Text></View><Text style={styles.chevron}>›</Text>
-      </Pressable>)}
-    </>}
-    <Text style={styles.footer}>Авторские тренировочные задания по типам материалов ФИПИ ОГЭ‑2026 и проекта ОГЭ‑2027. Для второй части доступны рисунки, развёрнутые решения и самопроверка.</Text>
+    {saved.length > 1 && <Disclosure title={`Ещё сохранённые работы · ${saved.length - 1}`}>{saved.slice(1).map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Продолжить: ${item.title}`} onPress={() => open(item)} style={styles.smallRow}><View style={{ flex: 1 }}><Text style={styles.rowTitle}>{item.title}</Text><Text style={styles.caption}>{item.description}</Text></View><Text style={styles.arrow}>›</Text></Pressable>)}</Disclosure>}
+    <View style={styles.section}><Text style={type.section}>На ближайшее занятие</Text></View>
+    <Pressable accessibilityRole="button" accessibilityLabel="Ошибки к повторению" onPress={() => router.push('/review')} style={styles.row}><View style={[styles.badge, { backgroundColor: colors.amber }]}><Text style={styles.badgeText}>↻</Text></View><View style={{ flex: 1 }}><Text style={styles.rowTitle}>Повторить ошибки</Text><Text style={styles.caption}>{due ? `${due} задач готовы к повторению во всех режимах` : 'Новые ошибки появятся здесь автоматически'}</Text></View><Text style={styles.arrow}>›</Text></Pressable>
+    {recommendation && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/guided', params: { module: recommendation.moduleId, group: String(recommendation.group) } })} style={styles.row}><View style={[styles.badge, { backgroundColor: colors.bluePale }]}><Text style={styles.badgeText}>ƒ</Text></View><View style={{ flex: 1 }}><Text style={styles.rowTitle}>Повторить: {recommendation.title}</Text><Text style={styles.caption}>{recommendation.groupTitle} · здесь пока меньше самостоятельных ответов</Text></View><Text style={styles.arrow}>›</Text></Pressable>}
+    {current && !current.daily && !done && <Pressable accessibilityRole="button" onPress={() => router.push('/daily')} style={styles.row}><View style={[styles.badge, { backgroundColor: colors.mint }]}><Text style={styles.badgeText}>5′</Text></View><View style={{ flex: 1 }}><Text style={styles.rowTitle}>Есть пять минут</Text><Text style={styles.caption}>Короткая тренировка без выбора темы</Text></View><Text style={styles.arrow}>›</Text></Pressable>}
+    <View style={styles.section}><Text style={type.section}>Под рукой</Text></View>
+    <View style={styles.tools}>{[{ title: 'Формулы', text: 'Памятки и примеры', path: '/reference', icon: 'ƒ' }, { title: 'Найди ошибку', text: 'Учимся замечать шаги', path: '/detective', icon: '?' }].map(item => <Pressable accessibilityRole="button" key={item.path} onPress={() => router.push(item.path as '/reference' | '/detective')} style={styles.tool}><Text style={styles.toolIcon}>{item.icon}</Text><Text style={styles.rowTitle}>{item.title}</Text><Text style={styles.caption}>{item.text}</Text></Pressable>)}</View>
+    <Pressable accessibilityRole="button" onPress={() => router.push('/exam-hub')} style={styles.weekly}><View style={{ flex: 1 }}><Text style={styles.rowTitle}>Варианты этой недели</Text><Text style={styles.caption}>10 готовых работ ОГЭ · задания №1–25</Text></View><Text style={styles.arrow}>›</Text></Pressable>
+    <Pressable accessibilityRole="button" onPress={() => router.push('/progress')} style={styles.progress}><Text style={styles.caption}>{percent === null ? 'После первых ответов здесь появится твой прогресс.' : `Самостоятельно в тренировках: ${percent}% · проверено ответов: ${progress.attempts}`}</Text><Text style={styles.progressLink}>Мой прогресс →</Text></Pressable>
   </Screen>;
 }
-
 const styles = StyleSheet.create({
-  dailyCard: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white, padding: 20, borderRadius: 24, marginTop: 20 },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 9 }, logo: { width: 34, height: 34, backgroundColor: colors.navy, borderRadius: 11, alignItems: 'center', justifyContent: 'center' }, logoText: { color: colors.white, fontSize: 23, fontWeight: '800' }, brandText: { fontSize: 12, fontWeight: '900', letterSpacing: 1, color: colors.navy },
-  hero: { marginTop: 26, backgroundColor: colors.navy, borderRadius: 26, padding: 22, minHeight: 206, flexDirection: 'row', overflow: 'hidden' }, heroTitle: { color: colors.white, fontSize: 26, lineHeight: 31, fontWeight: '800', marginTop: 17 }, heroCaption: { color: '#C8D8EF', fontSize: 13, lineHeight: 19, marginTop: 8 }, heroSymbol: { color: '#92AFFF', fontSize: 72, alignSelf: 'center' },
-  stats: { flexDirection: 'row', backgroundColor: colors.white, borderRadius: 20, marginTop: 20, padding: 18, alignItems: 'center' }, stat: { flex: 1, alignItems: 'center' }, statNumber: { color: colors.ink, fontSize: 24, fontWeight: '800' }, statLabel: { color: colors.muted, fontSize: 12, marginTop: 2 }, divider: { height: 36, width: 1, backgroundColor: colors.border },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 9 }, filter: { borderRadius: 30, backgroundColor: colors.white, paddingHorizontal: 13, paddingVertical: 9, borderWidth: 1, borderColor: colors.border }, filterActive: { backgroundColor: colors.blue, borderColor: colors.blue }, filterText: { color: colors.navy, fontSize: 12, fontWeight: '700' },
-  family: { marginTop: 21, marginBottom: 2, fontSize: 11, fontWeight: '800', letterSpacing: .7, color: colors.muted },
-  module: { flexDirection: 'row', gap: 13, alignItems: 'center', backgroundColor: colors.white, borderRadius: 20, padding: 15, marginTop: 10, borderWidth: 1, borderColor: colors.border }, moduleIcon: { width: 51, height: 51, borderRadius: 16, justifyContent: 'center', alignItems: 'center' }, moduleIconText: { fontSize: 25, color: colors.navy }, moduleTitle: { fontSize: 16, color: colors.ink, fontWeight: '800' }, moduleSub: { color: colors.muted, fontSize: 12, marginTop: 3 }, moduleMeta: { color: colors.blue, fontSize: 11, fontWeight: '700', marginTop: 7 }, chevron: { fontSize: 23, color: colors.muted }, footer: { color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center', marginTop: 24 },
+  brand: { flexDirection: 'row', gap: 11, alignItems: 'center', paddingTop: 4 }, logo: { width: 40, height: 40, borderRadius: 13, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' }, logoText: { fontSize: 26, color: colors.white, fontWeight: '700' }, brandName: { color: colors.ink, fontSize: 15, fontWeight: '800', lineHeight: 21 }, caption: { color: colors.muted, fontSize: 13, lineHeight: 20, marginTop: 3 },
+  hero: { padding: 23, backgroundColor: colors.navy, borderRadius: 23, marginTop: 20 }, heroLabel: { color: '#BDD0F1', fontSize: 11, lineHeight: 18, letterSpacing: 1, fontWeight: '800' }, heroTitle: { color: colors.white, fontSize: 26, lineHeight: 33, fontWeight: '800', marginTop: 12 }, heroText: { color: '#D9E4F6', fontSize: 15, lineHeight: 23, marginTop: 9 }, heroButton: { backgroundColor: colors.white, borderRadius: 14, minHeight: 54, alignItems: 'center', justifyContent: 'center', padding: 13, marginTop: 20 }, heroButtonText: { color: colors.navy, fontSize: 15, lineHeight: 22, fontWeight: '800' },
+  section: { marginTop: 27, marginBottom: 12 }, row: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.white, padding: 15, borderRadius: 18, marginBottom: 10 }, smallRow: { flexDirection: 'row', gap: 10, alignItems: 'center', paddingVertical: 13 }, rowTitle: { color: colors.ink, fontSize: 16, lineHeight: 23, fontWeight: '800' }, badge: { width: 43, height: 45, borderRadius: 13, alignItems: 'center', justifyContent: 'center' }, badgeText: { color: colors.navy, fontSize: 23, fontWeight: '700' }, arrow: { color: colors.blue, fontSize: 24 }, tools: { flexDirection: 'row', gap: 10 }, tool: { flex: 1, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: 18, padding: 15 }, toolIcon: { color: colors.blue, fontSize: 24, fontWeight: '700', marginBottom: 9 }, weekly: { marginTop: 12, backgroundColor: colors.bluePale, borderRadius: 18, padding: 17, flexDirection: 'row', alignItems: 'center', gap: 10 }, progress: { marginTop: 18, paddingBottom: 8 }, progressLink: { color: colors.blue, fontSize: 13, lineHeight: 20, fontWeight: '700', marginTop: 9, paddingVertical: 6 },
 });

@@ -38,7 +38,7 @@ export function PracticalFigure({ block, question }: { block: PracticalBlock; qu
     <Button secondary title="Крупный рисунок и условие ↗" onPress={() => setOpen(true)} />
     {block.table && <Table table={block.table} />}
     {question?.table && <Table table={question.table} />}
-    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen>
+    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen modal>
       <Button secondary title="Вернуться к вопросу" onPress={() => setOpen(false)} />
       <Text style={[type.section, { marginTop: 20 }]}>{block.title}</Text>
       <Text style={styles.condition}>{block.text}</Text>

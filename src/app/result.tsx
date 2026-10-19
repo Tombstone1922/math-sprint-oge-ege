@@ -31,7 +31,7 @@ export default function Result() {
     {!review && pendingMistakes(progress, { moduleId: selected.id }).length > 0 && <Button title="Повторить ошибки" secondary onPress={() => router.replace({ pathname: '/review', params: { module: selected.id } })} />}
     <Button title="Посмотреть мой прогресс" secondary onPress={() => router.push({ pathname: '/progress', params: { module: selected.id } })} />
     <Button title="Выбрать другую группу" secondary onPress={() => router.replace({ pathname: '/groups', params: { module: selected.id } })} />
-    <Button title="К модулям" secondary onPress={() => router.dismissTo('/')} />
+    <Button title="К модулям" secondary onPress={() => router.dismissTo('/topics')} />
   </Screen>;
 }
 const styles = StyleSheet.create({ badge: { alignSelf: 'center', width: 90, height: 90, borderRadius: 30, backgroundColor: colors.amber, justifyContent: 'center', alignItems: 'center' }, badgeText: { fontSize: 52, color: colors.navy }, scoreCard: { backgroundColor: colors.white, marginTop: 32, borderRadius: 27, padding: 25, alignItems: 'center', borderWidth: 1, borderColor: colors.border }, score: { color: colors.navy, fontSize: 74, fontWeight: '900', marginTop: 12 }, denominator: { fontSize: 30, color: colors.muted }, caption: { color: colors.muted, fontSize: 15, marginTop: 4 }, best: { textAlign: 'center', color: colors.navy, fontWeight: '700', marginTop: 20 } });
