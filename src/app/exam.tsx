@@ -10,6 +10,7 @@ import { studyStyles as s } from '../study/ui';
 import { colors } from '../theme';
 import { extendedTask } from '../extended/bank';
 import { WorkbookLink } from '../workbook/ui';
+import { weeklyTitle } from '../study/weekly';
 
 export default function Exam() {
   const { id } = useLocalSearchParams<{ id?: string }>(), { progress, study } = useProgress(), state = progress.study.exam;
@@ -35,7 +36,7 @@ function ExamWork({ session, now }: { session: ExamSession; now: number }) {
   const go = (position: number) => { setConfirm(false); study({ area: 'exam', action: { type: 'select', id: session.id, position } }); };
   return <Screen key={task.number}>
     <Pressable accessibilityRole="button" onPress={() => router.dismissTo('/exam-hub')} style={{ paddingVertical: 12 }}><Text style={s.chipText}>‹  Сохранить и выйти</Text></Pressable>
-    <Pill tone="amber">ПРОБНЫЙ ЭКЗАМЕН</Pill><View style={[s.row, { justifyContent: 'space-between', marginTop: 15 }]}><Text style={s.title}>Задание {task.number}</Text><Text accessibilityLabel="Оставшееся время экзамена" style={[s.title, { color: remaining !== null && remaining < 600000 ? colors.red : colors.blue }]}>{remaining === null ? 'Без таймера' : examClock(remaining)}</Text></View>
+    <Pill tone="amber">ПРОБНЫЙ ЭКЗАМЕН</Pill>{session.weekly && <Text style={s.small}>{weeklyTitle(session.weekly)}</Text>}<View style={[s.row, { justifyContent: 'space-between', marginTop: 15 }]}><Text style={s.title}>Задание {task.number}</Text><Text accessibilityLabel="Оставшееся время экзамена" style={[s.title, { color: remaining !== null && remaining < 600000 ? colors.red : colors.blue }]}>{remaining === null ? 'Без таймера' : examClock(remaining)}</Text></View>
     <Text style={s.small}>{remaining === null ? 'Ответы сохраняются. Разбор откроется после сдачи.' : 'Таймер идёт и вне приложения. Разбор — после сдачи.'}</Text>
     <Navigation session={session} position={session.position} select={go} />
     <ExamPrompt task={task} />
@@ -58,6 +59,7 @@ function ExamResult({ session }: { session: ExamSession }) {
   const { study } = useProgress(), [position, setPosition] = useState(0), task = session.tasks[position], work = session.work[task.number] ?? emptyExamWork(), result = examResults(session), extended = task.number >= 20 ? extendedTask(task.problemId)! : null;
   return <Screen key={`${session.id}-${position}`}>
     <Pressable accessibilityRole="button" onPress={() => router.dismissTo('/exam-hub')} style={{ paddingVertical: 12 }}><Text style={s.chipText}>‹  К пробным работам</Text></Pressable><Pill tone="mint">РАБОТА СДАНА</Pill><Text style={[type.title, { marginTop: 20 }]}>Результат пробника</Text>{session.expired && <Text style={[s.body, { color: colors.red }]}>Время закончилось. Учтены ответы, сохранённые до истечения таймера.</Text>}
+    {session.weekly && <Text style={s.body}>{weeklyTitle(session.weekly)}</Text>}
     <View style={[s.card, { backgroundColor: colors.navy }]}><Text style={{ color: colors.white, fontSize: 48, fontWeight: '800' }}>{result.automatic}<Text style={{ fontSize: 24 }}>/19</Text></Text><Text style={[s.body, { color: '#DDE8FA' }]}>Первая часть · проверена автоматически</Text><Text style={[s.body, { color: '#DDE8FA' }]}>Вторая часть: {result.manual}/12 · вручную оценено {result.scored}/6</Text>{result.total !== null && <Text style={[s.title, { color: colors.white, marginTop: 13 }]}>Учебный итог: {result.total}/31</Text>}</View>
     <Text style={s.small}>Итог включает ручную оценку второй части. Это учебный результат; он не подтверждает экзаменационную оценку. Ошибки и пропуски первой части сохранены в повторении.</Text>
     <Navigation session={session} position={position} select={setPosition} result />

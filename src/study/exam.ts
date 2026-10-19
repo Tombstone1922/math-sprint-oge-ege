@@ -1,36 +1,18 @@
 import type { ModuleId } from '../content.ts';
 import { checkAnswer, getProblemPool } from '../engine.ts';
-import { extendedGroup, extendedTask } from '../extended/bank.ts';
-import type { ExtendedNumber } from '../extended/model.ts';
+import { extendedTask } from '../extended/bank.ts';
+import { makeExam, practicalModules, resolveExam, type ExamRef } from './exam-bank.ts';
+import { parseWeeklyLabel, weeklyVariant, type WeeklyLabel } from './weekly.ts';
+export { makeExam, practicalModules, resolveExam, type ExamRef } from './exam-bank.ts';
 
 export const EXAM_DURATION = 235 * 60 * 1000;
-export type ExamRef = { number: number; moduleId: ModuleId | 'extended'; group: number; problemId: string };
+export const EXAM_HISTORY_LIMIT = 10;
 export type ExamWork = { input: string; draft: string; paper: boolean; flagged: boolean };
-export type ExamSession = { id: string; startedAt: number; deadline: number | null; position: number; tasks: ExamRef[]; work: Record<string, ExamWork>; finishedAt?: number; expired?: boolean; points: Record<string, number> };
+export type ExamSession = { id: string; startedAt: number; deadline: number | null; position: number; tasks: ExamRef[]; work: Record<string, ExamWork>; finishedAt?: number; expired?: boolean; points: Record<string, number>; weekly?: WeeklyLabel };
 export type ExamState = { current: ExamSession | null; history: ExamSession[] };
-export type ExamAction = { type: 'start'; timed: boolean; random?: () => number } | { type: 'select'; id: string; position: number } | { type: 'edit'; id: string; number: number; input?: string; draft?: string; paper?: boolean; flagged?: boolean } | { type: 'finish' | 'sync'; id: string } | { type: 'score'; id: string; number: number; points: number };
+export type ExamAction = { type: 'start'; timed: boolean; random?: () => number; weekly?: WeeklyLabel } | { type: 'select'; id: string; position: number } | { type: 'edit'; id: string; number: number; input?: string; draft?: string; paper?: boolean; flagged?: boolean } | { type: 'finish' | 'sync'; id: string } | { type: 'score'; id: string; number: number; points: number };
 export const emptyExam = (): ExamState => ({ current: null, history: [] });
 export const emptyExamWork = (): ExamWork => ({ input: '', draft: '', paper: false, flagged: false });
-export const practicalModules: readonly ModuleId[] = ['oge-apartment', 'oge-plot', 'oge-routes-grid', 'oge-routes', 'oge-tyres', 'oge-tariffs', 'oge-stoves', 'oge-paper'];
-// Selected training families keep the full variant varied; this is an authored mock, not an official KIM.
-const secondGroups: Record<ExtendedNumber, number[]> = { 20: [2, 3, 4, 6, 7, 8, 10], 21: [1, 2, 4, 8, 9, 10], 22: [5, 7, 8, 9, 10], 23: [1, 2, 4, 7, 9, 10], 24: [1, 3, 4, 6, 8, 9], 25: [1, 3, 4, 5, 7, 8, 10] };
-export function makeExam(random: () => number = Math.random): ExamRef[] {
-  const pick = <T>(items: readonly T[]): T => items[Math.min(items.length - 1, Math.max(0, Math.floor(random() * items.length)))];
-  const moduleId = pick(practicalModules), pool = getProblemPool(moduleId), first = pick(pool.filter(p => p.practical?.number === 1));
-  const block = pool.filter(p => p.practical?.block.id === first.practical!.block.id).sort((a, b) => a.practical!.number - b.practical!.number);
-  const refs: ExamRef[] = block.map(p => ({ number: p.practical!.number, moduleId, group: Math.floor(pool.indexOf(p) / 20) + 1, problemId: p.id }));
-  for (let number = 6; number <= 19; number++) {
-    const moduleId = `oge-${number}` as ModuleId, pool = getProblemPool(moduleId);
-    const p = pick(pool);
-    refs.push({ number, moduleId, group: Math.floor(pool.indexOf(p) / 20) + 1, problemId: p.id });
-  }
-  for (let number = 20; number <= 25; number++) {
-    const group = pick(secondGroups[number as ExtendedNumber]), p = pick(extendedGroup(number as ExtendedNumber, group));
-    refs.push({ number, moduleId: 'extended', group, problemId: p.id });
-  }
-  return refs;
-}
-export function resolveExam(ref: ExamRef) { return ref.moduleId === 'extended' ? undefined : getProblemPool(ref.moduleId).find(p => p.id === ref.problemId); }
 export function examResults(session: ExamSession) {
   const first = session.tasks.filter(t => t.number <= 19).map(ref => {
     const input = session.work[ref.number]?.input ?? '', p = resolveExam(ref)!;
@@ -47,8 +29,12 @@ export function reduceExam(state: ExamState, action: ExamAction, now = Date.now(
   if (current && !current.finishedAt && current.deadline !== null && now >= current.deadline) return { ...state, current: { ...current, finishedAt: current.deadline, expired: true } };
   if (action.type === 'start') {
     if (current && !current.finishedAt) return state;
-    const history = current ? [current, ...state.history.filter(s => s.id !== current.id)].slice(0, 5) : state.history;
-    return { history, current: { id: `exam-${now}-${Math.random().toString(36).slice(2)}`, startedAt: now, deadline: action.timed ? now + EXAM_DURATION : null, position: 0, tasks: makeExam(action.random), work: {}, points: {} } };
+    const weekly = action.weekly === undefined ? undefined : parseWeeklyLabel(action.weekly);
+    if (action.weekly !== undefined && !weekly) return state;
+    const tasks = weekly ? weeklyVariant(weekly.week, weekly.number)?.tasks.map(ref => ({ ...ref })) : makeExam(action.random);
+    if (!tasks) return state;
+    const history = current ? [current, ...state.history.filter(s => s.id !== current.id)].slice(0, EXAM_HISTORY_LIMIT) : state.history;
+    return { history, current: { id: `exam-${now}-${Math.random().toString(36).slice(2)}`, startedAt: now, deadline: action.timed ? now + EXAM_DURATION : null, position: 0, tasks, work: {}, points: {}, ...(weekly ? { weekly } : {}) } };
   }
   if (action.type === 'score') {
     if (!Number.isInteger(action.points) || action.points < 0 || action.points > 2 || action.number < 20 || action.number > 25 || !Number.isInteger(action.number)) return state;
@@ -87,9 +73,9 @@ export function parseExam(value: unknown): ExamState {
     }
     const points: Record<string, number> = {};
     if (s.finishedAt) for (let n = 20; n <= 25; n++) { const p = obj(s.points)[n]; if (typeof p === 'number' && Number.isInteger(p) && p >= 0 && p <= 2) points[n] = p; }
-    return { id: s.id, startedAt: s.startedAt, deadline: s.deadline as number | null, position: typeof s.position === 'number' && Number.isInteger(s.position) && s.position >= 0 && s.position < 25 ? s.position : 0, tasks, work, points, ...(s.finishedAt ? { finishedAt: s.finishedAt as number, expired: s.expired === true } : {}) };
+    return { id: s.id, startedAt: s.startedAt, deadline: s.deadline as number | null, position: typeof s.position === 'number' && Number.isInteger(s.position) && s.position >= 0 && s.position < 25 ? s.position : 0, tasks, work, points, ...(parseWeeklyLabel(s.weekly) ? { weekly: parseWeeklyLabel(s.weekly)! } : {}), ...(s.finishedAt ? { finishedAt: s.finishedAt as number, expired: s.expired === true } : {}) };
   }
   result.current = session(raw.current);
-  if (Array.isArray(raw.history)) result.history = raw.history.map(session).filter((s): s is ExamSession => Boolean(s?.finishedAt) && s!.id !== result.current?.id).filter((s, i, all) => all.findIndex(p => p.id === s.id) === i).slice(0, 5);
+  if (Array.isArray(raw.history)) result.history = raw.history.map(session).filter((s): s is ExamSession => Boolean(s?.finishedAt) && s!.id !== result.current?.id).filter((s, i, all) => all.findIndex(p => p.id === s.id) === i).slice(0, EXAM_HISTORY_LIMIT);
   return result;
 }

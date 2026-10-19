@@ -27,6 +27,7 @@ export function StudySummary() {
   return <View style={studyStyles.card}>
     <Pill tone="mint">УЧИСЬ И ПРОВЕРЯЙ СЕБЯ</Pill>
     <Button title={state.exam.current && !state.exam.current.finishedAt ? 'Продолжить пробный экзамен  →' : 'Пробный экзамен ОГЭ  →'} onPress={() => router.push('/exam-hub')} />
+    <Text style={studyStyles.small}>10 готовых вариантов №1–25 · новая подборка каждую неделю.</Text>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>{[{ title: 'Справочник формул', path: '/reference' }, { title: 'Найди ошибку', path: '/detective' }].map(item => <Pressable key={item.path} accessibilityRole="button" onPress={() => router.push(item.path as '/reference' | '/detective')} style={[studyStyles.chip, { flexGrow: 1 }]}><Text style={[studyStyles.chipText, { textAlign: 'center' }]}>{item.title}  ↗</Text></Pressable>)}</View>
     {attempts > 0 && <Text style={studyStyles.small}>«Найди ошибку»: {independent}/{attempts} самостоятельно · на повторение: {detectivePending(state.detective).length}. Эта статистика считается отдельно.</Text>}
   </View>;

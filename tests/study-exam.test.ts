@@ -78,11 +78,11 @@ test('Submission queues failures and blanks atomically without changing ordinary
 });
 test('Archived work remains reviewable and manually scorable; history is bounded and references validated', () => {
   let state = emptyExam();
-  for (let i = 0; i < 8; i++) { state = reduceExam(state, { type: 'start', timed: false }, 1000 + i * 1000); state = reduceExam(state, { type: 'finish', id: state.current!.id }, 1500 + i * 1000); }
-  assert.equal(state.history.length, 5);
+  for (let i = 0; i < 13; i++) { state = reduceExam(state, { type: 'start', timed: false }, 1000 + i * 1000); state = reduceExam(state, { type: 'finish', id: state.current!.id }, 1500 + i * 1000); }
+  assert.equal(state.history.length, 10);
   const id = state.history[0].id;
   state = reduceExam(state, { type: 'score', id, number: 20, points: 1 }); assert.equal(state.history[0].points[20], 1);
-  assert.equal(parseExam(JSON.parse(JSON.stringify(state))).history.length, 5);
+  assert.equal(parseExam(JSON.parse(JSON.stringify(state))).history.length, 10);
   const corrupt = JSON.parse(JSON.stringify(state)); corrupt.current.tasks[1] = { ...corrupt.current.tasks[0], number: 2 };
   assert.equal(parseExam(corrupt).current, null);
   const other = JSON.parse(JSON.stringify(state)); other.current.tasks[0].moduleId = 'unknown'; assert.equal(parseExam(other).current, null);
