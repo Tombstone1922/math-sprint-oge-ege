@@ -8,6 +8,7 @@ export type ExtendedSession = { id: string; number: ExtendedNumber; group: numbe
 export type ExtendedState = { stats: Record<string, ExtendedStat>; active: ExtendedSession | null };
 export type ExtendedAction =
   { type: 'start'; number: ExtendedNumber; group: number; review?: boolean; random?: () => number } |
+  { type: 'start-task'; taskId: string; review?: boolean } |
   { type: 'edit'; session: string; index: number; draft?: string; input?: string; paper?: boolean } |
   { type: 'hint' | 'check' | 'reveal' | 'next'; session: string; index: number } |
   { type: 'tick'; session: string; index: number; item: number } |
@@ -19,6 +20,11 @@ export const emptyWork = (): Work => ({ draft: '', paper: false, input: '', hint
 const emptyStat = (): ExtendedStat => ({ attempts: 0, self: 0, help: 0, repeat: 0, streak: 0, dueAt: null, lastAt: 0 });
 export const extendedPending = (state: ExtendedState, now?: number) => Object.entries(state.stats).filter(([id, s]) => extendedTask(id) && s.dueAt !== null && (now === undefined || s.dueAt <= now)).sort((a, b) => a[1].dueAt! - b[1].dueAt!);
 export function reduceExtended(state: ExtendedState, a: ExtendedAction, now = Date.now()): ExtendedState {
+  if (a.type === 'start-task') {
+    const task = extendedTask(a.taskId);
+    if (state.active || !task || a.review && (state.stats[task.id]?.dueAt == null || state.stats[task.id].dueAt! > now)) return state;
+    return { ...state, active: { id: `${now}-${Math.random().toString(36).slice(2)}`, number: task.number, group: task.group, mode: a.review ? 'review' : 'practice', ids: [task.id], position: 0, work: {} } };
+  }
   if (a.type === 'start') {
     if (state.active || !extendedNumbers.includes(a.number) || !Number.isInteger(a.group) || a.group < 1 || a.group > 10) return state;
     let ids = extendedGroup(a.number, a.group).map(t => t.id);

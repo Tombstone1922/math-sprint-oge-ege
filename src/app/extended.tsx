@@ -8,6 +8,7 @@ import { extendedStyles as s } from '../extended/ui';
 import { useProgress } from '../progress';
 import { colors } from '../theme';
 import { useLearningClock } from '../learning-ui';
+import { WorkbookSummary } from '../workbook/ui';
 
 export default function Extended() {
   const { number } = useLocalSearchParams<{ number?: string }>();
@@ -19,12 +20,13 @@ export default function Extended() {
     <Pill tone="amber">№20–25 · РАЗВЁРНУТОЕ РЕШЕНИЕ</Pill>
     <Text style={[type.title, { marginTop: 20 }]}>Вторая часть ОГЭ</Text>
     <Text style={s.body}>Шесть модулей по 200 авторских задач. В каждом — 10 групп по 20. На тренировку случайно выбираются 10 задач; решай по одной в своём темпе.</Text>
+    <WorkbookSummary />
     <View style={[s.card, { backgroundColor: colors.navy }]}><Text style={[s.heading, { color: colors.white }]}>Сначала твоё решение</Text><Text style={[s.body, { color: '#DBE5F6' }]}>Бумага или черновик → подсказка при затруднении → образец решения → проверка ключевых шагов. Приложение проверяет отдельный числовой итог; полноту решения оцениваешь ты или преподаватель.</Text></View>
     {active && <View style={[s.card, { backgroundColor: colors.amber }]}>
       <Text style={s.heading}>Сохранена подборка №{active.number}</Text><Text style={s.body}>Группа {active.group} · разобрано {Object.values(active.work).filter(w => w.rating).length} из {active.ids.length}. Черновик и подсказки сохранены.</Text>
       <Button title="Продолжить с места остановки  →" onPress={() => router.push('/extended-practice')} />
       <Button title={confirm ? 'Завершить и освободить подборку' : 'Закончить подборку досрочно'} secondary onPress={() => { if (!confirm) setConfirm(true); else { extended({ type: 'finish', session: active.id }); setConfirm(false); } }} />
-      {confirm && <><Text style={s.small}>Оценённые решения и очередь повторения останутся. Незаконченные черновики этой подборки будут удалены.</Text><Button title="Сохранить подборку и продолжить позже" secondary onPress={() => setConfirm(false)} /></>}
+      {confirm && <><Text style={s.small}>Оценённые решения, очередь повторения и записанные черновики останутся в рабочей тетради. Подборка завершится.</Text><Button title="Сохранить подборку и продолжить позже" secondary onPress={() => setConfirm(false)} /></>}
     </View>}
     <Text style={[type.section, { marginTop: 26 }]}>Выбери номер</Text>
     {extendedModules.map(module => {

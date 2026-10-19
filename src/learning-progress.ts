@@ -1,4 +1,5 @@
 import { emptyStudy, parseStudy, type StudyState } from './study/state.ts';
+import { emptyWorkbook, parseWorkbook, type Workbook } from './workbook/model.ts';
 import { emptyExtended, parseExtended, type ExtendedState } from './extended/progress.ts';
 import { emptyDaily, parseDaily, type DailyState } from './daily-model.ts';
 import { modules, type ModuleId } from './content.ts';
@@ -11,12 +12,12 @@ export type Counters = { attempts: number; correct: number; independent: number;
 export type GroupProgress = Counters & { completed: number; best: number; lastScore: number; seen: string[] };
 export type ModuleProgress = Counters & { completed: number; best: number; lastScore: number; byGroup: Record<string, GroupProgress> };
 export type Mistake = { moduleId: ModuleId; problemId: string; group: number; firstAt: number; lastAt: number; dueAt: number; streak: number; failures: number; reason: 'wrong' | 'hint' };
-export type LearningProgress = Counters & { version: 2; best: number; completed: number; lastScore: number; reviewSessions: number; reviewed: number; daily: DailyState; extended: ExtendedState; study: StudyState; byModule: Partial<Record<ModuleId, ModuleProgress>>; mistakes: Record<string, Mistake>; events: string[]; sessions: string[] };
+export type LearningProgress = Counters & { version: 2; best: number; completed: number; lastScore: number; reviewSessions: number; reviewed: number; daily: DailyState; extended: ExtendedState; study: StudyState; workbook: Workbook; byModule: Partial<Record<ModuleId, ModuleProgress>>; mistakes: Record<string, Mistake>; events: string[]; sessions: string[] };
 export type Attempt = { sessionId: string; moduleId: ModuleId; group: number; problemId: string; correct: boolean; hintLevel: number; mode: TrainingMode; at: number };
 export const emptyCounters = (): Counters => ({ attempts: 0, correct: 0, independent: 0, assisted: 0, hints: 0 });
 export const emptyGroup = (): GroupProgress => ({ ...emptyCounters(), completed: 0, best: 0, lastScore: 0, seen: [] });
 export const emptyModule = (): ModuleProgress => ({ ...emptyCounters(), completed: 0, best: 0, lastScore: 0, byGroup: {} });
-export const initialProgress = (): LearningProgress => ({ ...emptyCounters(), version: 2, best: 0, completed: 0, lastScore: 0, reviewSessions: 0, reviewed: 0, daily: emptyDaily(), extended: emptyExtended(), study: emptyStudy(), byModule: {}, mistakes: {}, events: [], sessions: [] });
+export const initialProgress = (): LearningProgress => ({ ...emptyCounters(), version: 2, best: 0, completed: 0, lastScore: 0, reviewSessions: 0, reviewed: 0, daily: emptyDaily(), extended: emptyExtended(), study: emptyStudy(), workbook: emptyWorkbook(), byModule: {}, mistakes: {}, events: [], sessions: [] });
 export const mistakeKey = (moduleId: ModuleId, problemId: string) => `${moduleId}:${problemId}`;
 export const accuracy = (correct: number, attempts: number): number | null => attempts ? Math.round(correct / attempts * 100) : null;
 export function findLearningProblem(moduleId: ModuleId, group: number, problemId: string): Problem | undefined {
@@ -110,5 +111,5 @@ export function parseProgress(value: unknown): LearningProgress {
     fresh.mistakes[mistakeKey(moduleId, problemId)] = { moduleId, problemId, group, firstAt: m.firstAt as number, lastAt: m.lastAt as number, dueAt: m.dueAt as number, streak: Math.min(2, count(m.streak)), failures: count(m.failures), reason: m.reason === 'hint' ? 'hint' : 'wrong' };
   }
   const strings = (v: unknown) => Array.isArray(v) ? v.filter((s): s is string => typeof s === 'string').slice(-600) : [];
-  return { ...fresh, daily: isV2 ? parseDaily(raw.daily) : emptyDaily(), extended: isV2 ? parseExtended(raw.extended) : emptyExtended(), study: isV2 ? parseStudy(raw.study) : emptyStudy(), ...legacy(raw), ...(isV2 ? counters(raw) : emptyCounters()), reviewSessions: isV2 ? count(raw.reviewSessions) : 0, reviewed: isV2 ? count(raw.reviewed) : 0, events: strings(raw.events), sessions: strings(raw.sessions) };
+  return { ...fresh, daily: isV2 ? parseDaily(raw.daily) : emptyDaily(), extended: isV2 ? parseExtended(raw.extended) : emptyExtended(), study: isV2 ? parseStudy(raw.study) : emptyStudy(), workbook: isV2 ? parseWorkbook(raw.workbook) : emptyWorkbook(), ...legacy(raw), ...(isV2 ? counters(raw) : emptyCounters()), reviewSessions: isV2 ? count(raw.reviewSessions) : 0, reviewed: isV2 ? count(raw.reviewed) : 0, events: strings(raw.events), sessions: strings(raw.sessions) };
 }

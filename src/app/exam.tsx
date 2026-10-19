@@ -9,6 +9,7 @@ import { ExamPrompt, ExamSolution } from '../study/task-view';
 import { studyStyles as s } from '../study/ui';
 import { colors } from '../theme';
 import { extendedTask } from '../extended/bank';
+import { WorkbookLink } from '../workbook/ui';
 
 export default function Exam() {
   const { id } = useLocalSearchParams<{ id?: string }>(), { progress, study } = useProgress(), state = progress.study.exam;
@@ -62,6 +63,7 @@ function ExamResult({ session }: { session: ExamSession }) {
     <Navigation session={session} position={position} select={setPosition} result />
     <Text style={[s.title, { marginTop: 20 }]}>Задание {task.number}</Text><ExamPrompt task={task} />
     <View style={s.card}><Text style={s.title}>{task.number <= 19 ? result.first[position].correct ? 'Ответ верный' : 'Нужно разобрать' : 'Твоё исходное решение'}</Text><Text selectable style={s.body}>{task.number <= 19 ? `Введено: ${work.input || 'нет ответа'}` : work.draft || (work.paper ? 'Решение выполнено на бумаге.' : 'Черновика нет; решение на бумаге не отмечено.')}</Text></View>
+    {extended && <WorkbookLink source="exam" session={session.id} taskId={task.problemId} />}
     <ExamSolution task={task} />
     {extended && <View style={s.card}><Text style={s.title}>Ручная оценка · 0–2</Text><Text style={s.body}>Сравни свою работу с образцом и обсуди спорные шаги с преподавателем. Введи балл вручную. Приложение не проверяет текст доказательства.</Text>{extended.checklist.map((item, i) => <Text key={i} style={s.small}>• {item}</Text>)}<View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>{[0, 1, 2].map(points => <Pressable key={points} accessibilityRole="radio" accessibilityLabel={`Оценка ${points} за задание ${task.number}`} accessibilityState={{ checked: session.points[task.number] === points }} onPress={() => study({ area: 'exam', action: { type: 'score', id: session.id, number: task.number, points } })} style={[s.option, { flex: 1, alignItems: 'center' }, session.points[task.number] === points && s.selected]}><Text style={s.title}>{points}</Text></Pressable>)}</View><Text style={s.small}>Оценки 0 и 1 добавляют задачу второй части на закрепление. Полный учебный итог появится после оценки всех шести заданий.</Text></View>}
     <View style={{ flexDirection: 'row', gap: 8 }}><View style={{ flex: 1 }}><Button secondary disabled={position === 0} title="← Назад" onPress={() => setPosition(position - 1)} /></View><View style={{ flex: 1 }}><Button disabled={position === 24} title="Дальше →" onPress={() => setPosition(position + 1)} /></View></View>

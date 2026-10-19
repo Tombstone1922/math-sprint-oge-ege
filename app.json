@@ -30,7 +30,15 @@
     "plugins": [
       "expo-router",
       "expo-updates",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Выберите фото своего решения для рабочей тетради.",
+          "cameraPermission": "Камера нужна, чтобы сфотографировать решение задачи.",
+          "microphonePermission": false
+        }
+      ]
     ]
   }
 }

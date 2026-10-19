@@ -9,6 +9,7 @@ import { extendedStyles as s } from '../extended/ui';
 import { GeometryFigure } from '../geometry-figure';
 import { useProgress } from '../progress';
 import { cardPalette, colors } from '../theme';
+import { WorkbookLink } from '../workbook/ui';
 
 export default function ExtendedPractice() {
   const { progress, extended } = useProgress(), active = progress.extended.active;
@@ -48,9 +49,11 @@ export default function ExtendedPractice() {
         </>}
       </View>
       <View style={s.card}><Text style={s.heading}>Если застрял</Text>{task.clues.slice(0, work.hint).map((clue, i) => <Text key={i} style={s.body}>{i + 1}. {clue}</Text>)}<Button secondary disabled={work.hint >= 2} title={work.hint === 0 ? 'Небольшой намёк' : work.hint === 1 ? 'Показать первый шаг' : 'Обе подсказки открыты'} onPress={() => extended({ type: 'hint', session, index })} /><Text style={s.small}>Подсказки учитываются в самооценке и добавляют задачу на закрепление.</Text></View>
-      <Button title="Сравнить с решением  →" disabled={!work.paper && !work.draft.trim()} onPress={() => extended({ type: 'reveal', session, index })} /><Text style={s.small}>Сначала запиши свой ход или отметь решение на бумаге. После сравнения исходный черновик останется для проверки.</Text>
+      <WorkbookLink source="practice" session={session} taskId={id} />
+      <Button title="Сравнить с решением  →" disabled={!work.paper && !work.draft.trim()} onPress={() => extended({ type: 'reveal', session, index })} /><Text style={s.small}>Сначала запиши свой ход, прикрепи фото или отметь решение на бумаге. После сравнения исходный черновик останется для проверки.</Text>
     </> : <>
       {work.draft && <View style={s.card}><Text style={s.heading}>Твой исходный черновик</Text><Text selectable style={s.body}>{work.draft}</Text></View>}
+      <WorkbookLink source="practice" session={session} taskId={id} />
       <View style={s.card}><Pill tone="mint">ОБРАЗЕЦ РЕШЕНИЯ</Pill>{task.graph && <GraphFigure graph={task.graph} />}{task.steps.map((step, i) => <View key={i} style={{ marginTop: 19 }}><Text style={s.heading}>{i + 1}. {step.title}</Text><Text selectable style={s.body}>{step.text}</Text></View>)}<View style={styles.answer}><Text style={s.small}>ИТОГ</Text><Text selectable style={s.heading}>{task.answer}</Text></View><Text style={s.small}>{task.pitfall}</Text></View>
       <View style={s.card}><Text style={s.heading}>Сверь своё решение</Text><Text style={s.small}>Отмечай то, что присутствовало в твоём решении или теперь стало понятно после разбора. Совпадение с образцом слово в слово не требуется.</Text>{task.checklist.map((item, i) => <Pressable key={i} accessibilityRole="checkbox" accessibilityLabel={item} accessibilityState={{ checked: work.checks.includes(i), disabled: Boolean(work.rating) }} disabled={Boolean(work.rating)} onPress={() => extended({ type: 'tick', session, index, item: i })} style={styles.check}><Text style={styles.checkMark}>{work.checks.includes(i) ? '☑' : '☐'}</Text><Text style={[s.body, { flex: 1, marginTop: 0 }]}>{item}</Text></Pressable>)}
         {!work.rating ? <>

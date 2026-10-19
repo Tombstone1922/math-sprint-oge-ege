@@ -6,7 +6,9 @@ import { createProgressWriter, loadProgress } from './learning-storage';
 import { startDaily, answerDaily, hintDaily, timeDaily, finishDaily } from './daily-training';
 import { applyStudy } from './study/integration';
 import type { StudyAction } from './study/state';
-import { reduceExtended, type ExtendedAction } from './extended/progress';
+import type { ExtendedAction } from './extended/progress';
+import { applyExtended, applyWorkbook } from './workbook/integration';
+import type { WorkbookAction } from './workbook/model';
 import { colors } from './theme';
 
 type ProgressContextValue = {
@@ -14,6 +16,7 @@ type ProgressContextValue = {
   ready: boolean;
   study: (action: StudyAction) => void;
   extended: (action: ExtendedAction) => void;
+  workbook: (action: WorkbookAction) => Promise<boolean>;
   answer: (attempt: Attempt) => void;
   hint: (attempt: Pick<Attempt, 'sessionId' | 'moduleId' | 'group' | 'problemId' | 'at'>) => void;
   dailyStart: () => void;
@@ -23,7 +26,7 @@ type ProgressContextValue = {
   dailyFinish: (id: string, elapsedMs: number) => void;
   complete: (session: Parameters<typeof finishSession>[1]) => void;
 };
-const ProgressContext = createContext<ProgressContextValue>({ progress: initialProgress(), ready: false, study: () => {}, extended: () => {}, answer: () => {}, hint: () => {}, complete: () => {}, dailyStart: () => {}, dailyAnswer: () => {}, dailyHint: () => {}, dailyTime: () => {}, dailyFinish: () => {} });
+const ProgressContext = createContext<ProgressContextValue>({ progress: initialProgress(), ready: false, study: () => {}, extended: () => {}, workbook: async () => false, answer: () => {}, hint: () => {}, complete: () => {}, dailyStart: () => {}, dailyAnswer: () => {}, dailyHint: () => {}, dailyTime: () => {}, dailyFinish: () => {} });
 
 export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState(initialProgress);
@@ -51,24 +54,25 @@ export function ProgressProvider({ children }: { children: React.ReactNode }) {
   }, [retry]);
   function persist(next: LearningProgress) {
     const revision = ++saveRevision.current;
-    writer.current(next).then(() => {
+    return writer.current(next).then(() => {
       if (mounted.current && revision === saveRevision.current) setSaveError(false);
-    }).catch(() => { if (mounted.current) setSaveError(true); });
+      return true;
+    }).catch(() => { if (mounted.current) setSaveError(true); return false; });
   }
   function apply(reduce: (state: LearningProgress) => LearningProgress) {
-    if (!loaded.current) return;
+    if (!loaded.current) return Promise.resolve(false);
     const next = reduce(current.current);
-    if (next === current.current) return;
+    if (next === current.current) return Promise.resolve(false);
     current.current = next;
     setProgress(next);
-    persist(next);
+    return persist(next);
   }
   if (!ready) return <View style={{ flex: 1, padding: 28, justifyContent: 'center', backgroundColor: colors.background }}>
     {!loadError && <ActivityIndicator color={colors.blue} size="large" />}
     <Text style={{ color: colors.ink, textAlign: 'center', marginTop: 18, fontSize: 16 }}>{loadError ? 'Не удалось загрузить сохранённый прогресс. Повторим загрузку, чтобы сохранить твои результаты.' : 'Загружаем твой прогресс…'}</Text>
     {loadError && <Pressable accessibilityRole="button" onPress={() => { setLoadError(false); setRetry(value => value + 1); }} style={{ padding: 18, marginTop: 16, backgroundColor: colors.blue, borderRadius: 16 }}><Text style={{ color: colors.white, textAlign: 'center', fontWeight: '700' }}>Повторить загрузку</Text></Pressable>}
   </View>;
-  return <ProgressContext.Provider value={{ progress, ready, study: action => apply(state => applyStudy(state, action)), extended: action => apply(state => { const next = reduceExtended(state.extended, action); return next === state.extended ? state : { ...state, extended: next }; }), dailyStart: () => apply(state => startDaily(state)), dailyAnswer: (id, index, input) => apply(state => answerDaily(state, id, index, input)), dailyHint: (id, index, level) => apply(state => hintDaily(state, id, index, level)), dailyTime: (id, elapsedMs) => apply(state => timeDaily(state, id, elapsedMs)), dailyFinish: (id, elapsedMs) => apply(state => finishDaily(state, id, elapsedMs)), answer: attempt => apply(state => recordAttempt(state, attempt)), hint: attempt => apply(state => recordHint(state, attempt)), complete: session => apply(state => finishSession(state, session)) }}>
+  return <ProgressContext.Provider value={{ progress, ready, workbook: action => apply(state => applyWorkbook(state, action)), study: action => apply(state => applyStudy(state, action)), extended: action => apply(state => applyExtended(state, action)), dailyStart: () => apply(state => startDaily(state)), dailyAnswer: (id, index, input) => apply(state => answerDaily(state, id, index, input)), dailyHint: (id, index, level) => apply(state => hintDaily(state, id, index, level)), dailyTime: (id, elapsedMs) => apply(state => timeDaily(state, id, elapsedMs)), dailyFinish: (id, elapsedMs) => apply(state => finishDaily(state, id, elapsedMs)), answer: attempt => apply(state => recordAttempt(state, attempt)), hint: attempt => apply(state => recordHint(state, attempt)), complete: session => apply(state => finishSession(state, session)) }}>
     <View style={{ flex: 1 }}>{children}
       {saveError && <View accessibilityLiveRegion="polite" style={{ padding: 16, backgroundColor: colors.amber }}><Text style={{ color: colors.ink, fontSize: 13 }}>Пока не удалось сохранить прогресс на устройстве. Перед закрытием приложения повтори сохранение.</Text><Pressable accessibilityRole="button" onPress={() => persist(current.current)} style={{ paddingVertical: 12 }}><Text style={{ color: colors.navy, fontWeight: '800' }}>Сохранить ещё раз</Text></Pressable></View>}
     </View>
