@@ -6,11 +6,12 @@ import { catalog, searchCatalog, sectionTitles, type CatalogFilter, type Catalog
 import { useProgress } from '../progress';
 import { colors } from '../theme';
 import { accuracy } from '../learning-progress';
+import { SubjectShortcut } from '../subject-ui';
 
 export default function Topics() {
   const [query, setQuery] = useState(''), [filter, setFilter] = useState<CatalogFilter>('all');
   const shown = useMemo(() => searchCatalog(query, filter), [query, filter]);
-  return <Screen><Text style={type.eyebrow}>ВЫБЕРИ, ЧТО ПОДТЯНУТЬ</Text><Text style={[type.title, { marginTop: 9 }]}>Темы и задания</Text>
+  return <Screen><Text style={type.eyebrow}>ВЫБЕРИ, ЧТО ПОДТЯНУТЬ</Text><Text style={[type.title, { marginTop: 9 }]}>Темы и задания</Text><SubjectShortcut />
     <View style={styles.search}><Text style={{ color: colors.blue, fontSize: 22 }}>⌕</Text><TextInput accessibilityLabel="Поиск тем и заданий" value={query} onChangeText={setQuery} autoCorrect={false} placeholder="Дроби, уравнения или №16" placeholderTextColor={colors.muted} style={styles.input} />{Boolean(query) && <Pressable accessibilityRole="button" accessibilityLabel="Очистить поиск" onPress={() => setQuery('')} style={styles.clear}><Text style={{ color: colors.muted, fontSize: 22 }}>×</Text></Pressable>}</View>
     <View style={styles.filters}>{([['all', 'Все'], ['skills', 'Навыки'], ['first', 'ОГЭ · 1 часть'], ['second', 'ОГЭ · 2 часть'], ['ege', 'Для ЕГЭ']] as const).map(([value, label]) => <Pressable key={value} accessibilityRole="button" aria-selected={filter === value} accessibilityState={{ selected: filter === value }} onPress={() => setFilter(value)} style={[styles.filter, filter === value && styles.selected]}><Text style={[styles.filterText, filter === value && { color: colors.white }]}>{label}</Text></Pressable>)}</View>
     <Pressable accessibilityRole="button" onPress={() => router.push('/reference')} style={styles.reference}><Text style={{ fontSize: 20, color: colors.blue }}>ƒ</Text><View style={{ flex: 1 }}><Text style={styles.rowTitle}>Справочник формул</Text><Text style={styles.caption}>Примеры, рисунки и избранное</Text></View><Text style={styles.arrow}>›</Text></Pressable>

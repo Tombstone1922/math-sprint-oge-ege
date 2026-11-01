@@ -10,6 +10,7 @@ import { localDay } from '../daily-model';
 import { nextTopic, resumeItems, type ResumeItem } from '../today-model';
 import { useLearningClock } from '../learning-ui';
 import { colors } from '../theme';
+import { SubjectShortcut } from '../subject-ui';
 
 export default function Today() {
   const { progress } = useProgress(), now = useLearningClock(), saved = resumeItems(progress), current = saved[0];
@@ -18,7 +19,7 @@ export default function Today() {
   const open = (item: ResumeItem) => item.daily ? router.push({ pathname: '/practice', params: { mode: 'daily' } }) : router.push(item.path);
   return <Screen>
     <View style={styles.brand}><View style={styles.logo}><Text style={styles.logoText}>∑</Text></View><View><Text style={styles.brandName}>Математика: рывок</Text><Text style={styles.caption}>{new Date(now).toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</Text></View></View>
-    <Text style={[type.title, { marginTop: 24 }]}>Сегодня</Text><Text style={[type.body, { marginTop: 5 }]}>Один понятный шаг вперёд.</Text>
+    <SubjectShortcut /><Text style={[type.title, { marginTop: 24 }]}>Сегодня</Text><Text style={[type.body, { marginTop: 5 }]}>Один понятный шаг вперёд.</Text>
     <View style={styles.hero}>
       <Text style={styles.heroLabel}>{current ? 'СОХРАНЕНО ДЛЯ ТЕБЯ' : done ? 'ХОРОШЕЕ НАЧАЛО' : 'НАЧНЁМ С МАЛЕНЬКОГО'}</Text>
       <Text style={styles.heroTitle}>{current ? current.title : done ? 'Сегодня уже позанимались' : 'Пять минут математики'}</Text>
