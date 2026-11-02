@@ -4,11 +4,13 @@ import { Text, View } from 'react-native';
 import { Back, Button, Pill, Screen, type } from '../components';
 import { examTitles, formatTitles, subjectModule, subjects } from '../subjects';
 import { SubjectSources, subjectTint, s } from '../subject-ui';
+import { PhysicsOverview } from '../science/overview';
 
 export default function SubjectModule() {
   const params = useLocalSearchParams<{ subject?: string; exam?: string; number?: string }>();
   const module = subjectModule(params.subject, params.exam, params.number);
   if (!module) return <Screen><Back /><Text style={type.title}>Такого модуля пока нет</Text><Text style={s.body}>Проверь предмет, экзамен и номер в карте подготовки.</Text><Button title="Выбрать предмет" onPress={() => router.replace('/subjects')} /></Screen>;
+  if (module.courseId) return <PhysicsOverview />;
   const subject = subjects.find(s => s.id === module.subject)!;
   const stages = [
     ['Короткий урок', 'Главная идея, обозначения и типичные ошибки.'],

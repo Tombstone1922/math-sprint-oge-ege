@@ -3,7 +3,7 @@ import test from 'node:test';
 import { catalog } from '../src/catalog.ts';
 import { examId, plannedSubject, searchSubjectModules, subjectModule, subjectModules, subjectRevision } from '../src/subjects.ts';
 
-test('subject maps contain every current exam slot, with unique identities and no pretend exercise banks', () => {
+test('subject maps contain every current exam slot, with unique identities and only the explicitly connected physics exercise bank', () => {
   assert.equal(subjectRevision.year, 2027);
   assert.equal(subjectRevision.status, 'draft');
   assert.equal(subjectModules.length, 91);
@@ -12,7 +12,9 @@ test('subject maps contain every current exam slot, with unique identities and n
     const modules = searchSubjectModules(subject, exam);
     assert.deepEqual(modules.map(m => m.number), Array.from({ length: count }, (_, i) => i + 1));
     for (const m of modules) {
-      assert.equal(m.status, 'planned'); assert.equal(m.readyTasks, 0);
+      const ready = subject === 'physics' && exam === 'oge' && m.number === 1;
+      assert.equal(m.status, ready ? 'ready' : 'planned'); assert.equal(m.readyTasks, ready ? 200 : 0);
+      if (ready) assert.equal(m.courseId, 'physics-oge-1'); else assert.equal(m.courseId, undefined);
       assert.ok(m.title.trim() && m.focus.trim());
       assert.equal(catalog.some(item => item.id === m.id), false, 'planned subjects must not enter mathematics practice');
       assert.equal(subjectModule(subject, exam, String(m.number)), m);

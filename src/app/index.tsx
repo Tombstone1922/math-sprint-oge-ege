@@ -11,6 +11,7 @@ import { nextTopic, resumeItems, type ResumeItem } from '../today-model';
 import { useLearningClock } from '../learning-ui';
 import { colors } from '../theme';
 import { SubjectShortcut } from '../subject-ui';
+import { ScienceResume } from '../science/ui';
 
 export default function Today() {
   const { progress } = useProgress(), now = useLearningClock(), saved = resumeItems(progress), current = saved[0];
@@ -26,7 +27,7 @@ export default function Today() {
       <Text style={styles.heroText}>{current ? current.description : done ? `В короткой тренировке: ${done.independent} из ${done.answered} самостоятельно. Можно перейти к любимой теме.` : 'Немного счёта, знакомые темы и прошлые ошибки — всё в одной короткой тренировке.'}</Text>
       <Pressable accessibilityRole="button" onPress={() => current ? open(current) : router.push(done ? '/topics' : '/daily')} style={styles.heroButton}><Text style={styles.heroButtonText}>{current ? 'Продолжить работу' : done ? 'Выбрать тему' : 'Начать пять минут'}  →</Text></Pressable>
     </View>
-    {saved.length > 1 && <Disclosure title={`Ещё сохранённые работы · ${saved.length - 1}`}>{saved.slice(1).map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Продолжить: ${item.title}`} onPress={() => open(item)} style={styles.smallRow}><View style={{ flex: 1 }}><Text style={styles.rowTitle}>{item.title}</Text><Text style={styles.caption}>{item.description}</Text></View><Text style={styles.arrow}>›</Text></Pressable>)}</Disclosure>}
+    <ScienceResume />{saved.length > 1 && <Disclosure title={`Ещё сохранённые работы · ${saved.length - 1}`}>{saved.slice(1).map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityLabel={`Продолжить: ${item.title}`} onPress={() => open(item)} style={styles.smallRow}><View style={{ flex: 1 }}><Text style={styles.rowTitle}>{item.title}</Text><Text style={styles.caption}>{item.description}</Text></View><Text style={styles.arrow}>›</Text></Pressable>)}</Disclosure>}
     <View style={styles.section}><Text style={type.section}>На ближайшее занятие</Text></View>
     <Pressable accessibilityRole="button" accessibilityLabel="Ошибки к повторению" onPress={() => router.push('/review')} style={styles.row}><View style={[styles.badge, { backgroundColor: colors.amber }]}><Text style={styles.badgeText}>↻</Text></View><View style={{ flex: 1 }}><Text style={styles.rowTitle}>Повторить ошибки</Text><Text style={styles.caption}>{due ? `${due} задач готовы к повторению во всех режимах` : 'Новые ошибки появятся здесь автоматически'}</Text></View><Text style={styles.arrow}>›</Text></Pressable>
     {recommendation && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/guided', params: { module: recommendation.moduleId, group: String(recommendation.group) } })} style={styles.row}><View style={[styles.badge, { backgroundColor: colors.bluePale }]}><Text style={styles.badgeText}>ƒ</Text></View><View style={{ flex: 1 }}><Text style={styles.rowTitle}>Повторить: {recommendation.title}</Text><Text style={styles.caption}>{recommendation.groupTitle} · здесь пока меньше самостоятельных ответов</Text></View><Text style={styles.arrow}>›</Text></Pressable>}

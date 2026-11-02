@@ -1,3 +1,4 @@
+import { PHYSICS_COURSE, physicsTasks, type ScienceCourseId } from './science/bank.ts';
 export type SubjectId = 'math' | 'physics' | 'informatics';
 export type PlannedSubjectId = Exclude<SubjectId, 'math'>;
 export type ExamId = 'oge' | 'ege';
@@ -5,7 +6,7 @@ export type ModuleFormat = 'short' | 'written' | 'experiment' | 'file' | 'progra
 export type SubjectModule = {
   id: string; subject: PlannedSubjectId; exam: ExamId; number: number;
   title: string; focus: string; format: ModuleFormat; part: 1 | 2 | null;
-  status: 'planned'; readyTasks: 0; note?: string;
+  status: 'planned' | 'ready'; readyTasks: number; courseId?: ScienceCourseId; note?: string;
 };
 export const subjects = [
   { id: 'math', title: 'Математика', subtitle: 'Тренировки, варианты ОГЭ и рабочая тетрадь', status: 'ready' },
@@ -22,7 +23,7 @@ export const catalogSources: Record<PlannedSubjectId, Record<ExamId, string>> = 
 };
 type Outline = readonly [title: string, focus: string];
 const physicsOge: readonly Outline[] = [
-  ['Величины и единицы измерения', 'Физический смысл, обозначения и единицы СИ.'],
+  ['Физические понятия и единицы СИ', 'Величины, явления, приборы и единицы измерения.'],
   ['Приборы и технические устройства', 'Какие явления и законы лежат в основе работы устройства.'],
   ['Узнаём физическое явление', 'Существенные признаки механических, тепловых и электромагнитных явлений.'],
   ['Свойства физических явлений', 'Условия протекания явления и выводы из описания опыта.'],
@@ -133,7 +134,8 @@ function makeModules(subject: PlannedSubjectId, exam: ExamId, rows: readonly Out
       : exam === 'oge' ? number >= 15 ? 'program' : number >= 11 ? 'file' : 'short' : number >= 24 ? 'program' : [3, 9, 17, 18, 22].includes(number) ? 'file' : 'short';
     const part = subject === 'physics' ? number <= (exam === 'oge' ? 16 : 20) ? 1 : 2 : exam === 'oge' ? number <= 10 ? 1 : 2 : null;
     const note = subject === 'informatics' && exam === 'ege' ? informatics2027Notes[number] : number === 17 && subject === 'physics' && exam === 'oge' ? 'На экзамене это опыт на реальном оборудовании. Учебный модуль будет помогать готовиться к нему.' : undefined;
-    return { id: `${subject}-${exam}-2027-${number}`, subject, exam, number, title, focus, format, part, status: 'planned', readyTasks: 0, ...(note ? { note } : {}) };
+    const ready = subject === 'physics' && exam === 'oge' && number === 1;
+    return { id: `${subject}-${exam}-2027-${number}`, subject, exam, number, title, focus, format, part, status: ready ? 'ready' : 'planned', readyTasks: ready ? physicsTasks.length : 0, ...(ready ? { courseId: PHYSICS_COURSE } : {}), ...(note ? { note } : {}) };
   });
 }
 export const subjectModules = [

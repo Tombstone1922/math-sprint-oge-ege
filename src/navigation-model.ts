@@ -6,7 +6,7 @@ export const mainTabs = [
   { id: 'progress', title: 'Прогресс', path: '/progress' },
 ] as const;
 export type MainTab = (typeof mainTabs)[number]['id'];
-export const focusRoutes = new Set(['practice', 'guided', 'exam', 'extended-practice', 'detective-practice']);
+export const focusRoutes = new Set(['practice', 'guided', 'exam', 'extended-practice', 'detective-practice', 'subject-practice', 'subject-lesson']);
 export function hasFocusedRoute(state: unknown, depth = 0): boolean {
   if (!state || typeof state !== 'object' || depth > 10) return false;
   const routes = (state as { routes?: unknown }).routes;
