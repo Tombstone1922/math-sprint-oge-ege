@@ -5,10 +5,10 @@ import { allPhysicsTasks, correctAnswer, physicsCorrect, physicsCourse, physicsC
 import { rng, fmt, type PhysicsTask } from '../src/science/physics-model.ts';
 import { physicsDrawing } from '../src/science/physics-drawing.ts';
 import { emptyScience, parseScience, practiceOptions, reduceScience, sciencePending, scienceTotals, type ScienceState } from '../src/science/state.ts';
-const added=allPhysicsTasks.filter(t=>t.number>=2);
+const added=allPhysicsTasks.filter(t=>t.number>=2&&t.number<=10);
 test('nine real banks contain 1800 different conditions and diagrams, exactly 10 groups of 20 per course',()=>{
  assert.equal(createHash('sha256').update(JSON.stringify(added)).digest('hex'),'7e1cdfb8396372a9a36f65784486b6ca38fef38048e425f928e5f4d911761002','Published IDs must retain their original content');
- assert.equal(added.length,1800);assert.equal(physicsCourses.length,10);const seen=new Set();
+ assert.equal(added.length,1800);assert.equal(physicsCourses.length,20);const seen=new Set();
  for(const c of physicsCourses){assert.equal(c.tasks.length,200);assert.equal(c.groups.length,10);assert.equal(c.lesson.length,3);assert.ok(c.sources.length);for(const g of c.groups)assert.equal(c.tasks.filter(t=>t.group===g.number).length,20);}
  for(const t of added){assert.equal(physicsTask(t.id),t);assert.equal(t.colorIndex,Number(t.id.split('-').at(-1))-1);assert.ok(t.prompt.length>15&&t.steps.length>=2&&t.category>0);const signature=JSON.stringify([t.number,t.prompt,t.targets,t.figure,t.options.map(o=>o.text).sort()]);assert.ok(!seen.has(signature),t.id);seen.add(signature);}
  assert.equal(new Set(added.map(t=>t.id)).size,1800);
@@ -80,5 +80,5 @@ test('incorrect and assisted numerical answers survive restore and require space
 });
 test('guided and standalone solutions agree after answer-option changes, without changing published bank one',()=>{
  for(const t of added){const opts=practiceOptions(t.id,rng(17));const solution=physicsSolution(t,opts);assert.ok(solution.at(-1)!.startsWith('Ответ: '+correctAnswer(t,opts)));}
- assert.equal(physicsCourse('physics-oge-11'),undefined);assert.equal(physicsCourse(['physics-oge-2']),undefined);
+ assert.equal(physicsCourse('physics-oge-21'),undefined);assert.equal(physicsCourse(['physics-oge-2']),undefined);
 });

@@ -1,0 +1,21 @@
+import React from 'react';
+import { Pressable, Text, TextInput, View } from 'react-native';
+import { Button, Disclosure } from '../components';
+import { s } from '../subject-ui';
+import { colors } from '../theme';
+import type { PhysicsTask } from './physics-model';
+import type { ScienceWork } from './state';
+import { useScience } from './provider';
+import { PhysicsSolution } from './task-ui';
+export function WrittenWork({ task, work, session }: { task: PhysicsTask; work: ScienceWork; session: string }) {
+  const { dispatch } = useScience(), base = { session, task: task.id }, criteria = task.written!.criteria;
+  return <View>
+    <View style={s.card}><Text style={s.title}>Моё решение</Text><Text style={s.small}>Запиши ответ и основные шаги. Если работаешь на бумаге, кратко перенеси сюда план и результат.</Text><TextInput accessibilityLabel="Моё решение по физике" multiline textAlignVertical="top" value={work.draft ?? ''} editable={!work.submitted} maxLength={6000} onChangeText={value => dispatch({ ...base, type: 'draft', value })} placeholder={task.written!.mode === 'experiment' ? 'Приборы и схема, формула, измерения с погрешностями, вычисления и вывод…' : 'Дано или ответ, физический закон, объяснение и вычисления…'} placeholderTextColor={colors.muted} style={{ marginTop: 12, minHeight: 170, padding: 14, borderWidth: 1, borderColor: colors.border, borderRadius: 14, backgroundColor: colors.white, color: colors.ink, fontSize: 16, lineHeight: 24 }} />{work.opened && !work.submitted && <Text style={s.small}>После просмотра образца можно доработать текст. Такая доработка учитывается как работа с помощью.</Text>}</View>
+    {!work.opened && !work.submitted && <Disclosure title="Подсказки к решению" initialOpen={work.hint > 0}>{work.hint >= 1 && <Text style={s.body}>{task.hint}</Text>}{work.hint >= 2 && <Text style={s.body}>{task.firstStep}</Text>}{work.hint >= 3 && <PhysicsSolution task={task} options={[]} />}<Button secondary title={work.hint === 0 ? 'Небольшой намёк' : work.hint === 1 ? 'Показать первый шаг' : work.hint === 2 ? 'Показать полный разбор' : 'Все подсказки открыты'} disabled={work.hint === 3} onPress={() => dispatch({ ...base, type: 'hint', level: work.hint + 1 })} /></Disclosure>}
+    {work.opened && <><PhysicsSolution task={task} options={[]} /><View style={s.card}><Text accessibilityRole="header" style={s.title}>Самопроверка по пунктам</Text><Text style={s.body}>Отметь то, что уже было верно в твоём решении. Это твои отметки; преподаватель может проверить работу отдельно.</Text>{criteria.map((criterion, i) => {
+      const checked = work.criteria?.[i] ?? false;
+      return <Pressable key={i} accessibilityRole="checkbox" accessibilityLabel={`Критерий ${i + 1}: ${criterion.title}`} accessibilityState={{ checked, disabled: work.submitted }} aria-checked={checked} aria-disabled={work.submitted} disabled={work.submitted} onPress={() => dispatch({ ...base, type: 'criterion', index: i, checked: !checked })} style={({ pressed }) => [{ flexDirection: 'row', gap: 12, paddingVertical: 14, minHeight: 56, borderTopWidth: 1, borderTopColor: colors.border }, pressed && s.pressed]}><View style={{ marginTop: 2, width: 25, height: 25, borderWidth: 1.5, borderColor: checked ? colors.blue : colors.border, borderRadius: 7, backgroundColor: checked ? colors.blue : colors.white, justifyContent: 'center', alignItems: 'center' }}>{checked && <Text style={{ color: colors.white, fontSize: 18, fontWeight: '700' }}>✓</Text>}</View><View style={{ flex: 1, minWidth: 0 }}><Text style={s.title}>{criterion.title}</Text><Text style={s.small}>{criterion.detail}</Text></View></Pressable>;
+    })}<Text accessibilityLiveRegion="polite" style={[s.body, { fontWeight: '700', color: colors.navy }]}>Отмечено: {work.criteria?.filter(Boolean).length ?? 0} из {criteria.length}</Text></View></>}
+    {work.submitted && <View accessibilityLiveRegion="polite" style={[s.notice, { backgroundColor: colors.mint }]}><Text style={s.title}>Самопроверка сохранена</Text><Text style={s.body}>По твоим отметкам выполнено {work.score ?? 0} из {criteria.length} пунктов.{!work.correct || work.hint ? ' Задача осталась на повторение.' : ' Все пункты отмечены.'}</Text></View>}
+  </View>;
+}

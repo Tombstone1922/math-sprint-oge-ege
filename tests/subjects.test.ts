@@ -12,7 +12,7 @@ test('subject maps contain every current exam slot, with unique identities and o
     const modules = searchSubjectModules(subject, exam);
     assert.deepEqual(modules.map(m => m.number), Array.from({ length: count }, (_, i) => i + 1));
     for (const m of modules) {
-      const ready = subject === 'physics' && exam === 'oge' && m.number <= 10;
+      const ready = subject === 'physics' && exam === 'oge' && m.number <= 20;
       assert.equal(m.status, ready ? 'ready' : 'planned'); assert.equal(m.readyTasks, ready ? 200 : 0);
       if (ready) assert.equal(m.courseId, `physics-oge-${m.number}`); else assert.equal(m.courseId, undefined);
       assert.ok(m.title.trim() && m.focus.trim());

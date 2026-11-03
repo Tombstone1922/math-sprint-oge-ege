@@ -1,13 +1,16 @@
 export type PhysicsCourseId = `physics-oge-${number}`;
 export type PhysicsPlot = { kind: 'plot'; xLabel: string; yLabel: string; points: [number, number][]; xTicks: number[]; yTicks: number[]; caption: string };
-export type PhysicsFigure = PhysicsPlot | { kind: 'rays'; focal: number; correct: number; caption: string } | { kind: 'circuit'; parallel: boolean; resistors: number[]; voltage?: number; caption: string } | { kind: 'lens'; focal: number; distance: number; caption: string } | { kind: 'charges'; values: string[]; caption: string } | { kind: 'table'; headers: string[]; rows: string[][]; caption: string } | { kind: 'lever'; left: number; right: number; force: number; caption: string };
+export type PhysicsFigure = PhysicsPlot | { kind: 'scale'; min: number; max: number; divisions: number; reading: number; unit: string; instrument: string; start?: number; caption: string } | { kind: 'apparatus'; mode: 'friction' | 'spring' | 'density' | 'optics'; labels: string[]; caption: string } | { kind: 'rays'; focal: number; correct: number; caption: string } | { kind: 'meters'; caption: string } | { kind: 'circuit'; parallel: boolean; resistors: number[]; voltage?: number; unknown?: boolean | number[]; caption: string } | { kind: 'lens'; focal: number; distance: number; caption: string } | { kind: 'charges'; values: string[]; caption: string } | { kind: 'table'; headers: string[]; rows: string[][]; caption: string } | { kind: 'lever'; left: number; right: number; force: number; caption: string };
 export type PhysicsOption = { id: string; text: string };
 export type PhysicsTask = {
   id: string; number: number; group: number; colorIndex: number;
-  kind: 'matching' | 'choice' | 'cloze' | 'number'; prompt: string;
+  kind: 'matching' | 'choice' | 'cloze' | 'number' | 'multi' | 'written'; prompt: string;
   targets: string[]; options: PhysicsOption[]; keys: string[]; value?: number; unit?: string;
   steps: string[]; hint: string; firstStep: string; sourceIds: number[]; category: number;
   figure?: PhysicsFigure; model?: { rule: string; values: number[] };
+  fixedOptions?: boolean;
+  passage?: { title: string; body: string };
+  written?: { mode: 'experiment' | 'reading' | 'explanation' | 'calculation'; criteria: { title: string; detail: string }[] };
 };
 export type PhysicsGroup = { number: number; title: string; note: string };
 export type PhysicsLessonPage = { title: string; text: string; example: string };
