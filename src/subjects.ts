@@ -1,4 +1,4 @@
-import { PHYSICS_COURSE, physicsTasks, type ScienceCourseId } from './science/bank.ts';
+import { physicsCourses, type ScienceCourseId } from './science/courses.ts';
 export type SubjectId = 'math' | 'physics' | 'informatics';
 export type PlannedSubjectId = Exclude<SubjectId, 'math'>;
 export type ExamId = 'oge' | 'ege';
@@ -134,8 +134,9 @@ function makeModules(subject: PlannedSubjectId, exam: ExamId, rows: readonly Out
       : exam === 'oge' ? number >= 15 ? 'program' : number >= 11 ? 'file' : 'short' : number >= 24 ? 'program' : [3, 9, 17, 18, 22].includes(number) ? 'file' : 'short';
     const part = subject === 'physics' ? number <= (exam === 'oge' ? 16 : 20) ? 1 : 2 : exam === 'oge' ? number <= 10 ? 1 : 2 : null;
     const note = subject === 'informatics' && exam === 'ege' ? informatics2027Notes[number] : number === 17 && subject === 'physics' && exam === 'oge' ? 'На экзамене это опыт на реальном оборудовании. Учебный модуль будет помогать готовиться к нему.' : undefined;
-    const ready = subject === 'physics' && exam === 'oge' && number === 1;
-    return { id: `${subject}-${exam}-2027-${number}`, subject, exam, number, title, focus, format, part, status: ready ? 'ready' : 'planned', readyTasks: ready ? physicsTasks.length : 0, ...(ready ? { courseId: PHYSICS_COURSE } : {}), ...(note ? { note } : {}) };
+    const course = subject === 'physics' && exam === 'oge' ? physicsCourses.find(c => c.number === number) : undefined;
+    const ready = Boolean(course);
+    return { id: `${subject}-${exam}-2027-${number}`, subject, exam, number, title, focus, format, part, status: ready ? 'ready' : 'planned', readyTasks: course?.tasks.length ?? 0, ...(course ? { courseId: course.id } : {}), ...(note ? { note } : {}) };
   });
 }
 export const subjectModules = [

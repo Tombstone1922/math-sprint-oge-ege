@@ -7,9 +7,11 @@ import { colors } from '../theme';
 import { type MatchingTask, optionText, targetText, taskSolution } from './bank';
 import { quantities, units } from './physics-units';
 import { useScience } from './provider';
+import { physicsCourse, type ScienceCourseId } from './courses';
 export const courseRoute = { pathname: '/subject-module' as const, params: { subject: 'physics', exam: 'oge', number: '1' } };
-export function CourseBack({ title = 'К модулю' }: { title?: string }) {
-  return <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={() => router.dismissTo(courseRoute)} style={({ pressed }) => [{ minHeight: 48, justifyContent: 'center', paddingVertical: 10, marginBottom: 10 }, pressed && s.pressed]}><Text style={s.link}>‹ {title}</Text></Pressable>;
+export const courseRouteFor = (id: ScienceCourseId) => ({ pathname: '/subject-module' as const, params: { subject: 'physics', exam: 'oge', number: String(physicsCourse(id)?.number ?? 1) } });
+export function CourseBack({ title = 'К модулю', course = 'physics-oge-1' }: { title?: string; course?: ScienceCourseId }) {
+  return <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={() => router.dismissTo(courseRouteFor(course))} style={({ pressed }) => [{ minHeight: 48, justifyContent: 'center', paddingVertical: 10, marginBottom: 10 }, pressed && s.pressed]}><Text style={s.link}>‹ {title}</Text></Pressable>;
 }
 export function ScienceGate() {
   const { loadError, retryLoad } = useScience();
@@ -36,6 +38,6 @@ export function UnitsReference() {
   return <View><Text style={s.body}>Название величины отвечает на вопрос «что измеряем?», единица — «в чём?». Варианты ниже не являются ответами к одному конкретному заданию.</Text>{units.map(u => <View key={u.id} style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingVertical: 12 }}><Text style={s.title}>{u.name}: {u.symbol}</Text><Text style={s.small}>{quantities.filter(q => q.unit === u.id).map(q => q.title).join(' · ')}</Text>{u.base !== u.symbol && <Text style={s.small}>Через основные единицы: {u.base}</Text>}</View>)}</View>;
 }
 export function ScienceResume() {
-  const { state, ready } = useScience();
-  return ready && state.active ? <Pressable accessibilityRole="button" accessibilityLabel="Продолжить физику №1" onPress={() => router.push('/subject-practice')} style={({ pressed }) => [s.card, pressed && s.pressed]}><Text style={s.title}>Продолжить физику №1 →</Text><Text style={s.body}>{state.active.phase === 'view' ? 'Карточки с объяснениями' : state.active.phase === 'result' ? 'Итог сохранённой подборки' : 'Самостоятельная тренировка'} · место остановки сохранено</Text></Pressable> : null;
+  const { state, ready } = useScience(), course = physicsCourse(state.active?.course);
+  return ready && state.active ? <Pressable accessibilityRole="button" accessibilityLabel={`Продолжить физику №${course?.number}`} onPress={() => router.push('/subject-practice')} style={({ pressed }) => [s.card, pressed && s.pressed]}><Text style={s.title}>Продолжить физику №{course?.number} →</Text><Text style={s.body}>{state.active.phase === 'view' ? 'Карточки с объяснениями' : state.active.phase === 'result' ? 'Итог сохранённой подборки' : 'Самостоятельная тренировка'} · место остановки сохранено</Text></Pressable> : null;
 }
