@@ -1,5 +1,6 @@
 export type PhysicsCourseId = `physics-oge-${number}`;
-export type PhysicsPlot = { kind: 'plot'; xLabel: string; yLabel: string; points: [number, number][]; xTicks: number[]; yTicks: number[]; caption: string };
+export type PhysicsCurve = { label: string; points: [number, number][]; dashed?: boolean };
+export type PhysicsPlot = { kind: 'plot'; xLabel: string; yLabel: string; points: [number, number][]; xTicks: number[]; yTicks: number[]; caption: string; curves?: PhysicsCurve[]; xGridStep?: number; yGridStep?: number };
 export type PhysicsFigure = PhysicsPlot | { kind: 'scale'; min: number; max: number; divisions: number; reading: number; unit: string; instrument: string; start?: number; caption: string } | { kind: 'apparatus'; mode: 'friction' | 'spring' | 'density' | 'optics'; labels: string[]; caption: string } | { kind: 'rays'; focal: number; correct: number; caption: string } | { kind: 'meters'; caption: string } | { kind: 'circuit'; parallel: boolean; resistors: number[]; voltage?: number; unknown?: boolean | number[]; caption: string } | { kind: 'lens'; focal: number; distance: number; caption: string } | { kind: 'charges'; values: string[]; caption: string } | { kind: 'table'; headers: string[]; rows: string[][]; caption: string } | { kind: 'lever'; left: number; right: number; force: number; caption: string };
 export type PhysicsOption = { id: string; text: string };
 export type PhysicsTask = {

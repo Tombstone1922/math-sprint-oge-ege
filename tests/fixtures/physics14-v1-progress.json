@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "active": {
+    "id": "science-1793700000000-262078474",
+    "course": "physics-oge-14",
+    "group": 3,
+    "mode": "practice",
+    "phase": "practice",
+    "ids": [
+      "physics14-v1-g3-11",
+      "physics14-v1-g3-19",
+      "physics14-v1-g3-2",
+      "physics14-v1-g3-8",
+      "physics14-v1-g3-1",
+      "physics14-v1-g3-16",
+      "physics14-v1-g3-10",
+      "physics14-v1-g3-3",
+      "physics14-v1-g3-20",
+      "physics14-v1-g3-7"
+    ],
+    "order": [
+      "physics14-v1-g3-16",
+      "physics14-v1-g3-3",
+      "physics14-v1-g3-2",
+      "physics14-v1-g3-10",
+      "physics14-v1-g3-7",
+      "physics14-v1-g3-20",
+      "physics14-v1-g3-19",
+      "physics14-v1-g3-11",
+      "physics14-v1-g3-8",
+      "physics14-v1-g3-1"
+    ],
+    "options": {
+      "physics14-v1-g3-11": [
+        "claim-4",
+        "claim-3",
+        "claim-1",
+        "claim-2",
+        "claim-0"
+      ],
+      "physics14-v1-g3-19": [
+        "claim-4",
+        "claim-3",
+        "claim-1",
+        "claim-2",
+        "claim-0"
+      ],
+      "physics14-v1-g3-2": [
+        "claim-1",
+        "claim-4",
+        "claim-3",
+        "claim-2",
+        "claim-0"
+      ],
+      "physics14-v1-g3-8": [
+        "claim-2",
+        "claim-1",
+        "claim-3",
+        "claim-0",
+        "claim-4"
+      ],
+      "physics14-v1-g3-1": [
+        "claim-3",
+        "claim-1",
+        "claim-4",
+        "claim-0",
+        "claim-2"
+      ],
+      "physics14-v1-g3-16": [
+        "claim-2",
+        "claim-1",
+        "claim-3",
+        "claim-4",
+        "claim-0"
+      ],
+      "physics14-v1-g3-10": [
+        "claim-1",
+        "claim-2",
+        "claim-4",
+        "claim-3",
+        "claim-0"
+      ],
+      "physics14-v1-g3-3": [
+        "claim-1",
+        "claim-3",
+        "claim-0",
+        "claim-2",
+        "claim-4"
+      ],
+      "physics14-v1-g3-20": [
+        "claim-3",
+        "claim-4",
+        "claim-1",
+        "claim-0",
+        "claim-2"
+      ],
+      "physics14-v1-g3-7": [
+        "claim-2",
+        "claim-3",
+        "claim-0",
+        "claim-4",
+        "claim-1"
+      ]
+    },
+    "position": 2,
+    "work": {
+      "physics14-v1-g3-16": {
+        "input": "25",
+        "hint": 0,
+        "submitted": true,
+        "correct": true,
+        "matched": 2
+      },
+      "physics14-v1-g3-3": {
+        "input": "13",
+        "hint": 0,
+        "submitted": true,
+        "correct": true,
+        "matched": 2
+      },
+      "physics14-v1-g3-2": {
+        "input": "1",
+        "hint": 0,
+        "submitted": false,
+        "correct": false,
+        "matched": 0
+      }
+    }
+  },
+  "stats": {
+    "physics14-v1-g3-16": {
+      "attempts": 1,
+      "correct": 1,
+      "independent": 1,
+      "assisted": 0,
+      "dueAt": null,
+      "streak": 0
+    },
+    "physics14-v1-g3-3": {
+      "attempts": 1,
+      "correct": 1,
+      "independent": 1,
+      "assisted": 0,
+      "dueAt": null,
+      "streak": 0
+    }
+  }
+}

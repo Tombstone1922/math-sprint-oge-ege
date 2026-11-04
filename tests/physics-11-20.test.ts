@@ -25,12 +25,11 @@ test('analysis has exactly two distinct true statements and accepts either selec
  const multi=added.filter(t=>t.kind==='multi');assert.equal(multi.length,400);
  for(const t of multi){assert.equal(t.options.length,5);assert.deepEqual(t.keys,['claim-0','claim-1']);assert.equal(new Set(t.options.map(o=>o.text)).size,5);const opts=practiceOptions(t.id,rng(11)),answer=correctAnswer(t,opts);assert.equal(new Set(answer).size,2);assert.ok(physicsCorrect(t,[...answer].reverse().join(''),opts));assert.ok(!physicsReady(t,answer[0]+answer[0]));assert.ok(!physicsReady(t,answer+'3'));}
 });
-test('motion, oscillation and Hooke statements are consistent with their graph or measured table',()=>{
- for(const t of added.filter(t=>t.number===14&&t.group<=3)){const f=t.figure!;assert.equal(f.kind,'plot');if(f.kind!=='plot')continue;
+test('motion and Hooke statements are consistent with their graph or measured table',()=>{
+ for(const t of added.filter(t=>t.number===14&&t.group<=2)){const f=t.figure!;assert.equal(f.kind,'plot');if(f.kind!=='plot')continue;
   const statement=(id:string)=>t.options.find(o=>o.id===id)!.text;
   if(t.group===1){const p=f.points[0],q=f.points.at(-1)!,v=(q[1]-p[1])/(q[0]-p[0]);assert.equal(statement('claim-0'),`Скорость тела равна ${v} м/с.`);assert.ok(statement('claim-1').includes(`${(q[1]-p[1])} м`));}
   if(t.group===2){const [a,b]=f.points,v=b[1],time=b[0]-a[0];assert.equal(statement('claim-0'),`Ускорение равно ${v/time} м/с².`);assert.ok(statement('claim-1').includes(fmt(v*time/2)));}
-  if(t.group===3){const A=Math.max(...f.points.map(p=>p[1])),T=f.points[50][0]-f.points[10][0];assert.equal(statement('claim-0'),`Амплитуда равна ${A} см.`);assert.equal(statement('claim-1'),`Период равен ${fmt(T)} с.`);}
  }
  for(const t of added.filter(t=>t.number===16&&t.group===1)){const f=t.figure!;assert.equal(f.kind,'table');if(f.kind!=='table')continue;const ratios=f.rows.map(r=>num(r[1])/num(r[2]));assert.ok(ratios.every(r=>Math.abs(r-ratios[0])<.03));const expected=50+10*(Number(t.id.split('-').at(-1)));assert.ok(Math.abs(ratios[0]-expected)<.03);}
 });

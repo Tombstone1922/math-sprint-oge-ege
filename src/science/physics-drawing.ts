@@ -1,25 +1,16 @@
+import { instrumentDrawing } from './physics-instruments.ts';
+import { plotDrawing } from './physics-plot.ts';
 import { fmt, type PhysicsFigure } from './physics-model.ts';
-export type PhysicsInk = { kind:'line';x1:number;y1:number;x2:number;y2:number;weight:number;stroke:string } | { kind:'text';x:number;y:number;value:string;size:number;width:number;color:string;bold:boolean } | {kind:'circle';x:number;y:number;r:number};
-const ink='#20334B',blue='#3565E8',grid='#DDE4ED';
+export type PhysicsInk = { kind:'line';x1:number;y1:number;x2:number;y2:number;weight:number;stroke:string } | { kind:'text';x:number;y:number;value:string;size:number;width:number;color:string;bold:boolean } | {kind:'circle';x:number;y:number;r:number;fill?:string} | {kind:'rect';x:number;y:number;width:number;height:number;fill:string;stroke:string;weight:number;radius:number};
+const ink='#20334B',blue='#3565E8';
 export function physicsDrawing(figure:PhysicsFigure):{width:number;height:number;items:PhysicsInk[]}{
  const items:PhysicsInk[]=[],width=390,height=280;
  const line=(x1:number,y1:number,x2:number,y2:number,weight=2,stroke=ink)=>items.push({kind:'line',x1,y1,x2,y2,weight,stroke});
  const text=(x:number,y:number,value:string,size=15,w=100,bold=false)=>items.push({kind:'text',x,y,value,size,width:w,color:ink,bold});
  const arrow=(x1:number,y1:number,x2:number,y2:number,stroke=ink)=>{line(x1,y1,x2,y2,2,stroke);const a=Math.atan2(y2-y1,x2-x1);for(const s of [-1,1])line(x2,y2,x2-7*Math.cos(a+s*.45),y2-7*Math.sin(a+s*.45),2,stroke);};
  if(figure.kind==='scale'){
-  const left=42,right=348,y=145,step=(figure.max-figure.min)/figure.divisions,X=(v:number)=>left+(v-figure.min)/(figure.max-figure.min)*(right-left);
-  if(['Термометр','Мензурка','Динамометр'].includes(figure.instrument)){
-   const bottom=222,top=62,x=190,Y=(v:number)=>bottom-(v-figure.min)/(figure.max-figure.min)*(bottom-top);
-   text(195,26,figure.instrument,17,300,true);line(x,top,x,bottom,2);
-   for(let i=0;i<=figure.divisions;i++){const yy=bottom-(bottom-top)*i/figure.divisions,major=i%5===0;line(x-(major?18:10),yy,x+(major?18:10),yy,1.4);if(major)text(264,yy+3,fmt(figure.min+i*step),14,110);}
-   arrow(65,Y(figure.reading),158,Y(figure.reading),blue);text(84,Y(figure.reading)-19,'Указатель',13,120);text(195,258,`Единица: ${figure.unit}`,16,300);
-   return {width,height,items};
-  }
-  text(195,26,figure.instrument,17,300,true);line(left,y,right,y,2);
-  for(let i=0;i<=figure.divisions;i++){const x=left+(right-left)*i/figure.divisions,major=i%5===0;line(x,y-(major?18:10),x,y+(major?18:10),1.4);if(major)text(x,y+40,fmt(figure.min+i*step),14,72);}
-  if(figure.start===undefined){arrow(X(figure.reading),75,X(figure.reading),y-22,blue);text(X(figure.reading),62,'Указатель',13,100);}
-  else{line(X(figure.start),95,X(figure.reading),95,7,blue);line(X(figure.start),91,X(figure.start),125,1,blue);line(X(figure.reading),91,X(figure.reading),125,1,blue);text(X(figure.start),71,'A',16,32,true);text(X(figure.reading),71,'Б',16,32,true);}
-  text(195,235,`Единица: ${figure.unit}`,16,300);
+  const instrument = instrumentDrawing(figure), vertical = ['Динамометр', 'Термометр', 'Мензурка'].includes(figure.instrument);
+  return { width: vertical ? 250 : width, height, items: vertical ? instrument.map(p => p.kind === 'line' ? { ...p, x1: p.x1 - 70, x2: p.x2 - 70 } : { ...p, x: p.x - 70 }) : instrument };
  }else if(figure.kind==='apparatus'){
   text(195,24,'Схема установки',17,300,true);
   if(figure.mode==='friction'){line(35,185,355,185,3);line(105,133,205,133,2);line(105,133,105,183,2);line(205,133,205,183,2);line(105,183,205,183,2);line(205,157,280,157,2);arrow(282,157,350,157,blue);text(157,114,figure.labels[0]??'Брусок',14,150);text(288,122,figure.labels[1]??'Динамометр',13,160);text(196,217,'Горизонтальная поверхность',14,310);}
@@ -27,15 +18,17 @@ export function physicsDrawing(figure:PhysicsFigure):{width:number;height:number
   else if(figure.mode==='density'){line(92,75,92,210);line(92,210,255,210);line(255,210,255,75);line(92,142,255,142,2,blue);line(151,155,197,155);line(151,155,151,195);line(197,155,197,195);line(151,195,197,195);if(figure.labels[0]?.includes('доступ')){line(160,195,160,210);line(187,195,187,210);}else line(174,80,174,155);text(174,52,figure.labels[0]??'Тело',14,220);text(170,240,figure.labels[1]??'Жидкость',14,300);}
   else{arrow(32,170,357,170);line(85,120,85,190,3);arrow(85,168,85,126,blue);arrow(190,214,190,81);arrow(190,81,190,214);line(312,92,312,213,4);line(85,126,190,126,1.6,blue);line(190,126,312,190,1.6,blue);text(85,74,'Предмет',14,104);text(190,52,'Линза',14,90);text(310,65,'Экран',14,100);text(195,247,figure.labels.join(' · '),13,360);}
  }else if(figure.kind==='plot'){
-  const left=68,right=360,top=35,bottom=222,xmin=Math.min(...figure.xTicks),xmax=Math.max(...figure.xTicks),ymin=Math.min(...figure.yTicks),ymax=Math.max(...figure.yTicks);
-  const X=(x:number)=>left+(x-xmin)/(xmax-xmin)*(right-left),Y=(y:number)=>bottom-(y-ymin)/(ymax-ymin)*(bottom-top);
-  for(const x of figure.xTicks){line(X(x),top,X(x),bottom,1,grid);line(X(x),bottom-4,X(x),bottom+4,1.5);text(X(x),bottom+18,fmt(x),13,60);}
-  for(const y of figure.yTicks){line(left,Y(y),right,Y(y),y===0?1.5:1,grid);line(left-4,Y(y),left+4,Y(y),1.5);text(left-31,Y(y)+3,fmt(y),13,58);}
-  arrow(left,bottom,right+9,bottom);arrow(left,bottom,left,top-12);
-  text((left+right)/2,height-13,figure.xLabel,16,260,true);text(160,14,figure.yLabel,16,240,true);
-  figure.points.slice(1).forEach((p,i)=>{const prev=figure.points[i];line(X(prev[0]),Y(prev[1]),X(p[0]),Y(p[1]),2.6,blue);});
+  items.push(...plotDrawing(figure));
  }else if(figure.kind==='meters'){
-  line(40,105,62,105);items.push({kind:'circle',x:80,y:105,r:18});text(80,109,'A',18,30,true);line(98,105,150,105);line(150,93,230,93);line(230,93,230,117);line(230,117,150,117);line(150,117,150,93);text(190,65,'Резистор R',16,180,true);line(230,105,350,105);line(40,105,40,230);line(350,105,350,230);line(40,230,180,230);line(210,230,350,230);line(180,212,180,248,3);line(210,219,210,241,3);text(195,270,'Источник',14,150);line(120,105,120,170);line(120,170,172,170);items.push({kind:'circle',x:190,y:170,r:18});text(190,174,'V',18,30,true);line(208,170,260,170);line(260,170,260,105);
+  // Source, rheostat and ammeter are in series. V measures only the test resistor.
+  const box=(x:number,y:number,w:number,h:number)=>{line(x,y,x+w,y);line(x+w,y,x+w,y+h);line(x+w,y+h,x,y+h);line(x,y+h,x,y);};
+  line(32,110,55,110);box(55,98,66,24);arrow(115,73,72,130);text(88,53,'Rр',16,60,true);
+  line(121,110,149,110);items.push({kind:'circle',x:167,y:110,r:18});text(167,114,'A',18,30,true);
+  line(185,110,231,110);box(231,98,66,24);text(264,70,'R',17,80,true);line(297,110,358,110);
+  line(215,110,215,184);line(215,184,246,184);items.push({kind:'circle',x:264,y:184,r:18});text(264,188,'V',18,30,true);line(282,184,320,184);line(320,184,320,110);
+  for(const x of [215,320])items.push({kind:'circle',x,y:110,r:3,fill:ink});
+  line(32,110,32,236);line(358,110,358,236);line(32,236,104,236);line(104,217,104,255,3);line(134,225,134,247,3);line(134,236,256,236);
+  items.push({kind:'circle',x:259,y:236,r:3},{kind:'circle',x:300,y:236,r:3});line(262,236,297,236);line(303,236,358,236);text(279,262,'К',17,40,true);text(119,270,'Источник',13,130);text(91,213,'+',14,22);text(146,213,'−',14,22);
  }else if(figure.kind==='circuit'){
   const resistor=(x:number,y:number,r:number,label:string)=>{line(x-30,y-12,x+30,y-12);line(x+30,y-12,x+30,y+12);line(x+30,y+12,x-30,y+12);line(x-30,y+12,x-30,y-12);text(x,y-32,figure.unknown === true || Array.isArray(figure.unknown) && figure.unknown.includes(label === 'R₁' ? 0 : 1) ? `${label} = ?` : `${label} = ${fmt(r)} Ом`,16,170,true);};
   if(figure.parallel){for(const y of [84,168]){line(40,y,165,y);line(225,y,350,y);}line(40,84,40,220);line(350,84,350,220);resistor(195,84,figure.resistors[0],'R₁');resistor(195,168,figure.resistors[1],'R₂');}

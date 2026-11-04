@@ -3,6 +3,7 @@ import { deviceGroupTitles, deviceTasks, recognitionTasks, phenomenonGroups, clo
 import { explanationTasks, explanationTitles } from './physics-explanation.ts';
 import { numericTasks, numericTitles } from './physics-numeric.ts';
 import { fmt, type PhysicsCourse, type PhysicsCourseId, type PhysicsTask, type PhysicsLessonPage } from './physics-model.ts';
+import { archivedPhysicsTasks } from './physics-archived.ts';
 import { upperTasks, upperTitles, upperGroupTitles, upperLessons, upperSources } from './physics-upper-courses.ts';
 export type ScienceCourseId = PhysicsCourseId;
 const legacy:PhysicsTask[]=physicsTasks.map(t=>({id:t.id,number:1,group:t.group,colorIndex:t.colorIndex,kind:'matching',prompt:t.concepts?'Сопоставь физические понятия с примерами.':'Сопоставь физические величины с единицами СИ.',targets:t.targets.map(id=>targetText(t,id)),options:t.options.map(id=>({id,text:optionText(t,id)})),keys:[...answerFor(t)].map(n=>t.options[Number(n)-1]),steps:taskSolution(t),hint:'Вспомни смысл понятия или формулу. Подставь единицы вместо чисел.',firstStep:taskSolution(t)[0],sourceIds:[208,29829],category:19}));
@@ -35,7 +36,7 @@ const groupTitles:Record<number,readonly string[]>={1:physicsGroups.map(g=>g.tit
 export const physicsCourses:readonly PhysicsCourse[]=titles.map((title,i)=>{
  const number=i+1;return {id:`physics-oge-${number}`,number,title,intro:number>=17?'Развёрнутое решение и самопроверка по пунктам.':number===12||number===13?'Две величины. Код: 1 — увеличится, 2 — уменьшится, 3 — не изменится.':[14,16].includes(number)?'Два верных утверждения из пяти.':number===15?'Шкала, погрешность или выбор условий опыта.':number===2?'Две позиции и четыре варианта ответа.':number===4?'Четыре пропуска и восемь слов.':number===3||number===5?'Один верный ответ из четырёх.':number===1?'Три соответствия и пять вариантов.':'Короткий числовой ответ в указанной единице.',groups:groupTitles[number].map((title,i)=>({number:i+1,title,note:number===1?physicsGroups[i].note:'20 учебных заданий · в подборке случайные 10'})),tasks:allPhysicsTasks.filter(t=>t.number===number),lesson:lessons[number],sources:sourceGroups[number]};
 });
-const tasks=new Map(allPhysicsTasks.map(t=>[t.id,t]));
+const tasks=new Map([...allPhysicsTasks,...archivedPhysicsTasks].map(t=>[t.id,t]));
 export const physicsTask=(id:string)=>tasks.get(id);
 export const physicsCourse=(id:unknown)=>typeof id==='string'?physicsCourses.find(c=>c.id===id):undefined;
 export const taskCourse=(id:string)=>{const t=physicsTask(id);return t?physicsCourses[t.number-1]:undefined;};
