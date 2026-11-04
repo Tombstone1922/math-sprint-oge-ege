@@ -1,7 +1,8 @@
 import { instrumentDrawing } from './physics-instruments.ts';
 import { plotDrawing } from './physics-plot.ts';
 import { fmt, type PhysicsFigure } from './physics-model.ts';
-export type PhysicsInk = { kind:'line';x1:number;y1:number;x2:number;y2:number;weight:number;stroke:string } | { kind:'text';x:number;y:number;value:string;size:number;width:number;color:string;bold:boolean } | {kind:'circle';x:number;y:number;r:number;fill?:string} | {kind:'rect';x:number;y:number;width:number;height:number;fill:string;stroke:string;weight:number;radius:number};
+import type { VectorInk } from '../vector-drawing.ts';
+export type PhysicsInk = VectorInk;
 const ink='#20334B',blue='#3565E8';
 export function physicsDrawing(figure:PhysicsFigure):{width:number;height:number;items:PhysicsInk[]}{
  const items:PhysicsInk[]=[],width=390,height=280;

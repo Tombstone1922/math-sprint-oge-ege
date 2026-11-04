@@ -1,0 +1,2 @@
+export type VectorInk = { kind:'line';x1:number;y1:number;x2:number;y2:number;weight:number;stroke:string } | { kind:'text';x:number;y:number;value:string;size:number;width:number;color:string;bold:boolean } | {kind:'circle';x:number;y:number;r:number;fill?:string} | {kind:'rect';x:number;y:number;width:number;height:number;fill:string;stroke:string;weight:number;radius:number};
+export type VectorDrawing = { width:number;height:number;items:VectorInk[] };

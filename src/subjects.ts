@@ -1,3 +1,5 @@
+import { informaticsCourses } from './informatics/courses.ts';
+import type { InformaticsCourseId } from './informatics/model.ts';
 import { physicsCourses, type ScienceCourseId } from './science/courses.ts';
 export type SubjectId = 'math' | 'physics' | 'informatics';
 export type PlannedSubjectId = Exclude<SubjectId, 'math'>;
@@ -6,7 +8,7 @@ export type ModuleFormat = 'short' | 'written' | 'experiment' | 'file' | 'progra
 export type SubjectModule = {
   id: string; subject: PlannedSubjectId; exam: ExamId; number: number;
   title: string; focus: string; format: ModuleFormat; part: 1 | 2 | null;
-  status: 'planned' | 'ready'; readyTasks: number; courseId?: ScienceCourseId; note?: string;
+  status: 'planned' | 'ready'; readyTasks: number; courseId?: ScienceCourseId | InformaticsCourseId; note?: string;
 };
 export const subjects = [
   { id: 'math', title: 'Математика', subtitle: 'Тренировки, варианты ОГЭ и рабочая тетрадь', status: 'ready' },
@@ -134,7 +136,7 @@ function makeModules(subject: PlannedSubjectId, exam: ExamId, rows: readonly Out
       : exam === 'oge' ? number >= 15 ? 'program' : number >= 11 ? 'file' : 'short' : number >= 24 ? 'program' : [3, 9, 17, 18, 22].includes(number) ? 'file' : 'short';
     const part = subject === 'physics' ? number <= (exam === 'oge' ? 16 : 20) ? 1 : 2 : exam === 'oge' ? number <= 10 ? 1 : 2 : null;
     const note = subject === 'informatics' && exam === 'ege' ? informatics2027Notes[number] : number === 17 && subject === 'physics' && exam === 'oge' ? 'На экзамене это опыт на реальном оборудовании. Учебный модуль будет помогать готовиться к нему.' : undefined;
-    const course = subject === 'physics' && exam === 'oge' ? physicsCourses.find(c => c.number === number) : undefined;
+    const course = exam === 'oge' ? (subject === 'physics' ? physicsCourses : informaticsCourses).find(c => c.number === number) : undefined;
     const ready = Boolean(course);
     return { id: `${subject}-${exam}-2027-${number}`, subject, exam, number, title, focus, format, part, status: ready ? 'ready' : 'planned', readyTasks: course?.tasks.length ?? 0, ...(course ? { courseId: course.id } : {}), ...(note ? { note } : {}) };
   });
