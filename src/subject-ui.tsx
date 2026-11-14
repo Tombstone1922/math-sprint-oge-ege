@@ -22,9 +22,9 @@ export function SubjectShortcut({ subject = 'math' }: { subject?: SubjectId }) {
 }
 export function SubjectSources({ subject, exam }: { subject: PlannedSubjectId; exam: ExamId }) {
   const [error, setError] = useState(false);
-  return <Disclosure title="Источники и структура 2027">
-    <Text style={s.body}>Карта сверена 1 ноября 2026 года по каталогам «Решу ЕГЭ / ОГЭ» и проектам спецификаций ФИПИ-2027. После утверждения документов проверим её ещё раз.</Text>
-    {[['Каталог «Решу»', catalogSources[subject][exam]], ['Проект и спецификация ФИПИ', fipiSources[exam]]].map(([title, url]) => <Pressable accessibilityRole="link" key={url} onPress={() => { setError(false); void Linking.openURL(url).catch(() => setError(true)); }} style={({ pressed }) => [s.sourceLink, pressed && s.pressed]}><Text style={s.link}>{title} ↗</Text></Pressable>)}
+  return <Disclosure title="Источники · ФИПИ 2027">
+    <Text style={s.body}>Нумерация сверена по утверждённым спецификациям и демоверсиям ФИПИ-2027. Задания в приложении авторские; каталог «Решу» — дополнительный источник примеров.</Text>
+    {[['Каталог «Решу»', catalogSources[subject][exam]], ['Демоверсия и спецификация ФИПИ', fipiSources[exam]]].map(([title, url]) => <Pressable accessibilityRole="link" key={url} onPress={() => { setError(false); void Linking.openURL(url).catch(() => setError(true)); }} style={({ pressed }) => [s.sourceLink, pressed && s.pressed]}><Text style={s.link}>{title} ↗</Text></Pressable>)}
     {error && <Text accessibilityLiveRegion="polite" style={s.body}>Не удалось открыть источник. Проверь подключение и попробуй ещё раз.</Text>}
   </Disclosure>;
 }

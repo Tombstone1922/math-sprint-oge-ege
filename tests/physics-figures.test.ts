@@ -3,11 +3,12 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { archivedPhysicsTasks } from '../src/science/physics-archived.ts';
-import { allPhysicsTasks, correctAnswer, physicsCorrect, physicsCourse, physicsTask } from '../src/science/courses.ts';
+import { allPhysicsTasks as registryTasks, correctAnswer, physicsCorrect, physicsCourse, physicsTask } from '../src/science/courses.ts';
 import { physicsDrawing, type PhysicsInk } from '../src/science/physics-drawing.ts';
 import { physicsPlotLayout } from '../src/science/physics-plot.ts';
 import { fmt, rng, type PhysicsFigure } from '../src/science/physics-model.ts';
 import { emptyScience, parseScience, reduceScience, sciencePending, scienceTotals, type ScienceState } from '../src/science/state.ts';
+const allPhysicsTasks=registryTasks.filter(t=>!t.exam&&t.number<=20);
 const near = (a: number, b: number) => assert.ok(Math.abs(a - b) < 1e-7, `${a} ≠ ${b}`);
 const plots = allPhysicsTasks.filter(t => t.number === 14 && t.group === 3);
 function measuredWave(points: [number, number][]) {

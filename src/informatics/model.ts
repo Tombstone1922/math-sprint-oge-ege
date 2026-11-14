@@ -1,13 +1,15 @@
+import type { Practical } from './practical-model.ts';
 import { sourceCategories, sourceExamples } from './sources.ts';
-export type InformaticsCourseId = `informatics-oge-${number}`;
+export type InformaticsCourseId = `informatics-${'oge'|'ege'}-${number}`;
 export type InfoTable = { kind: 'table'; headers: string[]; rows: string[][]; caption: string };
 export type InfoGraph = { kind: 'graph'; labels: string[]; edges: { from: number; to: number; weight?: number }[]; directed: boolean; caption: string };
 export type Expression = { op: 'cmp'; variable: 'x' | 's' | 't'; sign: '<' | '<=' | '>' | '>=' | '==' | '!='; value: number } | { op: 'mod'; variable: 'x' | 's' | 't'; divisor: number; remainder: number; equal: boolean } | { op: 'not'; a: Expression } | { op: 'and'; a: Expression; b: Expression } | { op: 'or'; a: Expression; b: Expression };
 export type InformaticsTask = {
- id: string; number: number; group: number; colorIndex: number; kind: 'number' | 'text';
+ id: string; number: number; group: number; colorIndex: number; kind: 'number' | 'text' | 'written' | 'pair';
  prompt: string; answer: string; format: string; keys: string[]; options: { id: string }[];
  steps: string[]; hint: string; firstStep: string; category: number; sourceIds: number[];
- figures: (InfoTable | InfoGraph)[]; code?: string;
+ figures: (InfoTable | InfoGraph)[]; code?: string; exam?: 'ege'; practical?: Practical;
+ written?: { criteria: { title:string; detail:string }[] };
  model: { rule: string; data: Record<string, unknown> };
 };
 export type InformaticsCourse = { id: InformaticsCourseId; number: number; title: string; tasks: readonly InformaticsTask[]; groups: { number: number; title: string }[]; lesson: { title: string; text: string; example: string }[] };
@@ -54,5 +56,5 @@ export function execute(start: number, commands: Command[], program: string, b =
 }
 export type TaskBody = Omit<InformaticsTask, 'id' | 'number' | 'group' | 'colorIndex' | 'kind' | 'options' | 'keys' | 'hint' | 'firstStep' | 'figures' | 'format' | 'category' | 'sourceIds'> & Partial<Pick<InformaticsTask, 'kind' | 'hint' | 'firstStep' | 'figures' | 'format' | 'category' | 'sourceIds'>>;
 export function task(number: number, group: number, index: number, b: TaskBody): InformaticsTask {
- const kind = b.kind ?? 'number', category = sourceCategories[number][group - 1]; return { id: `informatics${number}-v1-g${group}-${index + 1}`, number, group, colorIndex: index, category, sourceIds: sourceExamples[category], options: [], keys: [...b.answer], hint: 'Выдели исходные данные и условия. Не подменяй единицы или порядок действий.', firstStep: b.steps[0], figures: [], format: kind === 'number' ? 'Целое число' : 'Ответ без пробелов', ...b, kind };
+ const kind = b.kind ?? 'number', category = b.category ?? sourceCategories[number]?.[group - 1] ?? 0; return { id: `informatics${b.exam === 'ege' ? '-ege-' : ''}${number}-v1-g${group}-${index + 1}`, number, group, colorIndex: index, category, sourceIds: sourceExamples[category] ?? [], options: [], keys: [...b.answer], hint: 'Выдели исходные данные и условия. Не подменяй единицы или порядок действий.', firstStep: b.steps[0], figures: [], format: kind === 'number' ? 'Целое число' : 'Ответ без пробелов', ...b, kind };
 }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { allInformaticsTasks, informaticsCourses, informaticsCourse, informaticsTask, informaticsAnswer, informaticsCorrect, informaticsReady, validInformaticsInput } from '../src/informatics/courses.ts';
+import { allInformaticsTasks as registryTasks, informaticsCourses as registryCourses, informaticsCourse, informaticsTask, informaticsAnswer, informaticsCorrect, informaticsReady, validInformaticsInput } from '../src/informatics/courses.ts';
 import { informaticsDrawing } from '../src/informatics/drawing.ts';
 import { rng, type Expression, type Command, type InfoGraph } from '../src/informatics/model.ts';
 import { emptyInformatics, reduceInformatics, parseInformatics, informaticsTotals, informaticsPending, type InformaticsState } from '../src/informatics/state.ts';
@@ -8,11 +8,13 @@ import { createInformaticsWriter, loadInformatics, INFORMATICS_KEY } from '../sr
 import { emptyScience, reduceScience, parseScience } from '../src/science/state.ts';
 import { SCIENCE_KEY } from '../src/science/storage.ts';
 import { searchSubjectModules } from '../src/subjects.ts';
+const allInformaticsTasks=registryTasks.filter(t=>!t.exam&&t.number<=10);
+const informaticsCourses=registryCourses.filter(c=>c.id.includes('-oge-')&&c.number<=10);
 test('OGE informatics 1–10 have 2000 unique conditions, 100 groups and complete lessons, explanations and source references',()=>{
  assert.equal(allInformaticsTasks.length,2000);assert.equal(informaticsCourses.length,10);const seen=new Set();
  for(const c of informaticsCourses){assert.equal(c.tasks.length,200);assert.equal(c.groups.length,10);assert.equal(c.lesson.length,3);for(let g=1;g<=10;g++)assert.equal(c.tasks.filter(t=>t.group===g).length,20);}
  for(const t of allInformaticsTasks){const key=JSON.stringify([t.number,t.prompt,t.code,t.figures]);assert.ok(!seen.has(key),t.id);seen.add(key);assert.ok(t.steps.length>=2&&t.hint&&t.firstStep);assert.ok(t.sourceIds.length&&t.category!==39);assert.equal(t.colorIndex,Number(t.id.split('-').at(-1))-1);assert.ok(informaticsCorrect(t,t.answer,[]));}
- assert.equal(new Set(allInformaticsTasks.map(t=>t.id)).size,2000);assert.equal(searchSubjectModules('informatics','oge').filter(m=>m.status==='ready').length,10);assert.ok(searchSubjectModules('informatics','ege').every(m=>m.status==='planned'));
+ assert.equal(new Set(allInformaticsTasks.map(t=>t.id)).size,2000);assert.ok(searchSubjectModules('informatics','oge').slice(0,10).every(m=>m.status==='ready'));
 });
 test('text information answers account for actual removed/added punctuation, replacement and bit/byte units',()=>{
  for(const t of allInformaticsTasks.filter(t=>t.number===1)){const d=t.model.data as any;let expected:string|number;

@@ -1,3 +1,4 @@
+import { courseExam } from '../subject-bank';
 import React from 'react';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
@@ -9,7 +10,7 @@ import { quantities, units } from './physics-units';
 import { useScience } from './provider';
 import { physicsCourse, type ScienceCourseId } from './courses';
 export const courseRoute = { pathname: '/subject-module' as const, params: { subject: 'physics', exam: 'oge', number: '1' } };
-export const courseRouteFor = (id: ScienceCourseId) => ({ pathname: '/subject-module' as const, params: { subject: 'physics', exam: 'oge', number: String(physicsCourse(id)?.number ?? 1) } });
+export const courseRouteFor = (id: ScienceCourseId) => ({ pathname: '/subject-module' as const, params: { subject: 'physics', exam: courseExam(id), number: String(physicsCourse(id)?.number ?? 1) } });
 export function CourseBack({ title = 'К модулю', course = 'physics-oge-1' }: { title?: string; course?: ScienceCourseId }) {
   return <Pressable accessibilityRole="button" accessibilityLabel={title} onPress={() => router.dismissTo(courseRouteFor(course))} style={({ pressed }) => [{ minHeight: 48, justifyContent: 'center', paddingVertical: 10, marginBottom: 10 }, pressed && s.pressed]}><Text style={s.link}>‹ {title}</Text></Pressable>;
 }

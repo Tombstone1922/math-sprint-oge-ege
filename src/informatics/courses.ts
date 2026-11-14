@@ -1,9 +1,13 @@
+import { informaticsEge } from '../exam-outlines.ts';
+import { createGroups, examRegistry } from '../subject-bank.ts';
+import { egeInfoGroupTitle, egeInfoTasks } from './bank-ege.ts';
+import { practicalGroups, practicalLessons, practicalTasks, practicalTitles } from './bank-practical.ts';
 import { foundationTasks, foundationGroups } from './bank-foundations.ts';
 import { algorithmTasks, algorithmGroups } from './bank-algorithms.ts';
 import { networkTasks, networkGroups } from './bank-network.ts';
 import type { InformaticsCourse, InformaticsTask } from './model.ts';
-export const allInformaticsTasks: readonly InformaticsTask[] = [...foundationTasks, ...algorithmTasks, ...networkTasks];
-const titles = ['Объём текстовой информации','Кодирование и декодирование','Логические выражения','Таблицы дорог и кратчайшие пути','Команды исполнителя','Программа с условием','Адреса в Интернете','Логика поисковых запросов','Пути в ориентированном графе','Системы счисления'];
+export const allInformaticsTasks: readonly InformaticsTask[] = [...foundationTasks, ...algorithmTasks, ...networkTasks,...practicalTasks,...egeInfoTasks];
+const titles = ['Объём текстовой информации','Кодирование и декодирование','Логические выражения','Таблицы дорог и кратчайшие пути','Команды исполнителя','Программа с условием','Адреса в Интернете','Логика поисковых запросов','Пути в ориентированном графе','Системы счисления',...practicalTitles];
 const pages: [string,string,string][][] = [
  [['Биты и байты','В этой модели все символы занимают одинаковое число бит. Сначала узнай число символов, затем умножь его на разрядность. В одном байте 8 бит.','8 бит = 1 байт; 16 бит = 2 байта.'],['Разделители тоже занимают место','При удалении слова из списка могут исчезнуть запятая и пробел. Их нужно учесть отдельно. При замене слова разделители могут сохраняться.','Убыло 9 байтов при 8 битах на символ: 9 − 2 = 7 букв.'],['Проверь результат','Найденная длина должна соответствовать ровно одному слову. При смене кодировки меняется объём каждого символа, а не их количество.','120 символов: 120 байт при 8 битах и 240 байт при 16 битах.']],
  [['Кодовая таблица','Каждой букве соответствует цепочка символов или цифр. Сообщение составлено соединением кодов без разделителей. Не меняй порядок знаков.','А → 0, Б → 10: АБ → 010.'],['Границы кодов','Если ни один код не является началом другого, чтение однозначно. Иначе короткий код нельзя выбирать автоматически: проверь все разбиения и ограничения условия.','Условие «буквы не повторяются» помогает отбросить лишние варианты.'],['Контроль расшифровки','Заново закодируй найденное сообщение и сравни с исходной цепочкой целиком. Если спрашивают число букв, считай буквы, а не биты.','Три буквы могут иметь коды общей длиной семь знаков.']],
@@ -16,14 +20,26 @@ const pages: [string,string,string][][] = [
  [['Направления дорог','Стрелка разрешает движение только в одну сторону. Пересечение линий без кружка не создаёт нового города.','А → Б не означает, что разрешено Б → А.'],['Счёт путей','Положи F(А) = 1. Число путей в следующий город равно сумме значений его допустимых предшественников. Считай после обработки всех входящих вершин.','В город ведут пути от вершин со значениями 2 и 3: всего 5.'],['Обязательные и запрещённые города','Запрещённый город исключи из расчёта. Для обязательного отслеживай, был ли он посещён. При точном числе дорог учитывай ещё и длину пути в рёбрах.','Пути через две обязательные вершины должны выполнить оба условия.']],
  [['Позиционный вес','В системе с основанием b цифра справа имеет вес b⁰, следующая — b¹, затем b². Допустимые цифры меньше основания.','1011₂ = 8 + 2 + 1 = 11₁₀.'],['Обратный перевод','Для перевода десятичного числа дели его на основание, собирай остатки и читай их в обратном порядке.','13₁₀ = 1101₂.'],['Цифры и сравнение','Перед сравнением удобно перейти к десятичным значениям. Количество единиц и сумма цифр — разные величины. Ведущие нули в записи не добавляем.','В 1001₂ две единицы, четыре цифры и значение 9.']],
 ];
-const groups={...foundationGroups,...algorithmGroups,...networkGroups};
-export const informaticsCourses:readonly InformaticsCourse[]=titles.map((title,i)=>({id:`informatics-oge-${i+1}`,number:i+1,title,tasks:allInformaticsTasks.filter(t=>t.number===i+1),groups:groups[i+1].map((title,j)=>({number:j+1,title})),lesson:pages[i].map(([title,text,example])=>({title,text,example}))}));
+const groups={...foundationGroups,...algorithmGroups,...networkGroups,...practicalGroups};
+const banks=examRegistry(allInformaticsTasks,'informatics');
+const ogeCourses:InformaticsCourse[]=titles.map((title,i)=>({id:`informatics-oge-${i+1}`,number:i+1,title,tasks:banks[`informatics-oge-${i+1}`],groups:groups[i+1].map((title,j)=>({number:j+1,title})),lesson:i<10?pages[i].map(([title,text,example])=>({title,text,example})):practicalLessons[i-10]}));
+const egeCourses:InformaticsCourse[]=informaticsEge.map(([title,focus],i)=>{
+ const number=i+1,id=`informatics-ege-${number}` as const,tasks=banks[id],sample=tasks[0];
+ return {id,number,title,groups:createGroups(g=>egeInfoGroupTitle(number,g)),tasks,lesson:[
+  {title,text:focus,example:sample.steps[0]},
+  {title:'Как построить решение',text:sample.steps[1],example:sample.practical?.files?'Открой файл из условия и проверь реальные данные.':'Проверь ход решения на маленьком примере.'},
+  {title:'Запиши результат',text:'Ответ нужен ровно в том виде, который указан под заданием. Если чисел несколько, порядок имеет значение.',example:sample.format},
+ ]};
+});
+export const informaticsCourses:readonly InformaticsCourse[]=[...ogeCourses,...egeCourses];
 const tasks=new Map(allInformaticsTasks.map(t=>[t.id,t]));
 export const informaticsTask=(id:string)=>tasks.get(id);
 export const informaticsCourse=(id:unknown)=>typeof id==='string'?informaticsCourses.find(c=>c.id===id):undefined;
-export const informaticsTaskCourse=(id:string)=>{const t=tasks.get(id);return t?informaticsCourses[t.number-1]:undefined;};
+export const informaticsTaskCourse=(id:string)=>{const t=tasks.get(id);return t?informaticsCourse(`informatics-${t.exam??'oge'}-${t.number}`):undefined;};
+const numbers=(s:string)=>s.trim().split(/[;\s]+/).filter(Boolean).map(n=>Number(n.replace(',','.').replace('−','-')));
 const normalized=(s:string)=>s.normalize('NFC').toLocaleUpperCase('ru-RU').replaceAll('Ё','Е').replace(/\s/g,'');
 export const informaticsAnswer=(task:InformaticsTask,_options?:readonly string[])=>task.answer;
-export const validInformaticsInput=(task:InformaticsTask,input:unknown):input is string=>typeof input==='string'&&input.length<=80&&(task.kind==='number'?/^\d{0,10}$/.test(input):/^[\p{L}\d\s]*$/u.test(input));
-export const informaticsReady=(task:InformaticsTask,input:string)=>validInformaticsInput(task,input)&&normalized(input).length>0;
-export const informaticsCorrect=(task:InformaticsTask,input:string,_options:readonly string[]=[])=>informaticsReady(task,input)&&(task.kind==='number'?Number(input)===Number(task.answer):normalized(input)===normalized(task.answer));
+export const validInformaticsInput=(task:InformaticsTask,input:unknown):input is string=>typeof input==='string'&&input.length<=(task.kind==='pair'?256:80)&&(task.kind==='written'?false:task.kind==='number'?(task.exam==='ege'?/^[−+-]?\d{0,18}$/:/^\d{0,10}$/).test(input):task.kind==='pair'?/^[+−0-9.,;\s-]*$/.test(input):/^[\p{L}\d\s]*$/u.test(input));
+export const informaticsReady=(task:InformaticsTask,input:unknown):input is string=>validInformaticsInput(task,input)&&(task.kind==='pair'?numbers(input).length===numbers(task.answer).length&&numbers(input).every(Number.isFinite):task.kind==='number'?/^[−+-]?\d+$/.test(input):normalized(input).length>0);
+const cleanInt=(s:string)=>s.replace('−','-').replace(/^\+/,'').replace(/^(-?)0+(?=\d)/,'$1').replace(/^-0$/,'0');
+export const informaticsCorrect=(task:InformaticsTask,input:string,_options:readonly string[]=[])=>informaticsReady(task,input)&&(task.kind==='number'?cleanInt(input)===cleanInt(task.answer):task.kind==='pair'?numbers(input).every((n,i)=>Math.abs(n-numbers(task.answer)[i])<1e-8):normalized(input)===normalized(task.answer));

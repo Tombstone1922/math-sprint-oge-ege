@@ -3,18 +3,17 @@ import test from 'node:test';
 import { catalog } from '../src/catalog.ts';
 import { examId, plannedSubject, searchSubjectModules, subjectModule, subjectModules, subjectRevision } from '../src/subjects.ts';
 
-test('subject maps contain every current exam slot, with unique identities and only the explicitly connected subject banks', () => {
+test('subject maps contain every current exam slot, with unique identities and working banks for every slot', () => {
   assert.equal(subjectRevision.year, 2027);
-  assert.equal(subjectRevision.status, 'draft');
+  assert.equal(subjectRevision.status, 'approved');
   assert.equal(subjectModules.length, 91);
   assert.equal(new Set(subjectModules.map(m => m.id)).size, 91);
   for (const [subject, exam, count] of [['physics', 'oge', 22], ['physics', 'ege', 26], ['informatics', 'oge', 16], ['informatics', 'ege', 27]] as const) {
     const modules = searchSubjectModules(subject, exam);
     assert.deepEqual(modules.map(m => m.number), Array.from({ length: count }, (_, i) => i + 1));
     for (const m of modules) {
-      const ready = exam === 'oge' && (subject === 'physics' ? m.number <= 20 : m.number <= 10);
-      assert.equal(m.status, ready ? 'ready' : 'planned'); assert.equal(m.readyTasks, ready ? 200 : 0);
-      if (ready) assert.equal(m.courseId, `${subject}-oge-${m.number}`); else assert.equal(m.courseId, undefined);
+      assert.equal(m.status, 'ready'); assert.equal(m.readyTasks, 200);
+      assert.equal(m.courseId, `${subject}-${exam}-${m.number}`);
       assert.ok(m.title.trim() && m.focus.trim());
       assert.equal(catalog.some(item => item.id === m.id), false, 'planned subjects must not enter mathematics practice');
       assert.equal(subjectModule(subject, exam, String(m.number)), m);
@@ -22,11 +21,11 @@ test('subject maps contain every current exam slot, with unique identities and o
   }
 });
 
-test('2027 informatics positions use the new syllabus instead of silently retaining the 2026 numbering', () => {
+test('2027 informatics positions follow the approved specifications, rather than the earlier draft', () => {
   const get = (n: number) => subjectModule('informatics', 'ege', String(n))!;
-  assert.match(get(10).title, /маска подсети/);
-  assert.match(get(13).title, /исполнения алгоритма/);
-  assert.match(get(23).title, /графах/);
+  assert.match(get(10).title, /текстового редактора/);
+  assert.match(get(13).title, /маска подсети/);
+  assert.match(get(23).title, /исполнения алгоритма/);
   for (const n of [10, 13, 23, 27]) assert.ok(get(n).note);
   assert.match(get(27).note!, /одной строкой из двух чисел/);
 });

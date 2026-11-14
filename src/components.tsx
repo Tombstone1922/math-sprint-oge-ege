@@ -40,8 +40,8 @@ export function SearchField({ label, placeholder, value, onChange, style }: { la
   </View>;
 }
 
-export function Choice({ title, selected, onPress, role = 'button', label, style }: { title: string; selected: boolean; onPress: () => void; role?: 'button' | 'tab'; label?: string; style?: StyleProp<ViewStyle> }) {
-  return <Pressable accessibilityRole={role} accessibilityLabel={label} aria-selected={selected} accessibilityState={{ selected }} onPress={onPress} style={({ pressed }) => [styles.choice, selected && styles.selected, style, pressed && surface.pressed]}>
+export function Choice({ title, selected, onPress, role = 'button', label, style, disabled = false }: { title: string; selected: boolean; onPress: () => void; role?: 'button' | 'tab' | 'checkbox'; label?: string; disabled?: boolean; style?: StyleProp<ViewStyle> }) {
+  return <Pressable accessibilityRole={role} accessibilityLabel={label} disabled={disabled} aria-selected={role==='checkbox'?undefined:selected} aria-checked={role==='checkbox'?selected:undefined} accessibilityState={role==='checkbox'?{checked:selected,disabled}:{selected,disabled}} onPress={onPress} style={({ pressed }) => [styles.choice, selected && styles.selected, style, pressed && surface.pressed]}>
     <Text style={[styles.choiceText, selected && { color: colors.blue }]}>{title}</Text>
   </Pressable>;
 }

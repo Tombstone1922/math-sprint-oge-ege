@@ -1,3 +1,6 @@
+import { physicsEge } from '../exam-outlines.ts';
+import { createGroups, examRegistry } from '../subject-bank.ts';
+import { egePhysicsGroupTitle, egePhysicsTasks } from './physics-ege.ts';
 import { physicsGroups, physicsTasks, answerFor, taskSolution, targetText, optionText } from './bank.ts';
 import { deviceGroupTitles, deviceTasks, recognitionTasks, phenomenonGroups, clozeGroups, clozeTasks } from './physics-conceptual.ts';
 import { explanationTasks, explanationTitles } from './physics-explanation.ts';
@@ -7,7 +10,7 @@ import { archivedPhysicsTasks } from './physics-archived.ts';
 import { upperTasks, upperTitles, upperGroupTitles, upperLessons, upperSources } from './physics-upper-courses.ts';
 export type ScienceCourseId = PhysicsCourseId;
 const legacy:PhysicsTask[]=physicsTasks.map(t=>({id:t.id,number:1,group:t.group,colorIndex:t.colorIndex,kind:'matching',prompt:t.concepts?'Сопоставь физические понятия с примерами.':'Сопоставь физические величины с единицами СИ.',targets:t.targets.map(id=>targetText(t,id)),options:t.options.map(id=>({id,text:optionText(t,id)})),keys:[...answerFor(t)].map(n=>t.options[Number(n)-1]),steps:taskSolution(t),hint:'Вспомни смысл понятия или формулу. Подставь единицы вместо чисел.',firstStep:taskSolution(t)[0],sourceIds:[208,29829],category:19}));
-export const allPhysicsTasks:readonly PhysicsTask[]=[...legacy,...deviceTasks,...recognitionTasks,...clozeTasks,...explanationTasks,...numericTasks,...upperTasks];
+export const allPhysicsTasks:readonly PhysicsTask[]=[...legacy,...deviceTasks,...recognitionTasks,...clozeTasks,...explanationTasks,...numericTasks,...upperTasks,...egePhysicsTasks];
 const titles=['Физические понятия и единицы СИ','Приборы и технические устройства','Распознавание физических явлений','Текст с пропусками','Объяснение физических явлений','Механика: движение, силы и давление','Механика: колебания и энергия','Тепловые явления','Заряд и электрические цепи','Электричество, свет и волны',...upperTitles];
 const page=(title:string,text:string,example=''):PhysicsLessonPage=>({title,text,example});
 const lessons:Record<number,PhysicsLessonPage[]>={
@@ -33,19 +36,36 @@ const sourceGroups:Record<number,{category:number;title:string;examples:number[]
  ...upperSources,
 };
 const groupTitles:Record<number,readonly string[]>={1:physicsGroups.map(g=>g.title),2:deviceGroupTitles,3:phenomenonGroups.map(g=>g.title),4:clozeGroups.map(g=>g.title),5:explanationTitles,...numericTitles,...upperGroupTitles};
-export const physicsCourses:readonly PhysicsCourse[]=titles.map((title,i)=>{
- const number=i+1;return {id:`physics-oge-${number}`,number,title,intro:number>=17?'Развёрнутое решение и самопроверка по пунктам.':number===12||number===13?'Две величины. Код: 1 — увеличится, 2 — уменьшится, 3 — не изменится.':[14,16].includes(number)?'Два верных утверждения из пяти.':number===15?'Шкала, погрешность или выбор условий опыта.':number===2?'Две позиции и четыре варианта ответа.':number===4?'Четыре пропуска и восемь слов.':number===3||number===5?'Один верный ответ из четырёх.':number===1?'Три соответствия и пять вариантов.':'Короткий числовой ответ в указанной единице.',groups:groupTitles[number].map((title,i)=>({number:i+1,title,note:number===1?physicsGroups[i].note:'20 учебных заданий · в подборке случайные 10'})),tasks:allPhysicsTasks.filter(t=>t.number===number),lesson:lessons[number],sources:sourceGroups[number]};
+const banks=examRegistry(allPhysicsTasks,'physics');
+const ogeCourses:PhysicsCourse[]=titles.map((title,i)=>{
+ const number=i+1;return {id:`physics-oge-${number}`,number,title,intro:number>=17?'Развёрнутое решение и самопроверка по пунктам.':number===12||number===13?'Две величины. Код: 1 — увеличится, 2 — уменьшится, 3 — не изменится.':[14,16].includes(number)?'Два верных утверждения из пяти.':number===15?'Шкала, погрешность или выбор условий опыта.':number===2?'Две позиции и четыре варианта ответа.':number===4?'Четыре пропуска и восемь слов.':number===3||number===5?'Один верный ответ из четырёх.':number===1?'Три соответствия и пять вариантов.':'Короткий числовой ответ в указанной единице.',groups:groupTitles[number].map((title,i)=>({number:i+1,title,note:number===1?physicsGroups[i].note:'20 учебных заданий · в подборке случайные 10'})),tasks:banks[`physics-oge-${number}`],lesson:lessons[number],sources:sourceGroups[number]};
 });
+const egeCourses:PhysicsCourse[]=physicsEge.map(([title,focus],i)=>{
+ const number=i+1,id=`physics-ege-${number}` as const,tasks=banks[id], sample=tasks[0];
+ return {id,number,title,intro:focus,groups:createGroups(g=>egePhysicsGroupTitle(number,g)),tasks,
+ lesson:[
+  page(title,focus,sample.hint),
+  page('Первый шаг',sample.firstStep,'Сначала сформулируй закон или проверь условие, а затем подставляй числа.'),
+  page('Проверь решение',sample.kind==='written'?'Запиши обоснование и все необходимые вычисления. После откроется сверка.':'Сверь формат ответа: единицы, знак, порядок цифр.',sample.steps.at(-1)??sample.firstStep),
+ ],sources:[]};
+});
+export const physicsCourses:readonly PhysicsCourse[]=[...ogeCourses,...egeCourses];
 const tasks=new Map([...allPhysicsTasks,...archivedPhysicsTasks].map(t=>[t.id,t]));
 export const physicsTask=(id:string)=>tasks.get(id);
 export const physicsCourse=(id:unknown)=>typeof id==='string'?physicsCourses.find(c=>c.id===id):undefined;
-export const taskCourse=(id:string)=>{const t=physicsTask(id);return t?physicsCourses[t.number-1]:undefined;};
-export function correctAnswer(task:PhysicsTask,options:readonly string[]=task.options.map(o=>o.id)):string{if(task.kind==='written')return '';const answer=task.kind==='number'?fmt(task.value!):task.keys.map(key=>String(options.indexOf(key)+1)).join('');return task.kind==='multi'?[...answer].sort().join(''):answer;}
-export function validPhysicsInput(task:PhysicsTask,input:unknown):input is string {if(task.kind==='written')return false;return typeof input==='string'&&(task.kind==='number'?/^[+−-]?\d{0,10}([.,]\d{0,6})?$/.test(input)&&input.length<=17:new RegExp(`^[1-${task.options.length}]{0,${task.keys.length}}$`).test(input));}
-export function physicsReady(task:PhysicsTask,input:string):boolean{return validPhysicsInput(task,input)&&(task.kind==='number'?/^[+−-]?\d+([.,]\d+)?$/.test(input):input.length===task.keys.length&&(task.kind!=='multi'||new Set(input).size===task.keys.length));}
-export function physicsCorrect(task:PhysicsTask,input:string,options:readonly string[]):boolean {return physicsReady(task,input)&&(task.kind==='number'?Math.abs(Number(input.replace('−','-').replace(',','.'))-task.value!)<5e-7:(task.kind==='multi'?[...input].sort().join(''):input)===correctAnswer(task,options));}
+export const taskCourse=(id:string)=>{const t=physicsTask(id);return t?physicsCourse(`physics-${t.exam??'oge'}-${t.number}`):undefined;};
+export function correctAnswer(task:PhysicsTask,options:readonly string[]=task.options.map(o=>o.id)):string{if(task.kind==='written')return '';if(task.kind==='measurement')return task.keys.join(' ');const answer=task.kind==='number'?fmt(task.value!):task.keys.map(key=>String(options.indexOf(key)+1)).join('');return task.kind==='multi'?[...answer].sort().join(''):answer;}
+export const freePhysicsMulti=(task:PhysicsTask)=>task.exam==='ege'&&task.kind==='multi'&&task.number!==20;
+export const maxPhysicsChoices=(task:PhysicsTask)=>freePhysicsMulti(task)?3:task.keys.length;
+export function validPhysicsInput(task:PhysicsTask,input:unknown):input is string {if(task.kind==='written')return false;return typeof input==='string'&&(task.kind==='measurement'?/^[0-9,.+−;\s-]{0,38}$/.test(input):task.kind==='number'?/^[+−-]?\d{0,10}([.,]\d{0,6})?$/.test(input)&&input.length<=17:new RegExp(`^[1-${task.options.length}]{0,${maxPhysicsChoices(task)}}$`).test(input));}
+function measurementValues(input:string):number[]|null{
+ const values=input.trim().split(/[;\s]+/);
+ return values.length===2&&values.every(v=>/^[+−-]?\d{1,10}([.,]\d{1,6})?$/.test(v))?values.map(v=>Number(v.replace(',','.').replace('−','-'))):null;
+}
+export function physicsReady(task:PhysicsTask,input:string):boolean{return validPhysicsInput(task,input)&&(task.kind==='measurement'?measurementValues(input)!==null:task.kind==='number'?/^[+−-]?\d+([.,]\d+)?$/.test(input):(freePhysicsMulti(task)?input.length>=2:input.length===task.keys.length)&&(task.kind!=='multi'||new Set(input).size===input.length));}
+export function physicsCorrect(task:PhysicsTask,input:string,options:readonly string[]):boolean {return physicsReady(task,input)&&(task.kind==='measurement'?measurementValues(input)!.every((v,i)=>Math.abs(Number(task.keys[i].replace(',','.').replace('−','-'))-v)<1e-7):task.kind==='number'?Math.abs(Number(input.replace('−','-').replace(',','.'))-task.value!)<5e-7:(task.kind==='multi'?[...input].sort().join(''):input)===correctAnswer(task,options));}
 export function physicsSolution(task:PhysicsTask,options:readonly string[]=task.options.map(o=>o.id)):string[]{
  if(task.kind==='written')return task.steps;
  const old=physicsTasks.find(t=>t.id===task.id);if(old)return taskSolution(old,[...options]);
- return [...task.steps,`Ответ: ${correctAnswer(task,options)}${task.unit?` ${task.unit}`:''}.`];
+ return [...task.steps,`Ответ: ${task.kind==='measurement'?task.keys.join(' ± '):correctAnswer(task,options)}${task.unit?` ${task.unit}`:''}.`];
 }

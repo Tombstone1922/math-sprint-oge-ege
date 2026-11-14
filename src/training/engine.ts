@@ -84,7 +84,7 @@ function reduce(state: State, action: Action, now = Date.now()): State {
     if (!isReady(findTask(id)!, before.input)) return state;
     const expected = answer(findTask(id)!, active.options[id]);
     const correct = isCorrect(findTask(id)!, before.input, active.options[id]), assisted = before.hint > 0;
-    work = { ...before, submitted: true, correct, matched: task.kind === 'number' ? Number(correct) : task.kind === 'multi' ? [...before.input].filter(n => expected.includes(n)).length : [...expected].filter((n, i) => n === before.input[i]).length };
+    work = { ...before, submitted: true, correct, matched: ['number','pair','measurement','text'].includes(task.kind) ? Number(correct) : task.kind === 'multi' ? [...before.input].filter(n => expected.includes(n)).length : [...expected].filter((n, i) => n === before.input[i]).length };
     const old = stats[id] ?? emptyStat(); let dueAt = old.dueAt, streak = old.streak;
     if (!correct || assisted) { dueAt = now; streak = 0; }
     else if (active.mode === 'review' && dueAt !== null && dueAt <= now) { streak = Math.min(3, streak + 1); dueAt = streak === 3 ? null : now + (streak === 1 ? 86400000 : 259200000); }
@@ -129,7 +129,7 @@ function parse(value: unknown): State {
     }
     const input = validInput(findTask(id)!, w.input) ? w.input : '', hint = Math.min(3, count(w.hint)), submitted = w.submitted === true && isReady(findTask(id)!, input);
     const expected = answer(findTask(id)!, options[id]), correct = submitted && isCorrect(findTask(id)!, input, options[id]);
-    active.work[id] = { input, hint, submitted, correct, matched: submitted ? task.kind === 'number' ? Number(correct) : task.kind === 'multi' ? [...input].filter(c => expected.includes(c)).length : [...expected].filter((c, i) => c === input[i]).length : 0 };
+    active.work[id] = { input, hint, submitted, correct, matched: submitted ? ['number','pair','measurement','text'].includes(task.kind) ? Number(correct) : task.kind === 'multi' ? [...input].filter(c => expected.includes(c)).length : [...expected].filter((c, i) => c === input[i]).length : 0 };
   }
   if (active.phase === 'view') active.position = Math.min(ids.length - 1, active.position);
   else {

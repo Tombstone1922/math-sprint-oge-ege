@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createHash } from 'node:crypto';
-import { allPhysicsTasks, correctAnswer, physicsCorrect, physicsCourse, physicsCourses, physicsReady, physicsTask, physicsSolution, validPhysicsInput } from '../src/science/courses.ts';
+import { allPhysicsTasks as registryTasks, correctAnswer, physicsCorrect, physicsCourse, physicsCourses as registryCourses, physicsReady, physicsTask, physicsSolution, validPhysicsInput } from '../src/science/courses.ts';
 import { rng, fmt, type PhysicsTask } from '../src/science/physics-model.ts';
 import { physicsDrawing } from '../src/science/physics-drawing.ts';
 import { emptyScience, parseScience, practiceOptions, reduceScience, sciencePending, scienceTotals, type ScienceState } from '../src/science/state.ts';
+const allPhysicsTasks=registryTasks.filter(t=>!t.exam&&t.number<=20);
+const physicsCourses=registryCourses.filter(c=>c.id.includes('-oge-')&&c.number<=20);
 const added=allPhysicsTasks.filter(t=>t.number>=2&&t.number<=10);
 test('nine real banks contain 1800 different conditions and diagrams, exactly 10 groups of 20 per course',()=>{
  assert.equal(createHash('sha256').update(JSON.stringify(added)).digest('hex'),'7e1cdfb8396372a9a36f65784486b6ca38fef38048e425f928e5f4d911761002','Published IDs must retain their original content');
@@ -80,5 +82,5 @@ test('incorrect and assisted numerical answers survive restore and require space
 });
 test('guided and standalone solutions agree after answer-option changes, without changing published bank one',()=>{
  for(const t of added){const opts=practiceOptions(t.id,rng(17));const solution=physicsSolution(t,opts);assert.ok(solution.at(-1)!.startsWith('Ответ: '+correctAnswer(t,opts)));}
- assert.equal(physicsCourse('physics-oge-21'),undefined);assert.equal(physicsCourse(['physics-oge-2']),undefined);
+ assert.equal(physicsCourse('physics-oge-23'),undefined);assert.equal(physicsCourse(['physics-oge-2']),undefined);
 });

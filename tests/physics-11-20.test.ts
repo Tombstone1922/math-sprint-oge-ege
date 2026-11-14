@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { allPhysicsTasks, correctAnswer, physicsCorrect, physicsCourse, physicsCourses, physicsReady, physicsSolution, physicsTask } from '../src/science/courses.ts';
+import { allPhysicsTasks as registryTasks, correctAnswer, physicsCorrect, physicsCourse, physicsCourses as registryCourses, physicsReady, physicsSolution, physicsTask } from '../src/science/courses.ts';
 import { fmt, rng, type PhysicsTask } from '../src/science/physics-model.ts';
 import { physicsDrawing } from '../src/science/physics-drawing.ts';
 import { emptyScience, parseScience, practiceOptions, reduceScience, sciencePending, scienceTotals, type ScienceState } from '../src/science/state.ts';
 import { createScienceWriter, loadScience, SCIENCE_KEY } from '../src/science/storage.ts';
+const allPhysicsTasks=registryTasks.filter(t=>!t.exam&&t.number<=20);
+const physicsCourses=registryCourses.filter(c=>c.id.includes('-oge-')&&c.number<=20);
 const added=allPhysicsTasks.filter(t=>t.number>=11);
 const num=(v:string)=>Number(v.replace('−','-').replace(',','.'));
 test('11–20 contain 2000 unique authored conditions, ten groups of twenty, and all twenty modules are connected',()=>{
