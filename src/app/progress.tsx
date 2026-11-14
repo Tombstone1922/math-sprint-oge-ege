@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Back, Button, Screen, type } from '../components';
+import { Back, Button, PageHeader, Screen, type } from '../components';
 import { modules } from '../content';
 import { getGroupCount, getGroupProblems } from '../engine';
 import { accuracy, emptyGroup, pendingMistakes } from '../learning-progress';
 import { groupTitle, LearningBar, percentText } from '../learning-ui';
 import { useProgress } from '../progress';
-import { colors } from '../theme';
+import { colors, surface } from '../theme';
 
 export default function ProgressPage() {
   const { module: requested } = useLocalSearchParams<{ module?: string }>();
@@ -19,9 +19,7 @@ export default function ProgressPage() {
   const totals = selected ? progress.byModule[selected.id] : progress;
   return <Screen>
     {selected && <Back />}
-    <Text style={type.eyebrow}>РЕЗУЛЬТАТЫ ЗАНЯТИЙ</Text>
-    <Text style={[type.title, { marginTop: 18 }]}>Мой прогресс</Text>
-    <Text style={[type.body, { marginTop: 10 }]}>{selected ? selected.title : 'Результаты по темам и группам'}. Точность считается по проверенным ответам, включая незаконченные тренировки.</Text>
+    <PageHeader label="РЕЗУЛЬТАТЫ ЗАНЯТИЙ" title="Мой прогресс" description={`${selected ? selected.title : 'Результаты по темам и группам'}. Точность считается по проверенным ответам, включая незаконченные тренировки.`} />
     <View style={styles.hero}><Text style={styles.heroCaption}>БЕЗ ПОДСКАЗОК В ТРЕНИРОВКЕ</Text><Text style={styles.heroNumber}>{percentText(accuracy(totals?.independent ?? 0, totals?.attempts ?? 0))}</Text><Text style={styles.heroText}>Самостоятельно верно: {totals?.independent ?? 0} из {totals?.attempts ?? 0}</Text></View>
     <View style={styles.stats}><View style={styles.stat}><Text style={styles.statValue}>{percentText(accuracy(totals?.correct ?? 0, totals?.attempts ?? 0))}</Text><Text style={styles.statLabel}>верных ответов</Text></View><View style={styles.stat}><Text style={styles.statValue}>{totals?.assisted ?? 0}</Text><Text style={styles.statLabel}>ответов с помощью</Text></View><View style={styles.stat}><Text style={styles.statValue}>{totals?.completed ?? 0}</Text><Text style={styles.statLabel}>тренировок</Text></View></View>
     {!selected && <Text style={styles.note}>Ежедневных тренировок в последних 60 записях: {progress.daily.history.length}. Повторений ошибок: {progress.reviewSessions} · успешных циклов закрепления: {progress.reviewed}. Короткие повторы считаются отдельно от обычных десяток.</Text>}
@@ -54,4 +52,4 @@ export default function ProgressPage() {
     {selected && <Button title="Посмотреть все темы" secondary onPress={() => router.replace('/progress')} />}
   </Screen>;
 }
-const styles = StyleSheet.create({ hero: { padding: 23, backgroundColor: colors.navy, borderRadius: 25, marginTop: 23 }, heroCaption: { fontSize: 12, fontWeight: '800', letterSpacing: 1, color: '#C3D5F0' }, heroNumber: { color: colors.white, fontSize: 60, fontWeight: '800', marginTop: 8 }, heroText: { color: '#DAE5F7', fontSize: 14, lineHeight: 21 }, stats: { flexDirection: 'row', gap: 6, marginTop: 12 }, stat: { flex: 1, paddingVertical: 15, paddingHorizontal: 6, backgroundColor: colors.white, borderRadius: 17, alignItems: 'center' }, statValue: { fontSize: 22, color: colors.navy, fontWeight: '800' }, statLabel: { fontSize: 12, lineHeight: 15, color: colors.muted, textAlign: 'center', marginTop: 4 }, note: { fontSize: 13, lineHeight: 20, color: colors.muted, marginTop: 7 }, card: { backgroundColor: colors.white, padding: 18, borderWidth: 1, borderColor: colors.border, borderRadius: 22, marginTop: 12 }, row: { flexDirection: 'row', alignItems: 'center', gap: 10 }, moduleTitle: { fontSize: 18, lineHeight: 24, color: colors.ink, fontWeight: '800' }, arrow: { color: colors.blue, fontSize: 23 }, meta: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 7 }, group: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 16, marginTop: 17 }, groupTitle: { color: colors.ink, fontSize: 15, lineHeight: 21, fontWeight: '700' }, done: { color: colors.green, fontSize: 12, fontWeight: '800' }, recommendation: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFF7E6', borderRadius: 17, padding: 15, marginTop: 10 }, moduleLabel: { fontSize: 12, fontWeight: '700', color: colors.muted, marginBottom: 4 }, weakValue: { color: '#815C25', fontWeight: '800', fontSize: 17 } });
+const styles = StyleSheet.create({ hero: { ...surface.hero, padding: 23, marginTop: 23 }, heroCaption: { fontSize: 12, fontWeight: '800', letterSpacing: 1, color: colors.heroCaption }, heroNumber: { color: colors.white, fontSize: 60, fontWeight: '800', marginTop: 8 }, heroText: { color: colors.heroText, fontSize: 14, lineHeight: 21 }, stats: { flexDirection: 'row', gap: 6, marginTop: 12 }, stat: { ...surface.panel, flex: 1, paddingVertical: 15, paddingHorizontal: 6, alignItems: 'center' }, statValue: { fontSize: 22, color: colors.navy, fontWeight: '800' }, statLabel: { fontSize: 12, lineHeight: 15, color: colors.muted, textAlign: 'center', marginTop: 4 }, note: { fontSize: 13, lineHeight: 20, color: colors.muted, marginTop: 7 }, card: { ...surface.panel, padding: 18, marginTop: 12 }, row: { flexDirection: 'row', alignItems: 'center', gap: 10 }, moduleTitle: { fontSize: 18, lineHeight: 24, color: colors.ink, fontWeight: '800' }, arrow: { color: colors.blue, fontSize: 23 }, meta: { color: colors.muted, fontSize: 12, lineHeight: 18, marginTop: 7 }, group: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 16, marginTop: 17 }, groupTitle: { color: colors.ink, fontSize: 15, lineHeight: 21, fontWeight: '700' }, done: { color: colors.green, fontSize: 12, fontWeight: '800' }, recommendation: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#FFF7E6', borderRadius: 17, padding: 15, marginTop: 10 }, moduleLabel: { fontSize: 12, fontWeight: '700', color: colors.muted, marginBottom: 4 }, weakValue: { color: '#815C25', fontWeight: '800', fontSize: 17 } });

@@ -1,3 +1,4 @@
+import { MotionIn } from '../motion';
 import { FractionReference, WrittenFraction } from '../fraction-reference';
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -19,16 +20,16 @@ function LessonContent({ moduleId, title }: { moduleId: ModuleId; title: string 
   return <Screen key={`${moduleId}:${index}`} footer={<Button title={index === lesson.length - 1 ? 'Выбрать группу задач →' : 'Следующий приём →'} onPress={() => index === lesson.length - 1 ? router.push({ pathname: '/groups', params: { module: moduleId } }) : setIndex(index + 1)} />}>
     <Back label="Назад" />
     <View style={styles.row}><Text style={type.eyebrow}>УРОК · {title.toUpperCase()}</Text><Text style={styles.count}>{index + 1} / {lesson.length}</Text></View>
-    <ProgressBar current={index + 1} total={lesson.length} />
+    <ProgressBar current={index + 1} total={lesson.length} previous={index || undefined} />
     <View style={{ marginTop: 30 }}><Pill>{item.label}</Pill></View>
     <Text style={[type.title, { marginTop: 17 }]}>{item.title}</Text>
     <Text style={[type.body, { marginTop: 13 }]}>{item.description}</Text>
-    <View style={styles.card}>
+    <MotionIn style={styles.card}>
       <Text style={styles.cardLabel}>ПОПРОБУЙ ТАК</Text>
       {moduleId === 'fraction-decimals' ? <View style={{ marginTop: 20 }}><WrittenFraction n={Number(item.example.split('/')[0])} d={Number(item.example.split('/')[1])} size={38} /></View> : <Text style={styles.expression}>{item.example}</Text>}
       <Text style={styles.steps}>{item.steps}</Text>
       <View style={styles.answer}><Text style={styles.answerText}>= {item.answer}</Text></View>
-    </View>
+    </MotionIn>
     {moduleId === 'fraction-decimals' && <FractionReference />}
     <View style={styles.note}><Text style={styles.noteIcon}>✦</Text><Text style={styles.noteText}>Не гонись за скоростью. Сначала найди удобный путь к ответу.</Text></View>
     <Button secondary title="Формулы и примеры по теме ↗" onPress={() => router.push({ pathname: '/reference', params: { module: moduleId } })} />

@@ -4,8 +4,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ModuleId } from './content';
 import { accuracy, pendingMistakes } from './learning-progress';
 import { topicGroupNames } from './module-groups';
+import { ProgressBar } from './components';
 import { useProgress } from './progress';
-import { colors } from './theme';
+import { colors, surface } from './theme';
 
 export const groupTitle = (moduleId: ModuleId, group: number) => topicGroupNames[moduleId]?.[group - 1] ?? `Группа ${group}`;
 export const percentText = (n: number | null) => n === null ? '—' : `${n}%`;
@@ -18,7 +19,7 @@ export function reviewTime(at: number, now: number) {
   return at <= now ? 'Можно повторить сейчас' : new Date(at).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 export function LearningBar({ percent }: { percent: number }) {
-  return <View style={styles.track}><View style={[styles.fill, { width: `${Math.min(100, Math.max(0, percent))}%` }]} /></View>;
+  return <View style={styles.track}><ProgressBar current={percent} total={100} /></View>;
 }
 export function LearningSummary() {
   const { progress } = useProgress(), now = useLearningClock();
@@ -36,4 +37,4 @@ export function LearningSummary() {
     </Pressable>
   </View>;
 }
-const styles = StyleSheet.create({ summary: { gap: 10, marginTop: 18 }, card: { padding: 18, backgroundColor: colors.white, borderRadius: 20, borderWidth: 1, borderColor: colors.border }, row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, eyebrow: { fontSize: 11, letterSpacing: 1, fontWeight: '800', color: colors.blue }, arrow: { fontSize: 23, color: colors.blue }, number: { fontSize: 29, color: colors.navy, fontWeight: '800', marginTop: 3 }, unit: { fontSize: 13, fontWeight: '600', color: colors.navy }, caption: { fontSize: 13, lineHeight: 19, color: colors.muted, marginTop: 5 }, track: { height: 6, backgroundColor: colors.border, borderRadius: 9, marginTop: 10, overflow: 'hidden' }, fill: { height: 6, backgroundColor: colors.blue, borderRadius: 9 } });
+const styles = StyleSheet.create({ summary: { gap: 10, marginTop: 18 }, card: { ...surface.panel, padding: 18 }, row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, eyebrow: { fontSize: 11, letterSpacing: 1, fontWeight: '800', color: colors.blue }, arrow: { fontSize: 23, color: colors.blue }, number: { fontSize: 29, color: colors.navy, fontWeight: '800', marginTop: 3 }, unit: { fontSize: 13, fontWeight: '600', color: colors.navy }, caption: { fontSize: 13, lineHeight: 19, color: colors.muted, marginTop: 5 }, track: { marginTop: 10 } });

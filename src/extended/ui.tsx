@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { Button, Pill, type } from '../components';
 import { useProgress } from '../progress';
-import { colors } from '../theme';
+import { colors, surface } from '../theme';
 import { extendedPending } from './progress';
 import { ws } from '../workbook/ui';
 
@@ -20,7 +20,7 @@ export function ExtendedSummary() {
   </View>;
 }
 export const extendedStyles = StyleSheet.create({
-  card: { padding: 20, backgroundColor: colors.white, borderRadius: 23, borderWidth: 1, borderColor: colors.border, marginTop: 16 },
+  card: { ...surface.panel, padding: 20, marginTop: 16 },
   body: { color: colors.muted, fontSize: 15, lineHeight: 23, marginTop: 10 },
   small: { color: colors.muted, fontSize: 13, lineHeight: 20, marginTop: 10 },
   heading: { color: colors.ink, fontSize: 19, lineHeight: 25, fontWeight: '800' },

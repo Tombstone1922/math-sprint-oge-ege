@@ -8,7 +8,23 @@ import { WorkbookPhotoRecovery } from '../workbook/ui';
 import { NavigationFrame } from '../app-navigation';
 import { InformaticsProvider } from '../informatics/provider';
 import { ScienceProvider } from '../science/provider';
+import { MotionProvider, useReducedMotion } from '../motion';
+import { colors } from '../theme';
+
+const tabs = ['index', 'topics', 'exam-hub', 'workbook', 'progress'] as const;
+
+function AppStack() {
+  const reduced = useReducedMotion();
+  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: reduced ? 'none' : 'fade' }}>
+    {tabs.map(name => <Stack.Screen name={name} key={name} options={{ animation: 'none' }} />)}
+  </Stack>;
+}
 
 export default function RootLayout() {
-  return <SafeAreaProvider><ProgressProvider><ScienceProvider><InformaticsProvider><StatusBar style="dark" /><UpdateChecker /><WorkbookPhotoRecovery /><NavigationFrame><Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>{['index', 'topics', 'exam-hub', 'workbook', 'progress'].map(name => <Stack.Screen name={name} key={name} options={{ animation: 'none' }} />)}</Stack></NavigationFrame></InformaticsProvider></ScienceProvider></ProgressProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><MotionProvider><ProgressProvider><ScienceProvider><InformaticsProvider>
+    <StatusBar style="dark" />
+    <UpdateChecker />
+    <WorkbookPhotoRecovery />
+    <NavigationFrame><AppStack /></NavigationFrame>
+  </InformaticsProvider></ScienceProvider></ProgressProvider></MotionProvider></SafeAreaProvider>;
 }

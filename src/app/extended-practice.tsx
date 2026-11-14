@@ -1,3 +1,4 @@
+import { MotionIn } from '../motion';
 import React from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -32,7 +33,7 @@ export default function ExtendedPractice() {
     <Pressable accessibilityRole="button" onPress={() => router.dismissTo('/extended')} style={{ paddingVertical: 12 }}><Text style={s.link}>‹  Сохранить и к модулям</Text></Pressable>
     <Pill tone={active.mode === 'review' ? 'mint' : 'amber'}>№{task.number} · {active.mode === 'review' ? 'ПОВТОРЕНИЕ' : 'ПОЛНОЕ РЕШЕНИЕ'}</Pill>
     <Text style={[s.heading, { marginTop: 17 }]}>{module.groups[active.group - 1]}</Text><Text style={s.small}>Задача {index + 1} из {active.ids.length} · группа {active.group} · вариант {task.index + 1}</Text><View style={{ marginTop: 12 }}><ProgressBar current={index} total={active.ids.length} /></View>
-    <View style={[s.card, { backgroundColor: cardPalette[task.colorIndex], padding: 18 }]}>
+    <MotionIn style={[s.card, { backgroundColor: cardPalette[task.colorIndex], padding: 18 }]}>
       {task.fractionDisplay ? <View accessible accessibilityLabel={task.condition}>
         <Text style={styles.condition}>Решите {task.fractionDisplay.inequality ? 'неравенство' : 'уравнение'}.</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
@@ -42,7 +43,7 @@ export default function ExtendedPractice() {
       </View> : <Text selectable style={styles.condition}>{task.condition}</Text>}
       {task.scene && <GeometryFigure figure={{ kind: 'grid-scene', scene: task.scene, caption: 'Рисунок к условию. Нажми, чтобы увеличить.' }} />}
       {task.graph && !work.revealed && <Text style={s.small}>Построй график на бумаге. Образец появится при сравнении решения.</Text>}
-    </View>
+    </MotionIn>
     <Button secondary title="Справочник формул ↗" onPress={() => { if (!work.revealed && !work.rating && work.hint === 0) extended({ type: 'hint', session, index }); router.push('/reference'); }} />
     {!work.revealed ? <>
       <View style={s.card}>

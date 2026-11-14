@@ -1,5 +1,6 @@
+import { StudyModal } from './motion';
 import React, { useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { FigureSpec } from './engine';
 import { colors } from './theme';
 import { Button, Screen } from './components';
@@ -20,13 +21,13 @@ export function GeometryFigure({ figure }: { figure: FigureSpec }) {
     <Pressable accessibilityRole="button" accessibilityLabel="Увеличить геометрический рисунок" onPress={() => setOpen(true)}><GridFigure scene={figure.scene} /></Pressable>
     <Pressable accessibilityRole="button" onPress={() => setOpen(true)} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.blue, fontSize: 13, fontWeight: '700' }}>Увеличить рисунок ↗</Text></Pressable>
     {figure.caption && <Text style={{ color: colors.muted, fontSize: 12, lineHeight: 18, textAlign: 'center', marginBottom: 8 }}>{figure.caption}</Text>}
-    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen modal>
+    <StudyModal visible={open} onRequestClose={() => setOpen(false)}><Screen modal>
       <Button secondary title="Вернуться к заданию" onPress={() => setOpen(false)} />
       <Text style={{ color: colors.muted, marginTop: 16, marginBottom: 6 }}>Крупный рисунок можно прокручивать вправо.</Text>
       <ScrollView horizontal nestedScrollEnabled><GridFigure scene={figure.scene} enlarged /></ScrollView>
       {figure.caption && <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 21, marginVertical: 12 }}>{figure.caption}</Text>}
       <Button title="Вернуться к заданию" onPress={() => setOpen(false)} />
-    </Screen></Modal>
+    </Screen></StudyModal>
   </View>;
 }
 

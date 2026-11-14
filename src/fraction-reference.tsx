@@ -1,5 +1,6 @@
+import { StudyModal } from './motion';
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button, Pill, Screen, type } from './components';
 import { colors } from './theme';
 import { decimalExpansion, fractionDenominators, type FractionConversion } from './fraction-decimals';
@@ -28,7 +29,7 @@ export function FractionReference({ onOpen }: { onOpen?: () => void } = {}) {
     <Pressable accessibilityRole="button" accessibilityLabel="Открыть общую памятку дробей" onPress={() => { onOpen?.(); setOpen(true); }} style={styles.launch}>
       <View><Text style={styles.launchTitle}>Дроби → десятичные</Text><Text style={styles.launchText}>Общая памятка · знаменатели 2–16</Text></View><Text style={{ color: colors.blue, fontSize: 24 }}>↗</Text>
     </Pressable>
-    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen modal>
+    <StudyModal visible={open} onRequestClose={() => setOpen(false)}><Screen modal>
       <Button secondary title="Закрыть памятку" onPress={() => setOpen(false)} />
       <View style={{ marginTop: 22 }}><Pill>ПОД РУКОЙ</Pill></View><Text style={[type.title, { marginTop: 12 }]}>Узнавай дробь{ '\n' }с первого взгляда</Text>
       <Text style={[type.body, { marginVertical: 12 }]}>Дели числитель на знаменатель. Восьмые меняются с шагом 0,125, четверти — с шагом 0,25. Цифры в скобках повторяются бесконечно: 0,(3) = 0,333…</Text>
@@ -38,7 +39,7 @@ export function FractionReference({ onOpen }: { onOpen?: () => void } = {}) {
       <View style={styles.table}>{Array.from({ length: denominator - 1 }, (_, i) => i + 1).map(n => <View key={n} style={styles.tableRow}><WrittenFraction n={n} d={denominator} size={21} /><Text style={{ color: colors.muted, fontSize: 22 }}>=</Text><Text style={styles.decimal}>{decimalExpansion(n, denominator)}</Text></View>)}</View>
       <View style={styles.note}><Text style={styles.launchTitle}>Больше единицы</Text><View style={[styles.equation, { marginTop: 12 }]}><WrittenFraction n={17} d={8} size={22} /><Text style={styles.decimal}>= 2,125</Text></View><Text style={[type.body, { fontSize: 14, marginTop: 8 }]}>17 ÷ 8: две целые и ещё одна восьмая. Поэтому 2 + 0,125 = 2,125.</Text></View>
       <Button title="Вернуться к заданию" onPress={() => setOpen(false)} />
-    </Screen></Modal>
+    </Screen></StudyModal>
   </>;
 }
 const styles = StyleSheet.create({ equation: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 }, strip: { flexDirection: 'row', overflow: 'hidden', borderRadius: 5 }, launch: { marginTop: 16, padding: 16, borderRadius: 18, borderWidth: 1, borderColor: '#D9E4FA', backgroundColor: '#EDF3FF', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }, launchTitle: { fontSize: 16, color: colors.navy, fontWeight: '800' }, launchText: { color: colors.muted, fontSize: 12, marginTop: 4 }, anchors: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 }, anchor: { width: '47%', minHeight: 90, padding: 10, borderRadius: 18, backgroundColor: '#F0F6F3', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 }, anchorValue: { fontSize: 17, fontWeight: '800', color: colors.green }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, chip: { minWidth: 44, minHeight: 44, padding: 10, borderRadius: 14, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' }, table: { marginTop: 16, borderRadius: 20, borderWidth: 1, borderColor: colors.border, overflow: 'hidden', backgroundColor: colors.white }, tableRow: { flexDirection: 'row', alignItems: 'center', gap: 18, padding: 14, borderBottomWidth: 1, borderColor: colors.border }, decimal: { fontSize: 23, fontWeight: '800', color: colors.navy }, note: { marginTop: 18, padding: 18, borderRadius: 20, backgroundColor: colors.amber } });

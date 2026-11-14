@@ -4,7 +4,7 @@ import * as Linking from 'expo-linking';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Disclosure } from './components';
 import { catalogSources, fipiSources, subjects, type ExamId, type PlannedSubjectId, type SubjectId } from './subjects';
-import { colors } from './theme';
+import { colors, surface } from './theme';
 
 export const subjectTint = (subject: SubjectId) => subject === 'physics' ? colors.mint : subject === 'informatics' ? colors.amber : colors.bluePale;
 export function SubjectIcon({ subject }: { subject: SubjectId }) {
@@ -29,14 +29,14 @@ export function SubjectSources({ subject, exam }: { subject: PlannedSubjectId; e
   </Disclosure>;
 }
 export const s = StyleSheet.create({
-  card: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: 20, padding: 18, marginTop: 16 },
+  card: { ...surface.panel, padding: 18, marginTop: 16 },
   icon: { width: 48, height: 48, borderRadius: 15, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
   title: { fontSize: 17, lineHeight: 24, fontWeight: '800', color: colors.ink, flexShrink: 1, minWidth: 0 },
   body: { color: colors.muted, fontSize: 15, lineHeight: 23, marginTop: 8 },
   caption: { color: colors.muted, fontSize: 12, lineHeight: 18, letterSpacing: .6 },
   small: { color: colors.muted, fontSize: 13, lineHeight: 20, marginTop: 6 },
   link: { color: colors.blue, fontSize: 14, lineHeight: 21, fontWeight: '700', flexShrink: 1 },
-  pressed: { opacity: .78 }, shortcut: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, minHeight: 64, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: 17, marginTop: 18 },
+  pressed: surface.pressed, shortcut: { ...surface.panel, flexDirection: 'row', gap: 12, alignItems: 'center', paddingHorizontal: 15, paddingVertical: 10, minHeight: 64, marginTop: 18 },
   row: { flexDirection: 'row', gap: 14, alignItems: 'center' },
   number: { width: 44, minHeight: 44, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   badge: { color: colors.navy, fontSize: 17, fontWeight: '800' },

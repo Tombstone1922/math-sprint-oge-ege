@@ -1,6 +1,7 @@
+import { StudyModal } from '../motion';
 import React, { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { Button, Disclosure, Pill, Screen, type } from '../components';
 import { useProgress } from '../progress';
 import { emptyExamWork, examHasWork, examRemaining, examResults, resolveExam, type ExamSession } from '../study/exam';
@@ -54,7 +55,7 @@ function ExamWork({ session, now }: { session: ExamSession; now: number }) {
     </View>
     <Button secondary disabled={session.position === 0} title="← Предыдущее задание" onPress={() => go(session.position - 1)} />
     <Button secondary title="Завершить и сдать работу" onPress={() => setConfirm(true)} />
-    <Modal visible={confirm} animationType="slide" onRequestClose={() => setConfirm(false)}><Screen modal footer={<><Button title="Сдать и открыть результат" onPress={() => study({ area: 'exam', action: { type: 'finish', id: session.id } })} /><Button secondary title="Продолжить решать" onPress={() => setConfirm(false)} /></>}><Pill tone="amber">ЗАВЕРШЕНИЕ ПРОБНИКА</Pill><Text style={[type.title, { marginTop: 22 }]}>Сдать работу?</Text><Text style={s.body}>Есть ответ или решение: {count}/25. После сдачи ответы и черновики зафиксируются. Ошибки и пропуски первой части будут добавлены в повторение.</Text></Screen></Modal>
+    <StudyModal visible={confirm} onRequestClose={() => setConfirm(false)}><Screen modal footer={<><Button title="Сдать и открыть результат" onPress={() => study({ area: 'exam', action: { type: 'finish', id: session.id } })} /><Button secondary title="Продолжить решать" onPress={() => setConfirm(false)} /></>}><Pill tone="amber">ЗАВЕРШЕНИЕ ПРОБНИКА</Pill><Text style={[type.title, { marginTop: 22 }]}>Сдать работу?</Text><Text style={s.body}>Есть ответ или решение: {count}/25. После сдачи ответы и черновики зафиксируются. Ошибки и пропуски первой части будут добавлены в повторение.</Text></Screen></StudyModal>
   </Screen>;
 }
 function ExamResult({ session }: { session: ExamSession }) {

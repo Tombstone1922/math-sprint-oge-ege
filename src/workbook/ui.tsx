@@ -1,9 +1,10 @@
+import { StudyModal } from '../motion';
 import React, { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
-import { ActivityIndicator, Image, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Button, Pill, Screen, type } from '../components';
 import { useProgress } from '../progress';
-import { colors } from '../theme';
+import { colors, layout, surface } from '../theme';
 import { MAX_PHOTOS, pageId, type Page, type Photo } from './model';
 import { deletePhoto, photoUri } from './photos';
 import { discardPendingPhoto, recoverPhoto, takePhoto } from './picker';
@@ -40,7 +41,7 @@ function PhotoPreview({ photo, index, remove, disabled }: { photo: Photo; index:
     {uri && !error ? <Pressable accessibilityRole="button" accessibilityLabel={`Увеличить фото ${index + 1}`} onPress={() => { setZoom(1); setOpen(true); }} style={{ marginTop: 12 }}><Image source={{ uri }} accessibilityLabel={`Решение, лист ${index + 1}`} resizeMode="contain" onError={() => setError('Фото недоступно. Прикрепи снимок снова.')} style={{ width: '100%', height: 220, backgroundColor: '#F0F2F4', borderRadius: 12 }} /><Text style={ws.link}>Нажми, чтобы увеличить ↗</Text></Pressable> : error ? <Text style={ws.error}>{error}</Text> : <ActivityIndicator color={colors.blue} style={{ margin: 20 }} />}
     <Text style={ws.small}>{photo.width} × {photo.height} · {(photo.bytes / 1024 / 1024).toFixed(1)} МБ</Text>
     {confirm ? <><Text style={ws.body}>Убрать этот лист из работы? Исходное фото в галерее останется.</Text><Button disabled={disabled} secondary title={`Подтвердить удаление листа ${index + 1}`} onPress={remove} /><Button disabled={disabled} secondary title="Оставить фото" onPress={() => setConfirm(false)} /></> : <Pressable disabled={disabled} accessibilityRole="button" onPress={() => setConfirm(true)} style={{ paddingVertical: 14 }}><Text style={ws.link}>Удалить лист {index + 1}</Text></Pressable>}
-    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen modal scroll={false}><Text style={type.section}>Лист {index + 1}</Text><View style={ws.wrap}>{[1, 2, 3].map(scale => <Pressable accessibilityRole="button" accessibilityLabel={`Масштаб фото ${scale}×`} key={scale} onPress={() => setZoom(scale)} style={[ws.chip, zoom === scale && ws.selected]}><Text style={ws.chipText}>{scale}×</Text></Pressable>)}</View><Text style={ws.small}>Увеличь и прокручивай лист в обе стороны.</Text><ScrollView style={{ flex: 1 }}><ScrollView horizontal contentContainerStyle={{ alignItems: 'flex-start' }}><Image source={{ uri }} resizeMode="contain" accessibilityLabel={`Увеличенный лист ${index + 1}`} style={{ width: Math.max(1, width - 44) * zoom, height: Math.max(1, width - 44) * zoom * photo.height / photo.width }} /></ScrollView></ScrollView><Button title="Закрыть фото" onPress={() => setOpen(false)} /></Screen></Modal>
+    <StudyModal visible={open} onRequestClose={() => setOpen(false)}><Screen modal scroll={false}><Text style={type.section}>Лист {index + 1}</Text><View style={ws.wrap}>{[1, 2, 3].map(scale => <Pressable accessibilityRole="button" accessibilityLabel={`Масштаб фото ${scale}×`} key={scale} onPress={() => setZoom(scale)} style={[ws.chip, zoom === scale && ws.selected]}><Text style={ws.chipText}>{scale}×</Text></Pressable>)}</View><Text style={ws.small}>Увеличь и прокручивай лист в обе стороны.</Text><ScrollView style={{ flex: 1 }}><ScrollView horizontal contentContainerStyle={{ alignItems: 'flex-start' }}><Image source={{ uri }} resizeMode="contain" accessibilityLabel={`Увеличенный лист ${index + 1}`} style={{ width: Math.max(1, Math.min(width, layout.maxWidth) - 44) * zoom, height: Math.max(1, Math.min(width, layout.maxWidth) - 44) * zoom * photo.height / photo.width }} /></ScrollView></ScrollView><Button title="Закрыть фото" onPress={() => setOpen(false)} /></Screen></StudyModal>
   </View>;
 }
 export function WorkbookPhotos({ page }: { page: Page }) {
@@ -82,7 +83,7 @@ export function WorkbookPhotoRecovery() {
   return <View accessibilityLiveRegion="polite" style={{ paddingHorizontal: 22, paddingTop: 10, backgroundColor: colors.amber }}><Text style={ws.small}>{error || 'Фото решения восстановлено после возвращения в приложение.'}</Text>{error ? <View style={ws.wrap}><Pressable accessibilityRole="button" style={ws.chip} onPress={() => setRetry(n => n + 1)}><Text style={ws.chipText}>Повторить</Text></Pressable><Pressable accessibilityRole="button" style={ws.chip} onPress={() => { void discardPendingPhoto().then(() => { setError(''); }); }}><Text style={ws.chipText}>Отменить импорт</Text></Pressable></View> : <View style={ws.wrap}><Pressable accessibilityRole="button" style={ws.chip} onPress={() => { router.push({ pathname: '/workbook', params: { id: recovered } }); setRecovered(''); }}><Text style={ws.chipText}>Открыть работу</Text></Pressable><Pressable accessibilityRole="button" style={ws.chip} onPress={() => setRecovered('')}><Text style={ws.chipText}>Понятно</Text></Pressable></View>}</View>;
 }
 export const ws = StyleSheet.create({
-  card: { padding: 18, backgroundColor: colors.white, borderRadius: 23, borderWidth: 1, borderColor: colors.border, marginTop: 16 },
+  card: { ...surface.panel, padding: 18, marginTop: 16 },
   photoCard: { padding: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 16, marginTop: 14 },
   heading: { color: colors.ink, fontSize: 19, lineHeight: 26, fontWeight: '800' },
   body: { color: colors.muted, fontSize: 15, lineHeight: 23, marginTop: 10 },

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { router, usePathname, useRootNavigationState } from 'expo-router';
 import { Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from './theme';
+import { colors, layout, radius, surface } from './theme';
 import { focusRoutes, hasFocusedRoute, mainTabs, selectedTab, type MainTab } from './navigation-model';
 
 const NavigationSurface = createContext(false);
@@ -16,10 +16,10 @@ export function NavigationFrame({ children }: { children: React.ReactNode }) {
   // A formula or explanation opened over a task must not offer accidental task abandonment.
   const focused = hasFocusedRoute(state) || focusRoutes.has(path.slice(1));
   const visible = !focused && !keyboard;
-  return <NavigationSurface.Provider value={visible}><View style={{ flex: 1 }}>{children}{visible && <SafeAreaView edges={['bottom']} style={styles.safe}><View accessibilityRole="tablist" style={styles.bar}>{mainTabs.map(tab => {
+  return <NavigationSurface.Provider value={visible}><View style={{ flex: 1 }}>{children}{visible && <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}><View accessibilityRole="tablist" style={styles.bar}>{mainTabs.map(tab => {
     const selected = selectedTab(path) === tab.id;
-    return <Pressable accessibilityRole="tab" accessibilityLabel={tab.title} aria-selected={selected} accessibilityState={{ selected }} key={tab.id} onPress={() => router.dismissTo(tab.path)} style={styles.tab}>
-      <View style={[styles.iconBox, selected && { backgroundColor: colors.bluePale }]}><NavIcon name={tab.id} color={selected ? colors.blue : colors.muted} /></View>
+    return <Pressable accessibilityRole="tab" accessibilityLabel={tab.title} aria-selected={selected} accessibilityState={{ selected }} key={tab.id} onPress={() => router.dismissTo(tab.path)} style={({ pressed }) => [styles.tab, pressed && surface.pressed]}>
+      <View accessible={false} importantForAccessibility="no-hide-descendants" style={[styles.iconBox, selected && { backgroundColor: colors.bluePale }]}><NavIcon name={tab.id} color={selected ? colors.blue : colors.muted} /></View>
       <Text maxFontSizeMultiplier={1.2} style={[styles.label, selected && { color: colors.blue, fontWeight: '800' }]}>{tab.title}</Text>
     </Pressable>;
   })}</View></SafeAreaView>}</View></NavigationSurface.Provider>;
@@ -31,4 +31,4 @@ function NavIcon({ name, color }: { name: MainTab; color: string }) {
   if (name === 'workbook') return <View style={{ width: 25, height: 21, flexDirection: 'row' }}><View style={[line, { width: 12, height: 20, borderTopLeftRadius: 4, borderBottomLeftRadius: 2, borderRightWidth: .8 }]} /><View style={[line, { width: 12, height: 20, borderTopRightRadius: 4, borderBottomRightRadius: 2, borderLeftWidth: .8 }]} /></View>;
   return <View style={[line, { width: 21, height: 23, borderRadius: 4, paddingTop: 6, paddingHorizontal: 3 }]}>{name === 'today' ? <><View style={{ height: 1.5, backgroundColor: color, marginHorizontal: -3 }} /><View style={{ width: 5, height: 5, backgroundColor: color, borderRadius: 2, marginTop: 4, marginLeft: 2 }} /></> : <>{[0, 1, 2].map(i => <View key={i} style={{ height: 1.5, backgroundColor: color, marginBottom: 3, width: i === 2 ? 8 : 12 }} />)}</>}</View>;
 }
-const styles = StyleSheet.create({ safe: { backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border }, bar: { flexDirection: 'row', minHeight: 68, paddingHorizontal: 3, paddingTop: 5, paddingBottom: 4 }, tab: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 58, gap: 3 }, iconBox: { width: 46, height: 31, alignItems: 'center', justifyContent: 'center', borderRadius: 12 }, label: { color: colors.muted, fontSize: 11, lineHeight: 16, fontWeight: '600' } });
+const styles = StyleSheet.create({ safe: { backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border }, bar: { flexDirection: 'row', width: '100%', maxWidth: layout.maxWidth, alignSelf: 'center', minHeight: 66, paddingHorizontal: 4, paddingVertical: 4 }, tab: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 56, gap: 3 }, iconBox: { width: 46, height: 31, alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill }, label: { color: colors.muted, fontSize: 11, lineHeight: 16, fontWeight: '600', textAlign: 'center' } });

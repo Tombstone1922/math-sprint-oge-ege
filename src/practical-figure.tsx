@@ -1,5 +1,6 @@
+import { StudyModal } from './motion';
 import React, { useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { DataTable, PracticalBlock, PracticalQuestion } from './practical-models';
 import { practicalDrawing } from './practical-drawing';
 import { colors } from './theme';
@@ -38,7 +39,7 @@ export function PracticalFigure({ block, question }: { block: PracticalBlock; qu
     <Button secondary title="Крупный рисунок и условие ↗" onPress={() => setOpen(true)} />
     {block.table && <Table table={block.table} />}
     {question?.table && <Table table={question.table} />}
-    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen modal>
+    <StudyModal visible={open} onRequestClose={() => setOpen(false)}><Screen modal>
       <Button secondary title="Вернуться к вопросу" onPress={() => setOpen(false)} />
       <Text style={[type.section, { marginTop: 20 }]}>{block.title}</Text>
       <Text style={styles.condition}>{block.text}</Text>
@@ -46,7 +47,7 @@ export function PracticalFigure({ block, question }: { block: PracticalBlock; qu
       <ScrollView horizontal nestedScrollEnabled style={{ marginVertical: 12 }}><Drawing block={block} enlarged /></ScrollView>
       {block.table && <Table table={block.table} />}{question?.table && <Table table={question.table} />}
       <Button title="Вернуться к вопросу" onPress={() => setOpen(false)} />
-    </Screen></Modal>
+    </Screen></StudyModal>
   </View>;
 }
 const styles = StyleSheet.create({ caption: { color: colors.muted, fontSize: 12, lineHeight: 18, marginVertical: 4 }, condition: { color: colors.ink, fontSize: 15, lineHeight: 23, marginTop: 10 }, tableCaption: { color: colors.navy, fontWeight: '800', fontSize: 14, lineHeight: 21 }, expand: { paddingVertical: 10, minHeight: 44, justifyContent: 'center' }, expandText: { color: colors.blue, fontWeight: '700', fontSize: 14 }, preview: { alignSelf: 'center', marginTop: 8, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }, cell: { width: 130, padding: 10, fontSize: 13, lineHeight: 18, color: colors.ink, borderWidth: .5, borderColor: '#CBD5E1', textAlign: 'center' } });

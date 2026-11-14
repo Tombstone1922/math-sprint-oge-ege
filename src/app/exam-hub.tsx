@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
-import { Button, Disclosure, Screen, type } from '../components';
+import { Button, Disclosure, PageHeader, Screen } from '../components';
 import { useProgress } from '../progress';
 import { examHasWork, examRemaining, examResults } from '../study/exam';
 import { examClock, useExamNow } from '../study/exam-clock';
@@ -17,7 +17,7 @@ export default function ExamHub() {
   const now = useExamNow(current, id => study({ area: 'exam', action: { type: 'sync', id } }));
   const active = current && !current.finishedAt, remaining = current ? examRemaining(current, now) : null;
   const history = [current, ...exam.history].filter((e): e is NonNullable<typeof e> => Boolean(e?.finishedAt));
-  return <Screen><Text style={type.eyebrow}>ОТ ТРЕНИРОВКИ К ЭКЗАМЕНУ</Text><Text style={[type.title, { marginTop: 9 }]}>Варианты ОГЭ</Text><Text style={[type.body, { marginTop: 8 }]}>Полные учебные работы №1–25 из нашей базы. Разбор — после сдачи.</Text>
+  return <Screen><PageHeader label="ОТ ТРЕНИРОВКИ К ЭКЗАМЕНУ" title="Варианты ОГЭ" description="Полные учебные работы №1–25 из нашей базы. Разбор — после сдачи." />
     {active ? <View style={[s.card, { backgroundColor: colors.bluePale }]}><Text style={s.title}>Продолжим работу</Text>{current.weekly && <Text style={s.body}>{weeklyTitle(current.weekly)}</Text>}<Text style={s.body}>Есть ответ или решение: {current.tasks.filter(t => examHasWork(t, current.work[t.number])).length}/25.{remaining !== null ? `\nОсталось: ${examClock(remaining)}` : '\nБез ограничения времени.'}</Text><Button title="Продолжить экзамен →" onPress={() => router.push('/exam')} /></View> : <>
       <Text style={[s.small, { marginTop: 22, fontWeight: '700' }]}>Режим для выбранного варианта</Text><View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>{[{ title: 'С таймером', value: true }, { title: 'Без таймера', value: false }].map(item => <Pressable key={item.title} accessibilityRole="radio" aria-checked={timed === item.value} accessibilityState={{ checked: timed === item.value }} onPress={() => setTimed(item.value)} style={[s.chip, { flex: 1, borderRadius: 13, alignItems: 'center', paddingVertical: 13 }, timed === item.value && s.selected]}><Text style={s.chipText}>{item.title}</Text></Pressable>)}</View><Text style={s.small}>{timed ? '3 ч 55 мин · таймер идёт и вне приложения' : 'Можно решать в своём темпе и вернуться позже'}</Text>
     </>}

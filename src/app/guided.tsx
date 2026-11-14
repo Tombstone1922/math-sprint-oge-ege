@@ -1,3 +1,4 @@
+import { MotionIn } from '../motion';
 import { FractionReference } from '../fraction-reference';
 import React, { useMemo, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -23,18 +24,18 @@ function GuidedContent({ moduleId, group }: { moduleId: ModuleId; group: number 
   return <Screen key={problem.id} footer={<TaskActions title={index === ROUND_SIZE - 1 ? 'Теперь решаю сам →' : 'Следующая карточка →'} onPress={() => index === ROUND_SIZE - 1 ? router.replace({ pathname: '/practice', params: { module: moduleId, group: String(group), ids: round.map(item => item.id).join(',') } }) : setIndex(index + 1)} condition={<View style={{ marginTop: 18 }}><Text style={[type.body, { color: colors.ink }]}>{problem.expression}</Text><ProblemFigure problem={problem} /></View>} />}>
     <Back label="К группам" />
     <View style={styles.row}><Text style={type.eyebrow}>ГРУППА {group} · С ОТВЕТОМ</Text><Text style={styles.count}>{index + 1} / {ROUND_SIZE}</Text></View>
-    <ProgressBar current={index + 1} total={ROUND_SIZE} />
+    <ProgressBar current={index + 1} total={ROUND_SIZE} previous={index || undefined} />
     <Text style={[type.title, { marginTop: 31 }]}>Смотри и запоминай</Text>
     <Text style={[type.body, { marginTop: 10 }]}>{problem.practical ? 'Два случайных блока по пять вопросов. Открой общее условие, изучи решения, затем реши те же блоки самостоятельно.' : 'Сначала просмотри десять примеров с ответами. Затем реши эти же примеры сам в другом порядке.'}</Text>
     {moduleId === 'fraction-decimals' && <FractionReference />}
-    <View style={problemCardStyle(problem.colorIndex)}>
+    <MotionIn style={problemCardStyle(problem.colorIndex)}>
       <Pill tone="amber">{problem.practical ? `ЗАДАНИЕ ${problem.practical.number}` : `ПРИМЕР ${index + 1}`}</Pill>
       {problem.practical && <Text style={[styles.expression, styles.geometryExpression]}>{problem.expression}</Text>}
       <ProblemFigure problem={problem} />
       {!problem.practical && <Text style={[styles.expression, (hasFigure(problem) || ['oge-6', 'oge-7', 'oge-8', 'oge-9', 'oge-10', 'oge-12', 'oge-14', 'oge-19'].includes(moduleId)) && styles.geometryExpression]}>{problem.expression}</Text>}
       <Text style={styles.hint}>{problem.hint}</Text>
       <View style={styles.answer}><Text style={styles.answerText}>{problem.statements ? 'Ответ: ' : '= '}{problem.answerDisplay ?? problem.answer}</Text></View>
-    </View>
+    </MotionIn>
 
   </Screen>;
 }

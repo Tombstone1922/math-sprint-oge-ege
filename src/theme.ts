@@ -1,7 +1,19 @@
 export const colors = {
-  ink: '#18253D', muted: '#5E6D83', background: '#F5F7FB', white: '#FFFFFF',
-  navy: '#18355A', blue: '#3569E8', bluePale: '#E9F0FF', mint: '#D8F4E6',
-  green: '#168A58', amber: '#FFF0C8', red: '#D34D55', border: '#E6EAF1',
+  ink: '#16243B', muted: '#526278', background: '#F3F6FA', white: '#FFFFFF',
+  navy: '#182F50', blue: '#2A56CC', bluePale: '#EAF0FF', mint: '#E3F4EB',
+  green: '#136840', amber: '#FFF0CC', red: '#A73343', border: '#DFE6F0',
+  redPale: '#FBECEF', heroCaption: '#BCD2F6', heroText: '#DFEAFA',
+};
+
+export const layout = { maxWidth: 720, gutter: 22, compactGutter: 16, hitTarget: 48 };
+
+export const radius = { field: 14, card: 20, feature: 26, pill: 999 };
+
+export const surface = {
+  panel: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: radius.card },
+  field: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, borderRadius: radius.field },
+  hero: { backgroundColor: colors.navy, borderRadius: radius.feature },
+  pressed: { opacity: .82 },
 };
 
 // Twenty quiet card backgrounds. A problem keeps its shade in both stages.

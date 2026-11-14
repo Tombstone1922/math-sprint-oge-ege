@@ -1,5 +1,6 @@
+import { StudyModal } from './motion';
 import React, { useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { Button, Screen } from './components';
 import { plotLayout, plotNumber, type PlotLayout, type PlotPoint, type PlotRange } from './plot-layout';
 import { colors } from './theme';
@@ -47,10 +48,10 @@ export function ResponsivePlot({ range, description, compact = false, title = '�
       <Text style={{ color: colors.muted, fontSize: 12, lineHeight: 18 }}>Клетка: {plotNumber(p.gridStep)} ед.</Text>
       <Pressable accessibilityRole="button" accessibilityLabel={`Увеличить: ${title}`} onPress={() => setOpen(true)} style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}><Text style={{ color: colors.blue, fontSize: 13, fontWeight: '700' }}>Увеличить ↗</Text></Pressable>
     </View>
-    <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}><Screen modal footer={<Button secondary title="Вернуться к заданию" onPress={() => setOpen(false)} />}>
+    <StudyModal visible={open} onRequestClose={() => setOpen(false)}><Screen modal footer={<Button secondary title="Вернуться к заданию" onPress={() => setOpen(false)} />}>
       <Text style={{ fontSize: 22, fontWeight: '800', color: colors.navy, marginTop: 10 }}>{title}</Text>
       <Text style={{ color: colors.muted, fontSize: 14, lineHeight: 21, marginVertical: 12 }}>Крупный график можно прокручивать вправо. Клетка: {plotNumber(zoom.gridStep)} ед.</Text>
       <ScrollView horizontal nestedScrollEnabled><CoordinatePlot layout={zoom} description={description}>{open && children(zoom)}</CoordinatePlot></ScrollView>
-    </Screen></Modal>
+    </Screen></StudyModal>
   </View>;
 }
